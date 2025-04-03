@@ -71,7 +71,7 @@ erDiagram
     ORDERS {
         int id PK
         int user_id FK
-        varchar(20) status
+        varchar(25) status
         decimal total_price
         timestamp expires_at "(nullable)"
         timestamp created_at
@@ -102,7 +102,7 @@ erDiagram
   - 한 번에 여러 상품을 주문할 수 있기 떄문에 ORDER_ITEMS에 상품 별 주문을 관리합니다.
   - 가격 변동이 있을 수 있으므로, 주문 시점의 가격을 ORDER_ITEMS에 저장합니다.
 - ORDER.STATUS 
-  - `READY(주문대기)`, `STOCK_ALLOCATED(재고 확보)`, `STOCK_ALLOCATION_FAIL(재고 확보 실패)`, `PAID(결제완료)`, `PAY_FAILED(결제 실패)`,`DELIVERED(유저에게 전달)`, `DELIVERY_FAIL(유저에게 전달 실패)`, `COMPLETED(주문완료)` 로 구분됩니다
+  - `READY(주문대기)`, `STOCK_ALLOCATED(재고 확보)`, `STOCK_ALLOCATION_FAILED(재고 확보 실패)`, `PAID(결제완료)`, `PAYMENT_FAILED(결제 실패)`,`DELIVERED(유저에게 전달)`, `DELIVERY_FAILED(유저에게 전달 실패)`, `COMPLETED(주문완료)` 로 구분됩니다
   - 주문 과정에서 어느 곳에서 실패했는지 파악할 수 있도록 상태를 세분화 했습니다
 - ORDER.EXPIRES_AT 주문 만료시각
   - 주문 API와 결제 API를 분리했기 때문에 만료시각을 두고, 만료시각 이후에는 결제 할 수 없다는 제약을 추가했습니다.

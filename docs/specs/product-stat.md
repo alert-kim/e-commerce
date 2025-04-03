@@ -74,7 +74,7 @@ erDiagram
   ORDERS {
     int id PK
     int user_id FK
-    varchar(20) status
+    varchar(25) status
     decimal total_price
     timestamp expires_at "(nullable)"
     timestamp created_at
