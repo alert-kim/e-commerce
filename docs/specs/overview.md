@@ -14,3 +14,4 @@
 - [잔액충전/조회](./charge.md)
 - [주문](./order.md)
 - [결제](./payment.md)
+- [인기상품 통계/조회](./product-stat.md)
