@@ -107,7 +107,7 @@ class BalanceController {
                             ExampleObject(
                                 name = "최대 잔고 초과",
                                 value = EXCEED_MAX_BALANCE_CODE,
-                                summary = "EXCEED_MAX_BALANCE_CODE"
+                                summary = "EXCEED_MAX_BALANCE"
                             ),
                         ],
                         mediaType = "application/json",
