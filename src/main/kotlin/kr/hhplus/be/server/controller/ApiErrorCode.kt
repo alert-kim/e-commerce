@@ -6,9 +6,12 @@ object BalanceApiErrorCode {
 }
 
 object CouponErrorCode {
+    const val ALREADY_HAS_COUPON_CODE: String = """{"code":"ALREADY_HAS_COUPON"}"""
     const val ALREADY_USED_COUPON_CODE: String = """{"code":"ALREADY_USED_COUPON"}"""
     const val EXPIRED_COUPON_CODE: String = """{"code":"EXPIRED_COUPON"}"""
     const val NOT_FOUND_COUPON_CODE: String = """{"code":"NOT_FOUND_COUPON"}"""
+    const val OUT_OF_STOCK_COUPON_CODE: String = """{"code":"OUT_OF_STOCK_COUPON"}"""
+    const val INVALID_STATE_COUPON_CODE: String = """{"code":"INVALID_STATE_COUPON"}"""
 }
 
 object OrderErrorCode {

@@ -17,16 +17,12 @@ import kr.hhplus.be.server.controller.OrderErrorCode.INVALID_ORDER_PRICE_CODE
 import kr.hhplus.be.server.controller.OrderErrorCode.NOT_FOUND_ORDER_CODE
 import kr.hhplus.be.server.controller.OrderErrorCode.OUT_OF_PRODUCT_STOCK_CODE
 import kr.hhplus.be.server.controller.UserApiErrorCode.NOT_FOUND_USER_CODE
-import kr.hhplus.be.server.controller.order.reqeust.OrderRequest
-import kr.hhplus.be.server.controller.order.response.OrderResponse
 import kr.hhplus.be.server.controller.payment.requeset.PayRequest
 import kr.hhplus.be.server.controller.payment.respnse.PaymentResponse
-import kr.hhplus.be.server.model.order.OrderStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 
 @RestController
 @RequestMapping("/payments")
