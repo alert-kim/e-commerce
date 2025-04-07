@@ -57,6 +57,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
+	testImplementation("io.mockk:mockk:1.13.7")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 	// Swagger
