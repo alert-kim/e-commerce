@@ -11,7 +11,7 @@ sequenceDiagram
     participant Product
     participant Payment
     participant UserCoupon
-    participant UserBalance
+    participant Balance
     participant UserItem
     participant DataPlatform
     server ->> Order: 결제 요청
@@ -23,9 +23,9 @@ sequenceDiagram
 
     Order ->> Payment: 결제
     Payment ->> UserCoupon: 쿠폰 사용
-    Payment ->> UserBalance: 최종 결제 금액 차감
+    Payment ->> Balance: 최종 결제 금액 차감
     break 잔고 부족
-        UserBalance -->> Payment: 잔고부족
+        Balance -->> Payment: 잔고부족
         alt 쿠폰 사용
             Payment -->> UserCoupon: 쿠폰 사용 취소
         end

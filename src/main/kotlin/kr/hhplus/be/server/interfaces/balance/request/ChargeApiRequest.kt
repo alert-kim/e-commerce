@@ -1,5 +1,5 @@
 package kr.hhplus.be.server.interfaces.balance.request
 
-class ChargeApiRequest(
+data class ChargeApiRequest(
     val amount: Long,
 )

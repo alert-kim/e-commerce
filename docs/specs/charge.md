@@ -10,14 +10,14 @@
 sequenceDiagram
     participant server
     participant User
-    participant UserBalance
+    participant Balance
     participant BalanceRecord
     server ->> User: 유저 검증
-    server ->> UserBalance: 잔액 충전
+    server ->> Balance: 잔액 충전
     break 최대 잔액 초과
-        UserBalance --> server: 에러 발생
+        Balance --> server: 에러 발생
     end
-    UserBalance ->> server: 충전된 잔액
+    Balance ->> server: 충전된 잔액
     server ->> BalanceRecord: 잔액 충전 내역 저장
 ```
 - 유저 검증
@@ -35,11 +35,11 @@ sequenceDiagram
 sequenceDiagram
 participant server
 participant User
-participant UserBalance
+participant Balance
     server->>User: 유저 검증
     
-    server->>UserBalance: 잔액 조회
-    UserBalance-->>server: 잔액
+    server->>Balance: 잔액 조회
+    Balance-->>server: 잔액
 ```
 - 해당 유저 아이디가 실제 있는 유저인지 검증합니다.
 - 잔액 조회시, 해당 유저의 잔고가 생성되지 않은 경우, API 응답으로 잔고를 0으로 반환합니다.

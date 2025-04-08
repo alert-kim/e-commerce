@@ -8,25 +8,28 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.hhplus.be.server.domain.balance.BalanceService
+import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
+import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.EXCEED_MAX_BALANCE_CODE
-import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.NOT_FOUND_BALANCE_CODE
+import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorResponse
-import kr.hhplus.be.server.interfaces.UserApiErrorCode.NOT_FOUND_USER_CODE
+import kr.hhplus.be.server.interfaces.ErrorSpec
 import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
-import kr.hhplus.be.server.interfaces.balance.response.UserBalanceResponse
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import kr.hhplus.be.server.interfaces.balance.response.BalanceResponse
+import kr.hhplus.be.server.interfaces.common.ServerApiResponse
+import kr.hhplus.be.server.interfaces.common.handleRequest
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
 @RestController
 @RequestMapping("/balances")
 @Tag(name = "Balance API", description = "잔고 조회 및 충전 API")
-class BalanceController {
+class BalanceController(
+    private val userService: UserService,
+    private val balanceService: BalanceService,
+) {
 
     @Operation(
         summary = "잔고 조회",
@@ -41,7 +44,7 @@ class BalanceController {
                     Content(
                         mediaType = "application/json",
                         schema = Schema(
-                            implementation = UserBalanceResponse::class,
+                            implementation = BalanceResponse::class,
                             description = "잔고 조회 성공"
                         )
                     )
@@ -55,8 +58,8 @@ class BalanceController {
                         examples = [
                             ExampleObject(
                                 name = "찾을 수 없는 유저",
-                                value = NOT_FOUND_USER_CODE,
-                                summary = "NOT_FOUND_USER"
+                                value = """{"code":NOT_FOUND_USER}""",
+                                summary = "NOT_FOUND_USER",
                             ),
                         ],
                         mediaType = "application/json",
@@ -67,17 +70,22 @@ class BalanceController {
         ]
     )
     @GetMapping
-    fun getUserBalance(
+    fun getBalanceByUser(
         @Parameter(description = "유저 ID", required = true, example = "1")
         @RequestParam userId: Long,
-    ): UserBalanceResponse =
-        UserBalanceResponse(
-            id = 1L,
-            userId = userId,
-            balance = 1000.0.toBigDecimal(),
-            createdAt = Instant.now(),
-            updatedAt = Instant.now()
-        )
+    ): ResponseEntity<ServerApiResponse> = handleRequest(
+        block = {
+            val user = userService.get(userId)
+            val balance = balanceService.getOrNullByUerId(user.id)
+            BalanceResponse.of(user.id, balance)
+        },
+        errorSpec = {
+            when(it) {
+                is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
+                else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+        }
+    )
 
     @Operation(
         summary = "잔고 충전",
@@ -92,7 +100,7 @@ class BalanceController {
                     Content(
                         mediaType = "application/json",
                         schema = Schema(
-                            implementation = UserBalanceResponse::class,
+                            implementation = BalanceResponse::class,
                             description = "잔고 조회 성공"
                         )
                     )
@@ -123,7 +131,7 @@ class BalanceController {
                         examples = [
                             ExampleObject(
                                 name = "찾을 수 없는 잔고",
-                                value = NOT_FOUND_BALANCE_CODE,
+                                value = """{"code":NOT_FOUND_BALANCE}""",
                                 summary = "NOT_FOUND_BALANCE"
                             ),
                         ],
@@ -139,12 +147,11 @@ class BalanceController {
         @PathVariable balanceId: Long,
         @Parameter(description = "잔고 ID", required = true, example = "1")
         @RequestBody request: ChargeApiRequest,
-    ): UserBalanceResponse =
-        UserBalanceResponse(
-            id = 1L,
+    ): BalanceResponse =
+        BalanceResponse(
             userId = 2L,
-            balance = 1000.0.toBigDecimal(),
+            amount = 1000.0.toBigDecimal(),
             createdAt = Instant.now(),
-            updatedAt = Instant.now()
+            updatedAt = Instant.now(),
         )
 }

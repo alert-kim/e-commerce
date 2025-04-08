@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.interfaces
 
 object BalanceApiErrorCode {
-    const val NOT_FOUND_BALANCE_CODE: String = """{"code":"NOT_FOUND_BALANCE"}"""
     const val EXCEED_MAX_BALANCE_CODE: String = """{"code":"EXCEED_MAX_BALANCE"}"""
 }
 
@@ -24,7 +23,12 @@ object OrderErrorCode {
 
 
 object UserApiErrorCode {
-    const val NOT_FOUND_USER_CODE: String = """{"code":"NOT_FOUND_USER"}"""
+    const val NOT_FOUND_USER: String = "NOT_FOUND_USER"
+    const val NOT_FOUND_USER_CODE: String = """{"code":${NOT_FOUND_USER}}"""
 }
 
+enum class ErrorCode(val message: String) {
+    NOT_FOUND_USER("유저를 찾을 수 없습니다."),
+    INTERNAL_SERVER_ERROR("서버 내부 오류입니다."),
+}
 
