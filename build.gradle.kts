@@ -59,6 +59,7 @@ dependencies {
 	testImplementation("org.testcontainers:mysql")
 	testImplementation("io.mockk:mockk:1.13.7")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("io.kotest:kotest-property:5.7.2")
 
 	// Swagger
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
