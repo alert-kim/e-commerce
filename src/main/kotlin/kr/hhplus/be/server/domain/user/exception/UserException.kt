@@ -9,3 +9,7 @@ class NotFoundUserException(
 ) : UserException() {
     override val message: String = "사용자를 찾을 수 없습니다. $detail"
 }
+
+class RequiredUserIdException() : UserException() {
+    override val message: String = "사용자 ID가 필요합니다"
+}

@@ -4,6 +4,9 @@ import kr.hhplus.be.server.domain.user.UserId
 import org.springframework.stereotype.Service
 
 @Service
-class BalanceService {
-    fun getOrNullByUerId(userId: UserId): BalanceQueryModel? = TODO()
+class BalanceService(
+    private val repository: BalanceRepository
+) {
+    fun getOrNullByUerId(userId: UserId): Balance? =
+        repository.findByUserId(userId)
 }

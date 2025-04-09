@@ -8,9 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import kr.hhplus.be.server.domain.balance.BalanceService
+import kr.hhplus.be.server.domain.balance.BalanceFacade
+import kr.hhplus.be.server.application.user.UserFacade
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
-import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.EXCEED_MAX_BALANCE_CODE
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorResponse
@@ -27,8 +27,8 @@ import java.time.Instant
 @RequestMapping("/balances")
 @Tag(name = "Balance API", description = "잔고 조회 및 충전 API")
 class BalanceController(
-    private val userService: UserService,
-    private val balanceService: BalanceService,
+    private val userFacade: UserFacade,
+    private val balanceFacade: BalanceFacade,
 ) {
 
     @Operation(
@@ -75,8 +75,8 @@ class BalanceController(
         @RequestParam userId: Long,
     ): ResponseEntity<ServerApiResponse> = handleRequest(
         block = {
-            val user = userService.get(userId)
-            val balance = balanceService.getOrNullByUerId(user.id)
+            val user = userFacade.get(userId)
+            val balance = balanceFacade.getOrNullByUerId(user.id)
             BalanceResponse.of(user.id, balance)
         },
         errorSpec = {

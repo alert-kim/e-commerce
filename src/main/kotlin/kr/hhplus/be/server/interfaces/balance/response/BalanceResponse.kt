@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.balance.response
 
-import kr.hhplus.be.server.domain.balance.BalanceQueryModel
+import kr.hhplus.be.server.domain.balance.dto.BalanceQueryModel
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
