@@ -1,14 +1,15 @@
 package kr.hhplus.be.server.interfaces.balance
 
-import io.mockk.clearMocks
-import io.mockk.every
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.mockk.*
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.verify
-import kr.hhplus.be.server.domain.balance.BalanceFacade
+import kr.hhplus.be.server.application.balance.BalanceFacade
+import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
+import kr.hhplus.be.server.application.user.UserFacade
+import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
-import kr.hhplus.be.server.application.user.UserFacade
+import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
 import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.UserMock
 import org.junit.jupiter.api.BeforeEach
@@ -18,8 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import java.math.BigDecimal
 
 @WebMvcTest(BalanceController::class)
@@ -28,6 +31,9 @@ class BalanceControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @Autowired
     private lateinit var balanceFacade: BalanceFacade
@@ -66,8 +72,10 @@ class BalanceControllerTest {
             jsonPath("$.updatedAt") { value(balance.updatedAt.toString()) }
         }
 
-        verify { userFacade.get(user.id.value) }
-        verify { balanceFacade.getOrNullByUerId(user.id) }
+        verifyAll {
+            userFacade.get(user.id.value)
+            balanceFacade.getOrNullByUerId(user.id)
+        }
     }
 
     @Test
@@ -86,7 +94,7 @@ class BalanceControllerTest {
     }
 
     @Test
-    fun `잔고조회 - 유저의 잔고가 없는 경우 잔고를 0으로 반환한다`() {
+    fun `잔고 조회 - 유저의 잔고가 없는 경우 잔고를 0으로 반환한다`() {
         val user = UserMock.queryModel()
         every { userFacade.get(user.id.value) } returns user
         every { balanceFacade.getOrNullByUerId(user.id) } returns null
@@ -99,7 +107,74 @@ class BalanceControllerTest {
             jsonPath("$.amount") { value(BigDecimal.ZERO.toPlainString()) }
         }
 
-        verify { userFacade.get(user.id.value) }
-        verify { balanceFacade.getOrNullByUerId(user.id) }
+        verifyAll {
+            userFacade.get(user.id.value)
+            balanceFacade.getOrNullByUerId(user.id)
+        }
+    }
+
+    @Test
+    fun `잔고 충전 - 200 OK`() {
+        val userId = UserMock.id()
+        val balanceId = BalanceMock.id()
+        val request = ChargeApiRequest(userId = userId.value, amount = BigDecimal.valueOf(1_000))
+        val chargedBalance = BalanceMock.queryModel(userId = userId, amount = BigDecimal.valueOf(2_000))
+        every { balanceFacade.charge(ChargeBalanceFacadeCommand(userId = userId.value, amount = request.amount)) } returns chargedBalance
+
+        mockMvc.post("/balances/charge") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.userId") { value(chargedBalance.userId.value) }
+            jsonPath("$.amount") { value(chargedBalance.amount.toString()) }
+            jsonPath("$.createdAt") { value(chargedBalance.createdAt.toString()) }
+            jsonPath("$.updatedAt") { value(chargedBalance.updatedAt.toString()) }
+        }
+
+        verify {
+            balanceFacade.charge(
+               ChargeBalanceFacadeCommand(
+                    userId = userId.value,
+                    amount = request.amount,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `잔고 충전 - 최대 잔고를 초과한 경우 400 Bad Request`() {
+        val balanceId = BalanceMock.id()
+        val userId = UserMock.id()
+        val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
+        every { balanceFacade.charge(any()) } throws ExceedMaxBalanceException(balanceId, request.amount)
+
+        mockMvc.post("/balances/charge") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.errorCode") { value(ErrorCode.EXCEED_MAX_BALANCE.name) }
+        }
+
+        verify { balanceFacade.charge(ChargeBalanceFacadeCommand(userId = request.userId, amount = request.amount)) }
+    }
+
+    @Test
+    fun `잔고 충전 - 유저를 찾을 수 없는 경우 404 Not Found`() {
+        val balanceId = BalanceMock.id()
+        val userId = 1L
+        val request = ChargeApiRequest(userId, BigDecimal.valueOf(1_000))
+        every { balanceFacade.charge(any()) } throws NotFoundUserException()
+
+        mockMvc.post("/balances/charge") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isNotFound() }
+            jsonPath("$.errorCode") { value(ErrorCode.NOT_FOUND_USER.name) }
+        }
+
+        verify { balanceFacade.charge(ChargeBalanceFacadeCommand(userId = request.userId, amount = request.amount)) }
     }
 }

@@ -25,15 +25,15 @@ object BalanceMock {
     )
 
     fun queryModel(
-        id: BalanceId = BalanceId(IdMock.value()),
-        userId: UserId = UserId(IdMock.value()),
-        balance: BigDecimal = BigDecimal(1_000),
+        id: BalanceId = id(),
+        userId: UserId = UserMock.id(),
+        amount: BigDecimal = BigDecimal(1_000),
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = BalanceQueryModel(
         id = id,
         userId = userId,
-        amount = balance,
+        amount = amount,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )

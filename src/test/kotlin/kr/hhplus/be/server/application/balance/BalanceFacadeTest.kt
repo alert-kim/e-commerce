@@ -1,10 +1,11 @@
-package kr.hhplus.be.server.domain.balance
+package kr.hhplus.be.server.application.balance
 
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat

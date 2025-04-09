@@ -6,6 +6,10 @@ import org.springframework.http.ResponseEntity
 
 object ErrorSpec {
 
+    fun badRequest(code: ErrorCode): ResponseEntity<ServerApiResponse> =
+        ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse(code.name))
+
     fun notFound(code: ErrorCode): ResponseEntity<ServerApiResponse> =
         ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(code.name))
