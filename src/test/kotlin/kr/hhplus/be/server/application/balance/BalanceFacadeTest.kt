@@ -131,10 +131,7 @@ class BalanceFacadeTest {
         val userId = UserMock.id()
         val command = ChargeBalanceFacadeCommand(amount = BigDecimal.valueOf(1_000), userId = userId.value)
         every { userService.get(userId.value) } returns UserMock.user(id = userId)
-        every { balanceService.charge(ChargeBalanceCommand(userId, command.amount)) } throws ExceedMaxBalanceException(
-            BalanceMock.id(),
-            command.amount
-        )
+        every { balanceService.charge(ChargeBalanceCommand(userId, command.amount)) } throws ExceedMaxBalanceException(command.amount)
 
         assertThrows<ExceedMaxBalanceException> {
             facade.charge(command)

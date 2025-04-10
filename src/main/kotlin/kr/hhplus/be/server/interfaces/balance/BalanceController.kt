@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import kr.hhplus.be.server.application.balance.BalanceFacade
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
 import kr.hhplus.be.server.application.user.UserFacade
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceException
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.EXCEED_MAX_BALANCE_CODE
@@ -160,6 +161,7 @@ class BalanceController(
             when (it) {
                 is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
                 is ExceedMaxBalanceException -> ErrorSpec.badRequest(ErrorCode.EXCEED_MAX_BALANCE)
+                is BelowMinBalanceException -> ErrorSpec.badRequest(ErrorCode.BELOW_MIN_BALANCE)
                 else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
             }
         }

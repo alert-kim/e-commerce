@@ -147,7 +147,7 @@ class BalanceControllerTest {
         val balanceId = BalanceMock.id()
         val userId = UserMock.id()
         val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
-        every { balanceFacade.charge(any()) } throws ExceedMaxBalanceException(balanceId, request.amount)
+        every { balanceFacade.charge(any()) } throws ExceedMaxBalanceException(request.amount)
 
         mockMvc.post("/balances/charge") {
             contentType = MediaType.APPLICATION_JSON

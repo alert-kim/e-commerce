@@ -58,7 +58,7 @@ class BalanceServiceTest {
     @Test
     fun `충전 - 유저 Id에 해당하는 Balance가 없으면 충전 금액을 가진 잔고를 생성한다`() {
         val userId = UserMock.id()
-        val command = ChargeBalanceCommand(userId = userId, amount = BigDecimal.valueOf(1_000))
+        val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
         val newBalanceId = BalanceMock.id()
         every { repository.findByUserId(userId) } returns null
         every { repository.save(any()) } returns newBalanceId
@@ -79,7 +79,7 @@ class BalanceServiceTest {
 
     @Test
     fun `충전 - 유저 Id에 해당하는 Balance가 있으면 충전 금액을 더한 후 업데이트 한다`() {
-        val existingBalance = BalanceMock.balance()
+        val existingBalance = BalanceMock.balance(amount = BigDecimal.ONE)
         val originalAmount = existingBalance.amount
         val chargeAmount = BigDecimal.valueOf(1_000)
         val command = ChargeBalanceCommand(userId = existingBalance.userId, amount = chargeAmount)
@@ -99,12 +99,11 @@ class BalanceServiceTest {
 
     @Test
     fun `충전 - 충전 중 예외가 발생하면 해당 예외를 그대로 반환하고 잔고를 업데이트 하지 않는다`() {
-        val balanceId = BalanceMock.id()
         val userId = UserMock.id()
         val balance = mockk<Balance>()
-        val command = ChargeBalanceCommand(userId = userId, amount = BigDecimal.valueOf(1_000))
+        val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
         every { repository.findByUserId(command.userId) } returns balance
-        every { balance.charge(BalanceAmount(command.amount)) } throws ExceedMaxBalanceException(balanceId, BigDecimal.valueOf(1_000))
+        every { balance.charge(BalanceAmount(command.amount)) } throws ExceedMaxBalanceException(BigDecimal.valueOf(1_000))
 
         assertThrows<ExceedMaxBalanceException> {
             service.charge(command)

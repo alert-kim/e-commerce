@@ -11,8 +11,13 @@ class RequiredBalanceIdException : BalanceException() {
 }
 
 class ExceedMaxBalanceException(
-    id: BalanceId,
     amount: BigDecimal,
 ) : BalanceException() {
-    override val message: String = "잔고(${id.value})가 최대 금액을 초과했습니다. 현재 잔고: $amount"
+    override val message: String = "잔고가 최대 금액을 초과했습니다. 현재 잔고: $amount"
+}
+
+class BelowMinBalanceException(
+    amount: BigDecimal,
+) : BalanceException() {
+    override val message: String = "잔고가 최소 금액 미만입니다. 현재 잔고: $amount"
 }
