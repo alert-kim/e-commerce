@@ -4,9 +4,17 @@ import kr.hhplus.be.server.domain.balance.command.CreateBalanceRecord
 import org.springframework.stereotype.Service
 
 @Service
-class BalanceRecordService {
+class BalanceRecordService(
+    private val repository: BalanceRecordRepository,
+) {
     fun record(command: CreateBalanceRecord) {
-        TODO()
+        repository.save(
+            BalanceRecord.new(
+                balanceId = command.balanceId,
+                type = command.type,
+                amount = BalanceAmount(command.amount),
+            )
+        )
     }
 }
 
