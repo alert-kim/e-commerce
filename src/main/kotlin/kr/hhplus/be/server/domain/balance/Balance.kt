@@ -14,14 +14,18 @@ class Balance (
 ) {
     private var _amount: BalanceAmount = BalanceAmount(amount)
 
-    var amount: BigDecimal = _amount.value
-        private set
+    var amount: BigDecimal
+        get() = _amount.value
+        private set(value) {
+            this._amount = BalanceAmount(value)
+        }
 
     var updatedAt: Instant = updatedAt
         private set
 
     fun charge(amount: BalanceAmount) {
-        TODO()
+        this._amount = this._amount.plus(amount)
+        this.updatedAt = Instant.now()
     }
 
     fun requireId(): BalanceId =
@@ -29,6 +33,11 @@ class Balance (
 
     companion object {
         fun new(userId: UserId): Balance =
-            TODO()
+            Balance(
+                userId = userId,
+                createdAt = Instant.now(),
+                amount = BigDecimal.ZERO,
+                updatedAt = Instant.now(),
+            )
     }
 }
