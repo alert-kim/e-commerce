@@ -5,13 +5,30 @@ import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
 
-class Balance(
+class Balance (
     val id: BalanceId? = null,
     val userId: UserId,
-    var amount: BigDecimal,
-    val createdAt: Instant = Instant.now(),
-    var updatedAt: Instant = Instant.now(),
+    val createdAt: Instant,
+    amount: BigDecimal,
+    updatedAt: Instant,
 ) {
+    private var _amount: BalanceAmount = BalanceAmount(amount)
+
+    var amount: BigDecimal = _amount.value
+        private set
+
+    var updatedAt: Instant = updatedAt
+        private set
+
+    fun charge(amount: BalanceAmount) {
+        TODO()
+    }
+
     fun requireId(): BalanceId =
         id ?: throw RequiredBalanceIdException()
+
+    companion object {
+        fun new(userId: UserId): Balance =
+            TODO()
+    }
 }

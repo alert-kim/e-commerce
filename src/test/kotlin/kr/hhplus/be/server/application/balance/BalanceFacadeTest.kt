@@ -115,6 +115,7 @@ class BalanceFacadeTest {
         val command = ChargeBalanceFacadeCommand(amount = BigDecimal.valueOf(1_000), userId = userId.value)
         every { userService.get(userId.value) } throws NotFoundUserException("by id: ${userId.value}")
 
+
         assertThrows<NotFoundUserException> {
             facade.charge(command)
         }
@@ -142,5 +143,6 @@ class BalanceFacadeTest {
         verify(exactly = 0) {
             balanceRecordService.record(any())
         }
+        verify(exactly = 0) { balanceRecordService.record(any()) }
     }
 }

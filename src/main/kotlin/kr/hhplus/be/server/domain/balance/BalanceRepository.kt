@@ -4,4 +4,6 @@ import kr.hhplus.be.server.domain.user.UserId
 
 interface BalanceRepository {
     fun findByUserId(userId: UserId): Balance?
+
+    fun save(balance: Balance): BalanceId
 }

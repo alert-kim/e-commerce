@@ -14,6 +14,17 @@ class BalanceService(
         repository.findByUserId(userId)
 
     fun charge(command: ChargeBalanceCommand): BalanceId {
-        TODO()
+        val balance = repository.findByUserId(command.userId)
+        return when(balance) {
+            null -> {
+                val newBalance = Balance.new(command.userId)
+                newBalance.charge(BalanceAmount(command.amount))
+                repository.save(newBalance)
+            }
+            else -> {
+                balance.charge(BalanceAmount(command.amount))
+                repository.save(balance)
+            }
+        }
     }
 }
