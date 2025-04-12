@@ -14,31 +14,10 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
 
 @RestController
-@Tag(name = "Product API", description = "상품 관련 API")
-class ProductController {
+class ProductController : ProductControllerInterface {
 
-    @Operation(
-        summary = "상품 조회",
-        description = "판매 중인 상품 목록 조회"
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "상품 목록 조회 성공",
-                content = [
-                    Content(
-                        mediaType = "application/json",
-                        schema = Schema(
-                            implementation = ProductsResponse::class,
-                        )
-                    )
-                ]
-            ),
-        ]
-    )
     @GetMapping("/products")
-    fun getProducts(): ProductsResponse = ProductsResponse(
+    override fun getProducts(): ProductsResponse = ProductsResponse(
         products = listOf(
             ProductResponse(
                 id = 1L,
@@ -61,29 +40,8 @@ class ProductController {
         )
     )
 
-
-    @Operation(
-        summary = "인기 상품 조회",
-        description = "3일간 판매량이 높은 5개의 상품 조회, 제일 많이 팔린 순으로 반환"
-    )
-    @ApiResponses(
-        value = [
-            ApiResponse(
-                responseCode = "200",
-                description = "인기 상품 목록 조회 성공",
-                content = [
-                    Content(
-                        mediaType = "application/json",
-                        schema = Schema(
-                            implementation = ProductsResponse::class,
-                        )
-                    )
-                ]
-            ),
-        ]
-    )
     @GetMapping("/products:popular")
-    fun getPopularProducts(): ProductsResponse = ProductsResponse(
+    override fun getPopularProducts(): ProductsResponse = ProductsResponse(
         products = listOf(
             ProductResponse(
                 id = 1L,
