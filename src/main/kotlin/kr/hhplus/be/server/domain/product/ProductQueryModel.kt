@@ -11,4 +11,18 @@ data class ProductQueryModel(
     val price: BigDecimal,
     val stock: Long,
     val createdAt: Instant,
-)
+) {
+    companion object {
+        fun from(product: Product): ProductQueryModel {
+            return ProductQueryModel(
+                id = product.requireId(),
+                status = product.status,
+                name = product.name,
+                description = product.description,
+                price = product.price,
+                stock = product.stock.quantity,
+                createdAt = product.createdAt,
+            )
+        }
+    }
+}

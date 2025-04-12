@@ -1,24 +1,22 @@
 package kr.hhplus.be.server.interfaces.product
 
-import kr.hhplus.be.server.domain.product.ProductService
+import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
+import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorSpec
-import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import kr.hhplus.be.server.interfaces.common.handleRequest
 import kr.hhplus.be.server.interfaces.product.response.ProductResponse
 import kr.hhplus.be.server.interfaces.product.response.ProductsResponse
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.function.ServerResponse
 import java.math.BigDecimal
 import java.time.Instant
 
 @RestController
 class ProductController(
-    private val productService: ProductService,
+    private val productFacade: ProductFacade,
 ) : ProductControllerInterface {
 
     @GetMapping("/products")
@@ -27,7 +25,7 @@ class ProductController(
         @RequestParam(defaultValue = "20") pageSize: Int,
     ) = handleRequest(
         block = {
-            val productsPaged = productService.getAllOnSalePaged(page = page, size = pageSize)
+            val productsPaged = productFacade.getAllOnSalePaged(page = page, pageSize = pageSize)
 
             ProductsResponse(
                 totalCount = productsPaged.totalElements,
@@ -40,6 +38,7 @@ class ProductController(
         },
         errorSpec = {
             when (it) {
+                is InvalidPageRequestArgumentException -> ErrorSpec.badRequest(ErrorCode.INVALID_REQUEST)
                 else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
             }
         }

@@ -8,8 +8,10 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
+import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
+import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.domain.product.ProductQueryModel
-import kr.hhplus.be.server.domain.product.ProductService
+import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.mock.ProductMock
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.jupiter.api.BeforeEach
@@ -21,6 +23,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 
@@ -32,21 +35,21 @@ class ProductControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var productService: ProductService
+    private lateinit var productFacade: ProductFacade
 
     @TestConfiguration
     class Config {
         @Bean
-        fun productService(): ProductService = mockk()
+        fun productFacade(): ProductFacade = mockk(relaxed = true)
     }
 
     @BeforeEach
     fun setUp() {
-        clearMocks(productService)
+        clearMocks(productFacade)
     }
 
     @Test
-    fun `상품 목록 조회 - 200 OK`() {
+    fun `상품 목록 조회 - 200`() {
         val page = 0
         val pageSize = 20
         val totalCount = 50L
@@ -56,7 +59,11 @@ class ProductControllerTest {
 
                 )
         }
-        every { productService.getAllOnSalePaged(page, pageSize) } returns PageImpl(products, Pageable.unpaged(), totalCount)
+        every { productFacade.getAllOnSalePaged(page, pageSize) } returns PageImpl(
+            products,
+            Pageable.unpaged(),
+            totalCount
+        )
 
         mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
             .andExpect {
@@ -80,12 +87,16 @@ class ProductControllerTest {
     }
 
     @Test
-    fun `상품 목록 조회 - 200 OK - 상품 없음`() {
+    fun `상품 목록 조회 - 200 - 상품 없음`() {
         val page = 0
         val pageSize = 20
         val totalCount = 0L
         val products = emptyList<ProductQueryModel>()
-        every { productService.getAllOnSalePaged(page, pageSize) } returns PageImpl(products, Pageable.unpaged(), totalCount)
+        every { productFacade.getAllOnSalePaged(page, pageSize) } returns PageImpl(
+            products,
+            Pageable.unpaged(),
+            totalCount
+        )
 
         mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
             .andExpect {
@@ -99,16 +110,35 @@ class ProductControllerTest {
     }
 
     @Test
-    fun `상품 목록 조회 - 요청된 page, pageSize로 상품을 조회`() {
+    fun `상품 목록 조회 - 200 - 요청된 page, pageSize로 상품을 조회`() {
         val page = Arb.int(0..10).next()
         val pageSize = Arb.int(1..100).next()
-        every { productService.getAllOnSalePaged(page, pageSize) } returns PageImpl(emptyList(), Pageable.unpaged(), 0)
+        every { productFacade.getAllOnSalePaged(page, pageSize) } returns PageImpl(emptyList(), Pageable.unpaged(), 0)
 
         mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
             .andExpect {
                 status { isOk() }
             }
 
-        verify { productService.getAllOnSalePaged(page, pageSize) }
+        verify { productFacade.getAllOnSalePaged(page, pageSize) }
+    }
+
+    @Test
+    fun `상품 목록 조회 - 400 - 잘못된 page, pageSize`() {
+        val page = -1
+        val pageSize = 0
+        every { productFacade.getAllOnSalePaged(page, pageSize) } throws InvalidPageRequestArgumentException(
+            page = page,
+            pageSize = pageSize,
+            sort = Sort.by(Sort.Direction.DESC, "createdAt"),
+        )
+
+        mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
+            .andExpect {
+                status { isBadRequest() }
+                jsonPath("$.errorCode") { value(ErrorCode.INVALID_REQUEST.name) }
+            }
+
+        verify { productFacade.getAllOnSalePaged(page, pageSize) }
     }
 }

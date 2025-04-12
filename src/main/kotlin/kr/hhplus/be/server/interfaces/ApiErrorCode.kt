@@ -28,6 +28,8 @@ object UserApiErrorCode {
 }
 
 enum class ErrorCode(val message: String) {
+    INVALID_REQUEST("잘못된 요청입니다."),
+
     NOT_FOUND_USER("유저를 찾을 수 없습니다."),
 
     EXCEED_MAX_BALANCE("잔고가 최대치를 초과했습니다."),

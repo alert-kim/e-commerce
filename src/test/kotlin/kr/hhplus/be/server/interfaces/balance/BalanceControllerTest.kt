@@ -115,7 +115,7 @@ class BalanceControllerTest {
     }
 
     @Test
-    fun `잔고 충전 - 200 OK`() {
+    fun `잔고 충전 - 200`() {
         val userId = UserMock.id()
         val balanceId = BalanceMock.id()
         val request = ChargeApiRequest(userId = userId.value, amount = BigDecimal.valueOf(1_000))
@@ -144,7 +144,7 @@ class BalanceControllerTest {
     }
 
     @Test
-    fun `잔고 충전 - 최대 잔고를 초과한 경우 400 Bad Request`() {
+    fun `잔고 충전 - 400 - 최대 잔고를 초과`() {
         val userId = UserMock.id()
         val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
         every { balanceFacade.charge(any()) } throws ExceedMaxBalanceException(request.amount)
@@ -161,7 +161,7 @@ class BalanceControllerTest {
     }
 
     @Test
-    fun `잔고 충전 - 충전금이 최소 잔고 미만인 경우 400 Bad Request`() {
+    fun `잔고 충전 - 400 - 최소 잔고 미만`() {
         val userId = UserMock.id()
         val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
         every { balanceFacade.charge(any()) } throws BelowMinBalanceException(request.amount)
@@ -178,7 +178,7 @@ class BalanceControllerTest {
     }
 
     @Test
-    fun `잔고 충전 - 유저를 찾을 수 없는 경우 404 Not Found`() {
+    fun `잔고 충전 - 400 - 찾을 수 없는 유저`() {
         val userId = 1L
         val request = ChargeApiRequest(userId, BigDecimal.valueOf(1_000))
         every { balanceFacade.charge(any()) } throws NotFoundUserException()

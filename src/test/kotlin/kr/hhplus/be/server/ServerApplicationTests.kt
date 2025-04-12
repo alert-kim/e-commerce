@@ -2,6 +2,7 @@ package kr.hhplus.be.server
 
 import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceRepository
+import kr.hhplus.be.server.domain.product.ProductRepository
 import kr.hhplus.be.server.domain.user.UserRepository
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -18,6 +19,9 @@ class ServerApplicationTests {
 
 	@MockitoBean
 	lateinit var balanceRecordService: BalanceRecordService
+
+	@MockitoBean
+	lateinit var productRepository: ProductRepository
 
 	@Test
 	fun contextLoads() {}

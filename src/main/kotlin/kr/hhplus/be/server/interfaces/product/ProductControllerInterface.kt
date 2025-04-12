@@ -2,10 +2,12 @@ package kr.hhplus.be.server.interfaces.product
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.hhplus.be.server.interfaces.ErrorResponse
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import kr.hhplus.be.server.interfaces.product.response.ProductsResponse
 import org.springframework.data.domain.Pageable
@@ -34,11 +36,19 @@ interface ProductControllerInterface {
                     )
                 ]
             ),
+            ApiResponse(
+                responseCode = "400",
+                description = "잘못된 요청 (페이지 파라미터가 잘못됨)",
+                content = [Content(
+                    examples = [ExampleObject(value = """{"code":"INVALID_REQUEST"}""")],
+                    schema = Schema(implementation = ErrorResponse::class)
+                )]
+            ),
         ]
     )
     @GetMapping("/products")
     fun getProducts(
-        @RequestParam page: Int,
+        @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") pageSize: Int,
     ): ResponseEntity<ServerApiResponse>
 
