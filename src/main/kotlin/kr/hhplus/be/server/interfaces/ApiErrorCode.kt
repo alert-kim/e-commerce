@@ -2,6 +2,7 @@ package kr.hhplus.be.server.interfaces
 
 object BalanceApiErrorCode {
     const val EXCEED_MAX_BALANCE_CODE: String = """{"code":"EXCEED_MAX_BALANCE"}"""
+    const val BELOW_MIN_BALANCE_CODE: String = """{"code":"BELOW_MIN_BALANCE"}"""
 }
 
 object CouponErrorCode {
@@ -20,7 +21,6 @@ object OrderErrorCode {
     const val INVALID_ORDER_PRICE_CODE : String = """{"code":"INVALID_ORDER_PRICE"}"""
     const val OUT_OF_PRODUCT_STOCK_CODE : String = """{"code":"OUT_OF_PRODUCT_STOCK"}"""
 }
-
 
 object UserApiErrorCode {
     const val NOT_FOUND_USER: String = "NOT_FOUND_USER"

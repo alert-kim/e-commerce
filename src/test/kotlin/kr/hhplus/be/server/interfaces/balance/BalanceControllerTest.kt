@@ -6,6 +6,7 @@ import io.mockk.junit5.MockKExtension
 import kr.hhplus.be.server.application.balance.BalanceFacade
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
 import kr.hhplus.be.server.application.user.UserFacade
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceException
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
@@ -144,7 +145,6 @@ class BalanceControllerTest {
 
     @Test
     fun `잔고 충전 - 최대 잔고를 초과한 경우 400 Bad Request`() {
-        val balanceId = BalanceMock.id()
         val userId = UserMock.id()
         val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
         every { balanceFacade.charge(any()) } throws ExceedMaxBalanceException(request.amount)
@@ -161,8 +161,24 @@ class BalanceControllerTest {
     }
 
     @Test
+    fun `잔고 충전 - 충전금이 최소 잔고 미만인 경우 400 Bad Request`() {
+        val userId = UserMock.id()
+        val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
+        every { balanceFacade.charge(any()) } throws BelowMinBalanceException(request.amount)
+
+        mockMvc.post("/balances/charge") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.errorCode") { value(ErrorCode.BELOW_MIN_BALANCE.name) }
+        }
+
+        verify { balanceFacade.charge(ChargeBalanceFacadeCommand(userId = request.userId, amount = request.amount)) }
+    }
+
+    @Test
     fun `잔고 충전 - 유저를 찾을 수 없는 경우 404 Not Found`() {
-        val balanceId = BalanceMock.id()
         val userId = 1L
         val request = ChargeApiRequest(userId, BigDecimal.valueOf(1_000))
         every { balanceFacade.charge(any()) } throws NotFoundUserException()

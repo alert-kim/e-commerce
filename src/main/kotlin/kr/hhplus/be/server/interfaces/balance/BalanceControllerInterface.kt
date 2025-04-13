@@ -8,7 +8,11 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.BELOW_MIN_BALANCE_CODE
+import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.EXCEED_MAX_BALANCE_CODE
 import kr.hhplus.be.server.interfaces.ErrorResponse
+import kr.hhplus.be.server.interfaces.OrderErrorCode.INVALID_ORDER_PRICE_CODE
+import kr.hhplus.be.server.interfaces.OrderErrorCode.OUT_OF_PRODUCT_STOCK_CODE
 import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
 import kr.hhplus.be.server.interfaces.balance.response.BalanceResponse
 import org.springframework.http.ResponseEntity
@@ -61,10 +65,24 @@ interface BalanceControllerInterface {
             ApiResponse(
                 responseCode = "400",
                 description = "잘못된 요청",
-                content = [Content(
-                    examples = [ExampleObject(value = """{"code":"EXCEED_MAX_BALANCE"}""")],
-                    schema = Schema(implementation = ErrorResponse::class)
-                )]
+                content = [
+                    Content(
+                        examples = [
+                            ExampleObject(
+                                name = "최대 잔고 금액 초과",
+                                value = EXCEED_MAX_BALANCE_CODE,
+                                summary = "EXCEED_MAX_BALANCE"
+                            ),
+                            ExampleObject(
+                                name = "최소 잔고 금액 미만",
+                                value = BELOW_MIN_BALANCE_CODE,
+                                summary = "BELOW_MIN_BALANCE"
+                            ),
+                        ],
+                        mediaType = "application/json",
+                        schema = Schema(implementation = ErrorResponse::class)
+                    ),
+                ]
             ),
             ApiResponse(
                 responseCode = "404",
