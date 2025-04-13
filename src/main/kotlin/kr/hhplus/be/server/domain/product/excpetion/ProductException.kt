@@ -18,7 +18,7 @@ class NotFoundProductException(
 
 class OutOfStockProductException(
     productId: Long,
-    required: Long,
+    required: Int,
     remaining: Long,
 ) : ProductException() {
     override val message: String = "상품($productId)의 재고($remaining)가 부족합니다. 필요 수량: $required"

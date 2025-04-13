@@ -8,10 +8,14 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
+import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
+import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
+import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
 import kr.hhplus.be.server.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -87,6 +91,91 @@ class ProductServiceTest {
 
         verify(exactly = 0) {
             repository.findAllByStatus(any(), any())
+        }
+    }
+
+    @Test
+    fun `allocateStocks - 상품 재고 할당 성공`() {
+        val product1Id = ProductMock.id()
+        val product1 = ProductMock.product(id = product1Id, stock = ProductMock.stock(quantity = 20))
+        val product2Id = ProductMock.id()
+        val product2 = ProductMock.product(id = product2Id, stock = ProductMock.stock(quantity = 15))
+        val command = AllocateStocksCommand(
+            needStocks = listOf(
+                AllocateStocksCommand.NeedStock(
+                    productId = product1Id.value,
+                    quantity = 10,
+                ),
+                AllocateStocksCommand.NeedStock(
+                    productId = product2Id.value,
+                    quantity = 15,
+                ),
+            ),
+        )
+        every { repository.findAllByIds(listOf(product1Id.value, product2Id.value)) } returns listOf(product1, product2)
+
+        val result = service.allocateStocks(command)
+
+        assertAll(
+            { assertThat(result.stocks).hasSize(2) },
+            { assertThat(result.stocks[0].productId).isEqualTo(product1Id) },
+            { assertThat(result.stocks[0].quantity).isEqualTo(10) },
+            { assertThat(result.stocks[1].productId).isEqualTo(product2Id) },
+            { assertThat(result.stocks[1].quantity).isEqualTo(15) },
+        )
+        verify {
+            repository.findAllByIds(listOf(product1Id.value, product2Id.value))
+            repository.save(withArg { assertThat(it.id).isEqualTo(product1Id) })
+            repository.save(withArg { assertThat(it.id).isEqualTo(product2Id) })
+        }
+    }
+
+    @Test
+    fun `allocateStocks - 상품 재고 할당 실패 - 재고 부족, OutOfStockProductException 발생`() {
+        val product1Id = ProductMock.id()
+        val product1 = ProductMock.product(id = product1Id, stock = ProductMock.stock(quantity = 5))
+        val product2Id = ProductMock.id()
+        val product2 = ProductMock.product(id = product2Id, stock = ProductMock.stock(quantity = 5))
+        val command = AllocateStocksCommand(
+            needStocks = listOf(
+                AllocateStocksCommand.NeedStock(
+                    productId = product1Id.value,
+                    quantity = 5,
+                ),
+                AllocateStocksCommand.NeedStock(
+                    productId = product2Id.value,
+                    quantity = 15,
+                ),
+            ),
+        )
+        every { repository.findAllByIds(listOf(product1Id.value, product2Id.value)) } returns listOf(product1, product2)
+
+        shouldThrow<OutOfStockProductException> {
+            service.allocateStocks(command)
+        }
+    }
+
+    @Test
+    fun `allocateStocks - 상품 재고 할당 실패 - 상품 없음, NotFoundProductException 발생`() {
+        val product1Id = ProductMock.id()
+        val product1 = ProductMock.product(id = product1Id, stock = ProductMock.stock(quantity = 5))
+        val product2Id = ProductMock.id()
+        val command = AllocateStocksCommand(
+            needStocks = listOf(
+                AllocateStocksCommand.NeedStock(
+                    productId = product1Id.value,
+                    quantity = 5,
+                ),
+                AllocateStocksCommand.NeedStock(
+                    productId = product2Id.value,
+                    quantity = 15,
+                ),
+            ),
+        )
+        every { repository.findAllByIds(listOf(product1Id.value, product2Id.value)) } returns listOf(product1)
+
+        shouldThrow<NotFoundProductException> {
+            service.allocateStocks(command)
         }
     }
 }

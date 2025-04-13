@@ -91,7 +91,7 @@ class OrderControllerTest {
     @Test
     fun `주문 - 400 - 재고 부족`() {
         val request = request()
-        every { orderFacade.order(any()) } throws OutOfStockProductException(1L, 1L, 0L)
+        every { orderFacade.order(any()) } throws OutOfStockProductException(1L, 1, 0L)
 
         mockMvc.post("/orders") {
             contentType = MediaType.APPLICATION_JSON

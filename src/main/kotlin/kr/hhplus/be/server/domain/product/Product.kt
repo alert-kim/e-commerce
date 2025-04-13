@@ -22,4 +22,13 @@ class Product(
 
     fun requireId(): ProductId =
         id ?: throw RequiredProductIdException()
+
+    fun allocateStock(quantity: Int): ProductStockAllocated {
+        stock.allocate(quantity)
+        return ProductStockAllocated(
+            productId = requireId(),
+            quantity = quantity,
+            unitPrice = price,
+        )
+    }
 }
