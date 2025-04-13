@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.balance
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -11,6 +12,7 @@ import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
 import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
@@ -24,6 +26,11 @@ class BalanceServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var repository: BalanceRepository
+
+    @BeforeEach
+    fun setUp() {
+        clearMocks(repository)
+    }
 
     @Test
     fun `조회 - 유저 Id로 잔고를 조회해 반환한다`() {
@@ -79,11 +86,13 @@ class BalanceServiceTest {
 
     @Test
     fun `충전 - 유저 Id에 해당하는 Balance가 있으면 충전 금액을 더한 후 업데이트 한다`() {
-        val existingBalance = BalanceMock.balance(amount = BigDecimal.ONE)
+        val existingBalanceId = BalanceMock.id()
+        val existingBalance = BalanceMock.balance(id = existingBalanceId, amount = BigDecimal.ONE)
         val originalAmount = existingBalance.amount
         val chargeAmount = BigDecimal.valueOf(1_000)
         val command = ChargeBalanceCommand(userId = existingBalance.userId, amount = chargeAmount)
         every { repository.findByUserId(command.userId) } returns existingBalance
+        every { repository.save(any()) } returns existingBalanceId
 
         val result = service.charge(command)
 
@@ -94,7 +103,6 @@ class BalanceServiceTest {
                 assertThat(it.amount).isEqualByComparingTo(originalAmount.add(chargeAmount))
             })
         }
-        verify(exactly = 0) { repository.save(any()) }
     }
 
     @Test

@@ -21,3 +21,9 @@ class BelowMinBalanceException(
 ) : BalanceException() {
     override val message: String = "잔고가 최소 금액 미만입니다. 현재 잔고: $amount"
 }
+
+class NotFoundBalanceException(
+    detail: String,
+) : BalanceException() {
+    override val message: String = "잔고를 찾을 수 없습니다. $detail"
+}
