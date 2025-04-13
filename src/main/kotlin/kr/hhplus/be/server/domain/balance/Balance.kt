@@ -28,6 +28,11 @@ class Balance (
         this.updatedAt = Instant.now()
     }
 
+    fun use(amount: BalanceAmount) {
+        this._amount = this._amount.minus(amount)
+        this.updatedAt = Instant.now()
+    }
+
     fun requireId(): BalanceId =
         id ?: throw RequiredBalanceIdException()
 

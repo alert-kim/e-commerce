@@ -24,7 +24,7 @@ class BalanceFacade(
                 userId = user.requireId(),
                 amount = command.amount,
             )
-        )
+        ).balanceId
         balanceRecordService.record(
             CreateBalanceRecord(
                 balanceId = balanceId,

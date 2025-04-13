@@ -18,7 +18,6 @@ import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse
 import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse.CouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponsResponse
-import kr.hhplus.be.server.domain.coupon.CouponDiscountKind
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.time.Instant

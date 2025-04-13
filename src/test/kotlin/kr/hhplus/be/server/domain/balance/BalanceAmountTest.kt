@@ -69,4 +69,26 @@ class BalanceAmountTest {
             amount1 + amount2
         }
     }
+
+    @Test
+    fun `BalanceAmount의 minus 연산자는 두 값을 뺀 결과를 반환한다`() {
+        val amountValue1 = BigDecimal.valueOf(30_000)
+        val amountValue2 = BigDecimal.valueOf(10_000)
+        val minus = amountValue1.minus(amountValue2)
+
+        val result = BalanceAmount(amountValue1) - BalanceAmount(amountValue2)
+
+        assertThat(result.value).isEqualByComparingTo(minus)
+    }
+
+
+    @Test
+    fun `minus 연산 결과가 최소값을 초과하면 예외를 던진다`() {
+        val amount1 = BalanceAmount(BalanceAmount.MIN_AMOUNT)
+        val amount2 = BalanceAmount(BigDecimal.ONE)
+
+        assertThrows<BelowMinBalanceAmountException> {
+            amount1 - amount2
+        }
+    }
 }

@@ -11,6 +11,7 @@ import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
+import kr.hhplus.be.server.domain.balance.result.ChargeBalanceResult
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.mock.BalanceMock
@@ -86,7 +87,7 @@ class BalanceFacadeTest {
                     amount = command.amount,
                 )
             )
-        } returns balanceId
+        } returns ChargeBalanceResult(balanceId)
         every { balanceService.get(balanceId.value) } returns chargedBalance
 
         val result = facade.charge(command)

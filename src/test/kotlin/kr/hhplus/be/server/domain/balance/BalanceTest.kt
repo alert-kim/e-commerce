@@ -51,4 +51,16 @@ class BalanceTest {
         assertThat(balance.amount).isEqualByComparingTo(initialAmount.add(chargeAmount))
         assertThat(balance.updatedAt).isAfter(balance.createdAt)
     }
+
+    @Test
+    fun `user - 잔고를 사용하고 updatedAt을 갱신한다`() {
+        val initialAmount = BigDecimal.valueOf(1_000)
+        val balance = BalanceMock.balance(amount = initialAmount)
+        val useAmount = BigDecimal.valueOf(500)
+
+        balance.use(BalanceAmount(useAmount))
+
+        assertThat(balance.amount).isEqualByComparingTo(initialAmount.minus(useAmount))
+        assertThat(balance.updatedAt).isAfter(balance.createdAt)
+    }
 }

@@ -18,6 +18,9 @@ value class BalanceAmount (val value: BigDecimal) {
     operator fun plus(amount: BalanceAmount): BalanceAmount =
         BalanceAmount(this.value.plus(amount.value))
 
+    operator fun minus(amount: BalanceAmount): BalanceAmount =
+        BalanceAmount(this.value.minus(amount.value))
+
     companion object {
         val MIN_AMOUNT: BigDecimal = BigDecimal.valueOf(0)
         val MAX_AMOUNT: BigDecimal = BigDecimal.valueOf(1_000_000)
