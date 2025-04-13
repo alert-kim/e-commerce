@@ -20,7 +20,7 @@ data class OrderQueryModel (
     companion object {
         fun from(order: Order): OrderQueryModel {
             return OrderQueryModel(
-                id = order.id,
+                id = order.requireId(),
                 userId = order.userId,
                 status = order.status,
                 couponId = order.couponId,

@@ -5,12 +5,21 @@ import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import org.springframework.stereotype.Service
 
 @Service
-class OrderService {
+class OrderService(
+    private val repository: OrderRepository,
+) {
 
     fun createOrder(
         command: CreateOrderCommand,
     ): CreateOrderResult {
-        TODO()
+        val orderId = repository.save(
+            Order.new(
+                userId = command.userId,
+            )
+        )
+        return CreateOrderResult(
+            orderId = orderId,
+        )
     }
 
     fun placeStock(

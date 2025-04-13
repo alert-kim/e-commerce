@@ -9,7 +9,10 @@ import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderQueryModel
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderSheet
-import kr.hhplus.be.server.domain.order.command.*
+import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
+import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
+import kr.hhplus.be.server.domain.order.command.PayOrderCommand
+import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductService
@@ -84,7 +87,7 @@ class OrderFacade(
         val payment = paymentService.pay(
             PayCommand(
                 userId = order.userId,
-                orderId = order.id,
+                orderId = order.requireId(),
                 amount = order.totalAmount,
             )
         ).payment

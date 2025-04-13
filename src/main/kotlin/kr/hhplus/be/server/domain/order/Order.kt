@@ -1,12 +1,13 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.coupon.CouponId
+import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
 
 class Order(
-    val id: OrderId,
+    val id: OrderId? = null,
     val userId: UserId,
     val createdAt: Instant,
     status: OrderStatus,
@@ -39,5 +40,24 @@ class Order(
 
     val products: List<OrderProduct>
         get() = _products.toList()
+
+    fun requireId(): OrderId =
+        id ?: throw RequiredOrderIdException()
+
+    companion object {
+        fun new(
+            userId: UserId,
+        ): Order = Order(
+            userId = userId,
+            status = OrderStatus.READY,
+            originalAmount = BigDecimal.ZERO,
+            discountAmount = BigDecimal.ZERO,
+            totalAmount = BigDecimal.ZERO,
+            orderProducts = emptyList(),
+            couponId = null,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now(),
+        )
+    }
 }
 

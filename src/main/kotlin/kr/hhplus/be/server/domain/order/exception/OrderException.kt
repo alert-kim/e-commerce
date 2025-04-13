@@ -5,6 +5,10 @@ import kr.hhplus.be.server.domain.product.ProductId
 
 abstract class OrderException : DomainException()
 
+class RequiredOrderIdException : OrderException() {
+    override val message: String = "주문 ID가 필요합니다."
+}
+
 class InvalidOrderPriceException(
     productId: ProductId,
     detail: String,

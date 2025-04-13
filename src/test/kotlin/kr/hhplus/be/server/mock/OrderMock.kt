@@ -27,7 +27,7 @@ object OrderMock {
     )
 
     fun order(
-        id: OrderId = id(),
+        id: OrderId? = id(),
         userId: UserId = UserMock.id(),
         status: OrderStatus = OrderStatus.STOCK_ALLOCATED,
         couponId: CouponId? = CouponMock.id(),
