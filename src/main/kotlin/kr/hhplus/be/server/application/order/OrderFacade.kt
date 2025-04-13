@@ -81,15 +81,15 @@ class OrderFacade(
             )
         )
 
-        val receipt = paymentService.pay(
+        val payment = paymentService.pay(
             PayCommand(
                 userId = order.userId,
                 orderId = order.id,
                 amount = order.totalAmount,
             )
-        ).receipt
+        ).payment
 
-        orderService.pay(PayOrderCommand(receipt))
+        orderService.pay(PayOrderCommand(payment))
     }
 
     private fun createOrder(

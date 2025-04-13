@@ -1,12 +1,10 @@
 package kr.hhplus.be.server.domain.order
 
-import io.kotest.matchers.should
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import io.mockk.verifyAll
 import io.mockk.verifyOrder
 import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
@@ -20,7 +18,6 @@ import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
-import kr.hhplus.be.server.domain.payment.PaymentReceipt
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.payment.result.PayResult
@@ -33,6 +30,7 @@ import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.mock.PaymentMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -79,11 +77,11 @@ class OrderFacadeTest {
                 unitPrice = it.unitPrice
             )
         }
-        val receipt = PaymentReceipt(
+        val payment = PaymentMock.payment(
             orderId = orderId,
             userId = userId,
             amount = command.totalAmount,
-            at = Instant.now()
+            createdAt = Instant.now()
         )
         val order = OrderMock.order(id = orderId, userId = userId, couponId = couponId)
         val orderSheet = createOrderSheet(orderId, command)
@@ -93,7 +91,7 @@ class OrderFacadeTest {
             stocks = stockAllocated,
         )
         every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns CouponUsedResult(coupon)
-        every { paymentService.pay(any<PayCommand>()) } returns PayResult(receipt)
+        every { paymentService.pay(any<PayCommand>()) } returns PayResult(payment)
         every { orderService.get(orderId.value) } returns order
 
         val result = orderFacade.order(command)
@@ -152,7 +150,7 @@ class OrderFacadeTest {
             )
             orderService.pay(
                 PayOrderCommand(
-                    receipt = receipt
+                    payment = payment
                 )
             )
             orderService.get(orderId.value)
@@ -172,11 +170,10 @@ class OrderFacadeTest {
                 unitPrice = it.unitPrice
             )
         }
-        val receipt = PaymentReceipt(
+        val payment = PaymentMock.payment(
             orderId = orderId,
             userId = userId,
             amount = command.totalAmount,
-            at = Instant.now()
         )
         val order = OrderMock.order(id = orderId, userId = userId, couponId = null)
         every { userService.get(command.userId) } returns user
@@ -184,7 +181,7 @@ class OrderFacadeTest {
         every { productService.allocateStocks(any<AllocateStocksCommand>()) } returns AllocatedStockResult(
             stocks = stockAllocated,
         )
-        every { paymentService.pay(any<PayCommand>()) } returns PayResult(receipt)
+        every { paymentService.pay(any<PayCommand>()) } returns PayResult(payment)
         every { orderService.get(orderId.value) } returns order
 
         val result = orderFacade.order(command)
@@ -231,7 +228,7 @@ class OrderFacadeTest {
             )
             orderService.pay(
                 PayOrderCommand(
-                    receipt = receipt
+                    payment = payment
                 )
             )
             orderService.get(orderId.value)

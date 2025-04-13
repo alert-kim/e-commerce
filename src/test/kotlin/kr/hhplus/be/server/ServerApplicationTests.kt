@@ -3,6 +3,7 @@ package kr.hhplus.be.server
 import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceRepository
 import kr.hhplus.be.server.domain.coupon.CouponRepository
+import kr.hhplus.be.server.domain.payment.PaymentRepository
 import kr.hhplus.be.server.domain.product.ProductRepository
 import kr.hhplus.be.server.domain.user.UserRepository
 import org.junit.jupiter.api.Test
@@ -20,6 +21,9 @@ class ServerApplicationTests {
 
 	@MockitoBean
 	lateinit var balanceRecordService: BalanceRecordService
+
+	@MockitoBean
+	lateinit var paymentRepository: PaymentRepository
 
 	@MockitoBean
 	lateinit var productRepository: ProductRepository

@@ -36,7 +36,7 @@ class BalanceTest {
 
         assertAll(
             { assertThat(balance.userId).isEqualTo(userId) },
-            { assertThat(balance.amount).isEqualTo(BigDecimal.ZERO) },
+            { assertThat(balance.amount).isEqualByComparingTo(BigDecimal.ZERO) },
         )
     }
 
