@@ -10,9 +10,10 @@ object CouponErrorCode {
     const val ALREADY_HAS_COUPON_CODE: String = """{"code":"ALREADY_HAS_COUPON"}"""
     const val ALREADY_USED_COUPON_CODE: String = """{"code":"ALREADY_USED_COUPON"}"""
     const val EXPIRED_COUPON_CODE: String = """{"code":"EXPIRED_COUPON"}"""
-    const val NOT_FOUND_COUPON_CODE: String = """{"code":"NOT_FOUND_COUPON"}"""
-    const val OUT_OF_STOCK_COUPON_CODE: String = """{"code":"OUT_OF_STOCK_COUPON"}"""
     const val INVALID_STATE_COUPON_CODE: String = """{"code":"INVALID_STATE_COUPON"}"""
+    const val NOT_FOUND_COUPON_CODE: String = """{"code":"NOT_FOUND_COUPON"}"""
+    const val NOT_OWNED_COUPON_CODE: String = """{"code":"NOT_OWNED_COUPON"}"""
+    const val OUT_OF_STOCK_COUPON_CODE: String = """{"code":"OUT_OF_STOCK_COUPON"}"""
 }
 
 object OrderErrorCode {
@@ -45,6 +46,7 @@ enum class ErrorCode(val message: String) {
     NOT_FOUND_COUPON("쿠폰을 찾을 수 없습니다."),
     ALREADY_USED_COUPON("이미 사용된 쿠폰입니다."),
     EXPIRED_COUPON("쿠폰 사용 기간이 만료되었습니다."),
+    NOT_OWNED_COUPON("쿠폰을 소유자가 아닙니다."),
 
     // order
     INVALID_ORDER_PRICE("잘못된 주문 금액입니다."),

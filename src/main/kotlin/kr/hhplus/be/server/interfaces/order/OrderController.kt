@@ -5,6 +5,7 @@ import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.ExpiredCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
+import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderPriceException
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
@@ -55,6 +56,7 @@ class OrderController(
                     is InvalidOrderPriceException -> ErrorSpec.badRequest(ErrorCode.INVALID_ORDER_PRICE)
                     is AlreadyUsedCouponException -> ErrorSpec.badRequest(ErrorCode.ALREADY_USED_COUPON)
                     is ExpiredCouponException -> ErrorSpec.badRequest(ErrorCode.EXPIRED_COUPON)
+                    is NotOwnedCouponException -> ErrorSpec.forbidden(ErrorCode.NOT_OWNED_COUPON)
                     is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
                     is NotFoundProductException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_PRODUCT)
                     is NotFoundCouponException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_COUPON)

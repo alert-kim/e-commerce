@@ -10,6 +10,10 @@ object ErrorSpec {
         ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse(code.name))
 
+    fun forbidden(code: ErrorCode): ResponseEntity<ServerApiResponse> =
+        ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ErrorResponse(code.name))
+
     fun notFound(code: ErrorCode): ResponseEntity<ServerApiResponse> =
         ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(code.name))

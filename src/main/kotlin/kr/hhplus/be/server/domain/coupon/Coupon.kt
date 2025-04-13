@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.coupon
 
+import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
+import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
@@ -10,12 +12,7 @@ class Coupon(
     val userId: UserId,
     val name: String,
     val couponSourceId: CouponSourceId,
-    val discountKind: CouponDiscountKind,
-    val maxDiscountAmount: BigDecimal,
-    val discountAmount: BigDecimal?,
-    val discountRate: BigDecimal?,
-    val usableFrom: Instant,
-    val usableTo: Instant,
+    val discountAmount: BigDecimal,
     val createdAt: Instant,
     usedAt: Instant?,
     updatedAt: Instant,
@@ -29,4 +26,13 @@ class Coupon(
     fun requireId(): CouponId =
         id ?: throw RequiredCouponIdException()
 
+    fun use(userId: UserId) {
+        if (this.userId != userId) {
+            throw NotOwnedCouponException(id = requireId(), ownerId = this.userId, userId = userId)
+        }
+        if (usedAt != null) {
+            throw AlreadyUsedCouponException(id = requireId())
+        }
+        usedAt = Instant.now()
+    }
 }

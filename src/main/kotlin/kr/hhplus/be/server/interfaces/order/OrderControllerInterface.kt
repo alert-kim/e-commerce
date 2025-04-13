@@ -18,6 +18,7 @@ import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.INSUFFICIENT_BALANCE_C
 import kr.hhplus.be.server.interfaces.CouponErrorCode.ALREADY_USED_COUPON_CODE
 import kr.hhplus.be.server.interfaces.CouponErrorCode.EXPIRED_COUPON_CODE
 import kr.hhplus.be.server.interfaces.CouponErrorCode.NOT_FOUND_COUPON_CODE
+import kr.hhplus.be.server.interfaces.CouponErrorCode.NOT_OWNED_COUPON_CODE
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -78,6 +79,23 @@ interface OrderControllerInterface {
                                 name = "잔고 부족",
                                 value = INSUFFICIENT_BALANCE_CODE,
                                 summary = "INSUFFICIENT_BALANCE"
+                            ),
+                        ],
+                        mediaType = "application/json",
+                        schema = Schema(implementation = ErrorResponse::class)
+                    ),
+                ]
+            ),
+            ApiResponse(
+                responseCode = "403",
+                description = "권한 없음",
+                content = [
+                    Content(
+                        examples = [
+                            ExampleObject(
+                                name = "쿠폰을 소유하고 있지 않음",
+                                value = NOT_OWNED_COUPON_CODE,
+                                summary = "NOT_OWNED_COUPON"
                             ),
                         ],
                         mediaType = "application/json",

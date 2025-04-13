@@ -1,10 +1,14 @@
 package kr.hhplus.be.server.domain.coupon
 
+import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
+import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
+import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Instant
 
 class CouponTest {
     @Test
@@ -24,4 +28,32 @@ class CouponTest {
             coupon.requireId()
         }
     }
+
+    @Test
+    fun `use - 쿠폰 사용`() {
+        val coupon = CouponMock.coupon(usedAt = null)
+
+        coupon.use(coupon.userId)
+
+        assertThat(coupon.usedAt).isNotNull
+    }
+
+    @Test
+    fun `use - 다른 사람 쿠폰 사용 - NotOwnedCouponException 발생`() {
+        val coupon = CouponMock.coupon(userId = UserId(1L), usedAt = null)
+
+        assertThrows<NotOwnedCouponException> {
+            coupon.use(UserId(2L))
+        }
+    }
+
+    @Test
+    fun `use - 이미 사용한 쿠폰 - AlreadyUsedCouponException 발생`() {
+        val coupon = CouponMock.coupon(usedAt = Instant.now())
+
+        assertThrows<AlreadyUsedCouponException> {
+            coupon.use(coupon.userId)
+        }
+    }
+
 }

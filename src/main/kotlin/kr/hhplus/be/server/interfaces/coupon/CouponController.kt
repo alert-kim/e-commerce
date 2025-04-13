@@ -56,7 +56,6 @@ class CouponController {
                 CouponResponse(
                     id = 1L,
                     name = "쿠폰1",
-                    type = CouponDiscountKind.FIXED_AMOUNT,
                     quantity = 10,
                     maxDiscountAmount = BigDecimal.valueOf(10_000),
                     discountRate = null,
@@ -99,7 +98,6 @@ class CouponController {
                     coupon = CouponResponse(
                         id = 1L,
                         name = "쿠폰1",
-                        type = CouponDiscountKind.FIXED_AMOUNT,
                         quantity = 10,
                         maxDiscountAmount = BigDecimal.valueOf(10_000),
                         discountRate = null,
@@ -203,7 +201,6 @@ class CouponController {
             coupon = CouponResponse(
                 id = 1L,
                 name = "쿠폰1",
-                type = CouponDiscountKind.FIXED_AMOUNT,
                 quantity = 10,
                 maxDiscountAmount = BigDecimal.valueOf(10_000),
                 discountRate = null,
