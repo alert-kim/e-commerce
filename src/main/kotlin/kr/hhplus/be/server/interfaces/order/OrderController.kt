@@ -3,8 +3,8 @@ package kr.hhplus.be.server.interfaces.order
 import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
-import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.coupon.exception.ExpiredCouponException
+import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderPriceException
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
@@ -46,6 +46,7 @@ class OrderController(
                     discountAmount = request.discountAmount,
                     totalAmount = request.totalAmount,
                 ))
+
                 OrderResponse.from(order)
             },
             errorSpec = {

@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.balance
 
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
+import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
 import kr.hhplus.be.server.domain.user.UserId
 import org.springframework.stereotype.Service
@@ -28,5 +29,9 @@ class BalanceService(
                 repository.save(balance)
             }
         }
+    }
+
+    fun use(command: UseBalanceCommand): Balance {
+        TODO()
     }
 }

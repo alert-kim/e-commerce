@@ -18,7 +18,7 @@ import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse
 import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse.CouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponsResponse
-import kr.hhplus.be.server.domain.coupon.CouponType
+import kr.hhplus.be.server.domain.coupon.CouponDiscountKind
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.time.Instant
@@ -56,7 +56,7 @@ class CouponController {
                 CouponResponse(
                     id = 1L,
                     name = "쿠폰1",
-                    type = CouponType.FIXED_AMOUNT,
+                    type = CouponDiscountKind.FIXED_AMOUNT,
                     quantity = 10,
                     maxDiscountAmount = BigDecimal.valueOf(10_000),
                     discountRate = null,
@@ -99,7 +99,7 @@ class CouponController {
                     coupon = CouponResponse(
                         id = 1L,
                         name = "쿠폰1",
-                        type = CouponType.FIXED_AMOUNT,
+                        type = CouponDiscountKind.FIXED_AMOUNT,
                         quantity = 10,
                         maxDiscountAmount = BigDecimal.valueOf(10_000),
                         discountRate = null,
@@ -203,7 +203,7 @@ class CouponController {
             coupon = CouponResponse(
                 id = 1L,
                 name = "쿠폰1",
-                type = CouponType.FIXED_AMOUNT,
+                type = CouponDiscountKind.FIXED_AMOUNT,
                 quantity = 10,
                 maxDiscountAmount = BigDecimal.valueOf(10_000),
                 discountRate = null,

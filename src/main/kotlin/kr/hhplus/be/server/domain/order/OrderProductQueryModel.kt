@@ -11,4 +11,17 @@ data class OrderProductQueryModel (
     val unitPrice: BigDecimal,
     val totalPrice: BigDecimal,
     val createdAt: Instant,
-)
+) {
+    companion object {
+        fun from(orderProduct: OrderProduct): OrderProductQueryModel {
+            return OrderProductQueryModel(
+                orderId = orderProduct.orderId,
+                productId = orderProduct.productId,
+                quantity = orderProduct.quantity,
+                unitPrice = orderProduct.unitPrice,
+                totalPrice = orderProduct.totalPrice,
+                createdAt = orderProduct.createdAt
+            )
+        }
+    }
+}

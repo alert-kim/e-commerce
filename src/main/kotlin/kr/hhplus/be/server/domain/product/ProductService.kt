@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.domain.product
 
 import kr.hhplus.be.server.domain.common.createPageRequest
+import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
+import kr.hhplus.be.server.domain.product.result.AllocatedStockResult
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -9,6 +11,12 @@ import org.springframework.stereotype.Service
 class ProductService(
     private val repository: ProductRepository,
 ) {
+    fun allocateStocks(
+        command: AllocateStocksCommand
+    ): AllocatedStockResult {
+        TODO()
+    }
+
     fun getAllByStatusOnPaged(status: ProductStatus, page: Int, pageSize: Int): Page<Product> {
         val pageable =
             createPageRequest(page = page, pageSize = pageSize, sort = Sort.by(Sort.Direction.DESC, "createdAt"))

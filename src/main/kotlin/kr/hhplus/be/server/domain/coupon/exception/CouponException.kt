@@ -5,6 +5,11 @@ import kr.hhplus.be.server.domain.coupon.CouponId
 
 abstract class CouponException : DomainException()
 
+class RequiredCouponIdException(
+) : CouponException() {
+    override val message: String = "쿠폰 ID가 필요합니다."
+}
+
 class NotFoundCouponException(
     detail: String,
 ) : CouponException() {

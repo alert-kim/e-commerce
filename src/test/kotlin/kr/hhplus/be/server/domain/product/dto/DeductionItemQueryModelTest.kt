@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 
-class ProductQueryModelTest {
+class DeductionItemQueryModelTest {
     @Test
     fun `상품 정보를 올바르게 변환한다`() {
         val product = ProductMock.product()
