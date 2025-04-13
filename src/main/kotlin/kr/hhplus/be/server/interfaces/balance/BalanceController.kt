@@ -3,8 +3,9 @@ package kr.hhplus.be.server.interfaces.balance
 import kr.hhplus.be.server.application.balance.BalanceFacade
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
 import kr.hhplus.be.server.application.user.UserFacade
-import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceException
-import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
+import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
+import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorSpec
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*
 class BalanceController(
     private val userFacade: UserFacade,
     private val balanceFacade: BalanceFacade,
-): BalanceControllerInterface {
+) : BalanceControllerInterface {
 
     @GetMapping
     override fun getBalance(
@@ -55,8 +56,10 @@ class BalanceController(
         errorSpec = {
             when (it) {
                 is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
-                is ExceedMaxBalanceException -> ErrorSpec.badRequest(ErrorCode.EXCEED_MAX_BALANCE)
-                is BelowMinBalanceException -> ErrorSpec.badRequest(ErrorCode.BELOW_MIN_BALANCE)
+                is NotFoundProductException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_PRODUCT)
+
+                is ExceedMaxBalanceAmountException -> ErrorSpec.badRequest(ErrorCode.EXCEED_MAX_BALANCE)
+                is BelowMinBalanceAmountException -> ErrorSpec.badRequest(ErrorCode.BELOW_MIN_BALANCE)
                 else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
             }
         }

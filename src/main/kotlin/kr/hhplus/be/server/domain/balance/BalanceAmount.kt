@@ -1,17 +1,17 @@
 package kr.hhplus.be.server.domain.balance
 
-import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceException
-import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
+import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import java.math.BigDecimal
 
 @JvmInline
 value class BalanceAmount (val value: BigDecimal) {
     init {
         if (value < MIN_AMOUNT) {
-            throw BelowMinBalanceException(value)
+            throw BelowMinBalanceAmountException(value)
         }
         if (value > MAX_AMOUNT) {
-            throw ExceedMaxBalanceException(value)
+            throw ExceedMaxBalanceAmountException(value)
         }
     }
 

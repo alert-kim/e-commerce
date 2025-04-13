@@ -6,8 +6,8 @@ import io.mockk.junit5.MockKExtension
 import kr.hhplus.be.server.application.balance.BalanceFacade
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
 import kr.hhplus.be.server.application.user.UserFacade
-import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceException
-import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
+import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
@@ -147,7 +147,7 @@ class BalanceControllerTest {
     fun `잔고 충전 - 400 - 최대 잔고를 초과`() {
         val userId = UserMock.id()
         val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
-        every { balanceFacade.charge(any()) } throws ExceedMaxBalanceException(request.amount)
+        every { balanceFacade.charge(any()) } throws ExceedMaxBalanceAmountException(request.amount)
 
         mockMvc.post("/balances/charge") {
             contentType = MediaType.APPLICATION_JSON
@@ -164,7 +164,7 @@ class BalanceControllerTest {
     fun `잔고 충전 - 400 - 최소 잔고 미만`() {
         val userId = UserMock.id()
         val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
-        every { balanceFacade.charge(any()) } throws BelowMinBalanceException(request.amount)
+        every { balanceFacade.charge(any()) } throws BelowMinBalanceAmountException(request.amount)
 
         mockMvc.post("/balances/charge") {
             contentType = MediaType.APPLICATION_JSON

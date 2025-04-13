@@ -1,10 +1,7 @@
 package kr.hhplus.be.server.domain.balance.dto
 
 import io.kotest.assertions.throwables.shouldThrow
-import kr.hhplus.be.server.domain.balance.Balance
-import kr.hhplus.be.server.domain.balance.BalanceId
 import kr.hhplus.be.server.domain.balance.exception.RequiredBalanceIdException
-import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.mock.BalanceMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

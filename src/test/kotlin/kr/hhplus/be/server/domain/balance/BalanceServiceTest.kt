@@ -8,7 +8,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
-import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
+import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
@@ -111,9 +111,9 @@ class BalanceServiceTest {
         val balance = mockk<Balance>()
         val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
         every { repository.findByUserId(command.userId) } returns balance
-        every { balance.charge(BalanceAmount(command.amount)) } throws ExceedMaxBalanceException(BigDecimal.valueOf(1_000))
+        every { balance.charge(BalanceAmount(command.amount)) } throws ExceedMaxBalanceAmountException(BigDecimal.valueOf(1_000))
 
-        assertThrows<ExceedMaxBalanceException> {
+        assertThrows<ExceedMaxBalanceAmountException> {
             service.charge(command)
         }
 

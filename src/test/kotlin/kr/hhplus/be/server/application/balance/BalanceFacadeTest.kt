@@ -7,11 +7,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
-import kr.hhplus.be.server.application.balance.result.ChargeBalanceResult
 import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
-import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceException
+import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.mock.BalanceMock
@@ -131,9 +130,9 @@ class BalanceFacadeTest {
         val userId = UserMock.id()
         val command = ChargeBalanceFacadeCommand(amount = BigDecimal.valueOf(1_000), userId = userId.value)
         every { userService.get(userId.value) } returns UserMock.user(id = userId)
-        every { balanceService.charge(ChargeBalanceCommand(userId, command.amount)) } throws ExceedMaxBalanceException(command.amount)
+        every { balanceService.charge(ChargeBalanceCommand(userId, command.amount)) } throws ExceedMaxBalanceAmountException(command.amount)
 
-        assertThrows<ExceedMaxBalanceException> {
+        assertThrows<ExceedMaxBalanceAmountException> {
             facade.charge(command)
         }
 
