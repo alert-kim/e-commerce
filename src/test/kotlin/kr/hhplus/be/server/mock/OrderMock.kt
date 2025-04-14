@@ -89,4 +89,34 @@ object OrderMock {
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
+
+    fun orderSheetProduct(
+        productId: Long = IdMock.value(),
+        quantity: Int = 2,
+        unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
+        totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
+    ): OrderSheet.OrderProduct = OrderSheet.OrderProduct(
+        productId = productId,
+        quantity = quantity,
+        unitPrice = unitPrice,
+        totalPrice = totalPrice,
+    )
+
+    fun orderSheet(
+        orderId: OrderId = id(),
+        userId: UserId = UserMock.id(),
+        orderProducts: List<OrderSheet.OrderProduct> = listOf(orderSheetProduct()),
+        couponId: Long? = CouponMock.id().value,
+        originalAmount: BigDecimal = BigDecimal.valueOf(2_000),
+        discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
+        totalAmount: BigDecimal = BigDecimal.valueOf(1_000),
+    ): OrderSheet = OrderSheet(
+        orderId = orderId,
+        userId = userId,
+        orderProducts = orderProducts,
+        couponId = couponId,
+        originalAmount = originalAmount,
+        discountAmount = discountAmount,
+        totalAmount = totalAmount,
+    )
 }

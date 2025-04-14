@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
+import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import org.springframework.stereotype.Service
 
@@ -25,7 +26,17 @@ class OrderService(
     fun placeStock(
         command: PlaceStockCommand,
     )  {
-        TODO()
+        val orderId = command.orderSheet.orderId
+        val order = repository.findById(orderId.value)
+            ?: throw NotFoundOrderException("by id: ${orderId.value}")
+
+        val stocks = command.stocks
+        command.orderSheet.verifyProductPrice(stocks)
+
+        order.placeStock(
+            stocks = stocks,
+        )
+        repository.save(order)
     }
 
     fun applyCoupon(

@@ -20,6 +20,16 @@ object ProductMock {
         updatedAt = updatedAt,
     )
 
+    fun stockAllocated(
+        productId: ProductId = id(),
+        quantity: Int = 10,
+        unitPrice: BigDecimal = BigDecimal.valueOf(10_000),
+    ): ProductStockAllocated = ProductStockAllocated(
+        productId = productId,
+        quantity = quantity,
+        unitPrice = unitPrice,
+    )
+
     fun product(
         id: ProductId? = id(),
         status: ProductStatus = ProductStatus.ON_SALE,

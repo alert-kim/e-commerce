@@ -11,4 +11,21 @@ class OrderProduct(
     val unitPrice: BigDecimal,
     val totalPrice: BigDecimal,
     val createdAt: Instant,
-)
+) {
+    companion object {
+        fun new(
+            orderId: OrderId,
+            productId: ProductId,
+            quantity: Int,
+            unitPrice: BigDecimal,
+        ): OrderProduct =
+            OrderProduct(
+                orderId = orderId,
+                productId = productId,
+                quantity = quantity,
+                unitPrice = unitPrice,
+                totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity.toLong())),
+                createdAt = Instant.now(),
+            )
+    }
+}

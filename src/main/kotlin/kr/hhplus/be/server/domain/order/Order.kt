@@ -1,7 +1,9 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.coupon.CouponId
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
+import kr.hhplus.be.server.domain.product.ProductStockAllocated
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -43,6 +45,36 @@ class Order(
 
     fun requireId(): OrderId =
         id ?: throw RequiredOrderIdException()
+
+    fun placeStock(stocks: List<ProductStockAllocated>) {
+        if (status != OrderStatus.READY) {
+            throw InvalidOrderStatusException(
+                orderId = requireId().value,
+                status = status,
+                expect = OrderStatus.READY,
+            )
+        }
+        stocks.forEach { stock ->
+            OrderProduct.new(
+                orderId = requireId(),
+                productId = stock.productId,
+                quantity = stock.quantity,
+                unitPrice = stock.unitPrice,
+            ).also { orderProduct ->
+                addOrderProduct(orderProduct)
+            }
+        }
+        status = OrderStatus.STOCK_ALLOCATED
+        updatedAt = Instant.now()
+    }
+
+    private fun addOrderProduct(
+        orderProduct: OrderProduct,
+    ) {
+        _products.add(orderProduct)
+        originalAmount = originalAmount.add(orderProduct.totalPrice)
+        totalAmount = totalAmount.add(orderProduct.totalPrice)
+    }
 
     companion object {
         fun new(
