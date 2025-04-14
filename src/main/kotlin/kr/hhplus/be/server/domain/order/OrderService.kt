@@ -27,8 +27,7 @@ class OrderService(
         command: PlaceStockCommand,
     )  {
         val orderId = command.orderSheet.orderId
-        val order = repository.findById(orderId.value)
-            ?: throw NotFoundOrderException("by id: ${orderId.value}")
+        val order = get(orderId.value)
 
         val stocks = command.stocks
         command.orderSheet.verifyProductPrice(stocks)
@@ -43,8 +42,7 @@ class OrderService(
         command: ApplyCouponCommand,
     ) {
         val orderId = command.orderSheet.orderId
-        val order = repository.findById(orderId.value)
-            ?: throw NotFoundOrderException("by id: ${orderId.value}")
+        val order = get(orderId.value)
         command.orderSheet.verifyCoupon(command.coupon)
 
         order.applyCoupon(command.coupon)
@@ -56,8 +54,7 @@ class OrderService(
         command: PayOrderCommand,
     ) {
         val payment = command.payment
-        val order = repository.findById(payment.orderId.value)
-            ?: throw NotFoundOrderException("by id: ${payment.orderId.value}")
+        val order = get(payment.orderId.value)
 
         order.pay()
         repository.save(order)
@@ -65,9 +62,7 @@ class OrderService(
 
     fun get(
         id: Long,
-    ): Order {
-        TODO(
-            "Not yet implemented"
-        )
-    }
+    ): Order =
+        repository.findById(id)
+            ?: throw NotFoundOrderException("by id: $id")
 }

@@ -218,4 +218,27 @@ class OrderServiceTest {
             repository.save(any())
         }
     }
+
+    @Test
+    fun `get - 주문 조회`() {
+        val orderId = OrderMock.id()
+        every { repository.findById(orderId.value) } returns OrderMock.order(id = orderId)
+
+        val result = service.get(orderId.value)
+
+        assertThat(result.id).isEqualTo(orderId)
+        verify {
+            repository.findById(orderId.value)
+        }
+    }
+
+    @Test
+    fun `get - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
+        val orderId = OrderMock.id()
+        every { repository.findById(orderId.value) } returns null
+
+        shouldThrow<NotFoundOrderException> {
+            service.get(orderId.value)
+        }
+    }
 }
