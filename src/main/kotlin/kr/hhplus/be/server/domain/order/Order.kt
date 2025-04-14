@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
+import kr.hhplus.be.server.domain.payment.Payment
 import kr.hhplus.be.server.domain.product.ProductStockAllocated
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
@@ -99,6 +100,18 @@ class Order(
         _products.add(orderProduct)
         originalAmount = originalAmount.add(orderProduct.totalPrice)
         totalAmount = totalAmount.add(orderProduct.totalPrice)
+    }
+
+    fun pay() {
+        if (status != OrderStatus.STOCK_ALLOCATED) {
+            throw InvalidOrderStatusException(
+                id = requireId(),
+                status = status,
+                expect = OrderStatus.STOCK_ALLOCATED,
+            )
+        }
+        this.status = OrderStatus.COMPLETED
+        updatedAt = Instant.now()
     }
 
     companion object {

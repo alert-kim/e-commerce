@@ -186,4 +186,29 @@ class OrderTest {
             order.applyCoupon(coupon)
         }
     }
+
+    @Test
+    fun `pay - 결제 처리`() {
+        val order = OrderMock.order(
+            status = OrderStatus.STOCK_ALLOCATED,
+        )
+
+        order.pay()
+
+        assertAll(
+            { assertThat(order.status).isEqualTo(OrderStatus.COMPLETED) },
+            { assertThat(order.updatedAt).isAfter(order.createdAt) },
+        )
+    }
+
+    @Test
+    fun `pay - 주문 상태가 STOCK_ALLOCATED가 아니면 InvalidOrderStatusException 발생`() {
+        val order = OrderMock.order(
+            status = OrderStatus.READY,
+        )
+
+        assertThrows<InvalidOrderStatusException> {
+            order.pay()
+        }
+    }
 }

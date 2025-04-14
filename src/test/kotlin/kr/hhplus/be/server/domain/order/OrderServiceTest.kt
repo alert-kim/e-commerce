@@ -11,12 +11,10 @@ import io.mockk.verify
 import kr.hhplus.be.server.domain.coupon.Coupon
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
+import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.mock.ProductMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.BeforeEach
@@ -171,6 +169,49 @@ class OrderServiceTest {
                 orderSheet = orderSheet,
                 coupon = CouponMock.coupon(),
             ))
+        }
+
+        verify(exactly = 0) {
+            repository.save(any())
+        }
+    }
+
+    @Test
+    fun `pay  - 결제`() {
+        val orderId = OrderMock.id()
+        val order = mockk<Order>(relaxed = true)
+        val payment = PaymentMock.payment(
+            orderId = orderId,
+            amount = BigDecimal.ZERO,
+        )
+        val command = PayOrderCommand(
+            payment = payment,
+        )
+        every { repository.findById(orderId.value) } returns order
+        every { repository.save(any()) } returns orderId
+
+        service.pay(command)
+
+        verify {
+            repository.save(any())
+        }
+    }
+
+
+    @Test
+    fun `pay - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
+        val orderId = OrderMock.id()
+        val payment = PaymentMock.payment(
+            orderId = orderId,
+            amount = BigDecimal.ZERO,
+        )
+        val command = PayOrderCommand(
+            payment = payment,
+        )
+        every { repository.findById(orderId.value) } returns null
+
+        shouldThrow<NotFoundOrderException> {
+            service.pay(command)
         }
 
         verify(exactly = 0) {

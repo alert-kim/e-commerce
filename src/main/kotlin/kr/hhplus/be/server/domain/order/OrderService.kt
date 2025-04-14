@@ -55,7 +55,12 @@ class OrderService(
     fun pay(
         command: PayOrderCommand,
     ) {
-        TODO("Not yet implemented")
+        val payment = command.payment
+        val order = repository.findById(payment.orderId.value)
+            ?: throw NotFoundOrderException("by id: ${payment.orderId.value}")
+
+        order.pay()
+        repository.save(order)
     }
 
     fun get(
