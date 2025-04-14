@@ -6,6 +6,7 @@ import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
+import kotlin.math.min
 
 class Coupon(
     val id: CouponId?,
@@ -35,4 +36,7 @@ class Coupon(
         }
         usedAt = Instant.now()
     }
+
+    fun calculateDiscountAmount(totalAmount: BigDecimal): BigDecimal =
+        totalAmount.min(discountAmount)
 }

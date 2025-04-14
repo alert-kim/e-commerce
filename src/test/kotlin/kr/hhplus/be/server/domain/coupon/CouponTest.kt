@@ -8,6 +8,7 @@ import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.Instant
 
 class CouponTest {
@@ -56,4 +57,25 @@ class CouponTest {
         }
     }
 
+    @Test
+    fun `calculateDiscountAmount - 할인 금액 계산 (total이 discount보다 큼)`() {
+        val totalAmount = BigDecimal.valueOf(1_000)
+        val discountAmount = BigDecimal.valueOf(500)
+        val coupon = CouponMock.coupon(discountAmount = discountAmount)
+
+        val result = coupon.calculateDiscountAmount(totalAmount)
+
+        assertThat(result).isEqualTo(discountAmount)
+    }
+
+    @Test
+    fun `calculateDiscountAmount - 할인 금액 계산 (discount가 total보다 큼)`() {
+        val totalAmount = BigDecimal.valueOf(1_000)
+        val discountAmount = BigDecimal.valueOf(1_500)
+        val coupon = CouponMock.coupon(discountAmount = discountAmount)
+
+        val result = coupon.calculateDiscountAmount(totalAmount)
+
+        assertThat(result).isEqualTo(totalAmount)
+    }
 }

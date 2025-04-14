@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.domain.order
 
+import kr.hhplus.be.server.domain.coupon.Coupon
 import kr.hhplus.be.server.domain.coupon.CouponId
+import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
 import kr.hhplus.be.server.domain.product.ProductStockAllocated
@@ -49,7 +51,7 @@ class Order(
     fun placeStock(stocks: List<ProductStockAllocated>) {
         if (status != OrderStatus.READY) {
             throw InvalidOrderStatusException(
-                orderId = requireId().value,
+                id = requireId(),
                 status = status,
                 expect = OrderStatus.READY,
             )
@@ -65,6 +67,29 @@ class Order(
             }
         }
         status = OrderStatus.STOCK_ALLOCATED
+        updatedAt = Instant.now()
+    }
+
+    fun applyCoupon(coupon: Coupon) {
+        if (status != OrderStatus.STOCK_ALLOCATED) {
+            throw InvalidOrderStatusException(
+                id = requireId(),
+                status = status,
+                expect = OrderStatus.READY,
+            )
+        }
+        val newCouponId = coupon.requireId()
+        when(val originalCouponId = this.couponId) {
+            null -> Unit
+            newCouponId -> return
+            else -> throw AlreadyCouponAppliedException(
+                id = requireId(), couponId = originalCouponId, newCouponId = newCouponId
+            )
+        }
+
+        this.discountAmount = coupon.calculateDiscountAmount(totalAmount)
+        this.totalAmount = totalAmount.minus(discountAmount)
+        this.couponId = newCouponId
         updatedAt = Instant.now()
     }
 

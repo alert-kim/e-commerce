@@ -42,7 +42,14 @@ class OrderService(
     fun applyCoupon(
         command: ApplyCouponCommand,
     ) {
-        TODO()
+        val orderId = command.orderSheet.orderId
+        val order = repository.findById(orderId.value)
+            ?: throw NotFoundOrderException("by id: ${orderId.value}")
+        command.orderSheet.verifyCoupon(command.coupon)
+
+        order.applyCoupon(command.coupon)
+
+        repository.save(order)
     }
 
     fun pay(

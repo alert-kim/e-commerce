@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.order
 
+import kr.hhplus.be.server.domain.coupon.Coupon
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderCouponException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderPriceException
 import kr.hhplus.be.server.domain.product.ProductStockAllocated
 import kr.hhplus.be.server.domain.user.UserId
@@ -41,6 +43,16 @@ data class OrderSheet(
                     "wrong total price, expected: ${orderProduct.totalPrice}, actual: ${totalPrice}"
                 )
             }
+        }
+    }
+
+    fun verifyCoupon(coupon: Coupon) {
+        val couponId = coupon.requireId().value
+        if (this.couponId != couponId) {
+            throw InvalidOrderCouponException(
+                orderId,
+                "wrong coupon id, expected: $couponId, actual: ${this.couponId}"
+            )
         }
     }
 }

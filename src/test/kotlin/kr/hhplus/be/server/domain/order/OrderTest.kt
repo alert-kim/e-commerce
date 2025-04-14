@@ -1,7 +1,11 @@
 package kr.hhplus.be.server.domain.order
 
+import io.kotest.assertions.throwables.shouldThrow
+import kr.hhplus.be.server.domain.coupon.CouponId
+import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
+import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
 import kr.hhplus.be.server.mock.UserMock
@@ -10,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.Instant
 
 class OrderTest {
     @Test
@@ -75,25 +80,110 @@ class OrderTest {
                 { assertThat(orderProduct.productId).isEqualTo(productStock.productId) },
                 { assertThat(orderProduct.quantity).isEqualTo(productStock.quantity) },
                 { assertThat(orderProduct.unitPrice).isEqualByComparingTo(productStock.unitPrice) },
-                { assertThat(orderProduct.totalPrice).isEqualByComparingTo(
+                {
+                    assertThat(orderProduct.totalPrice).isEqualByComparingTo(
                         productStock.unitPrice.multiply(BigDecimal.valueOf(productStock.quantity.toLong()))
                     )
                 },
             )
         }
+    }
 
-        @Test
-        fun `placeStock - 주문 상태가 READY가 아니면 InvalidOrderStatusException 발생`() {
-            val order = OrderMock.order(
-                status = OrderStatus.COMPLETED,
-            )
-            val productStocks = List(2) {
-                ProductMock.stockAllocated()
-            }
+    @Test
+    fun `placeStock - 주문 상태가 READY가 아니면 InvalidOrderStatusException 발생`() {
+        val order = OrderMock.order(
+            status = OrderStatus.COMPLETED,
+        )
+        val productStocks = List(2) {
+            ProductMock.stockAllocated()
+        }
 
-            assertThrows<InvalidOrderStatusException> {
-                order.placeStock(productStocks)
-            }
+        assertThrows<InvalidOrderStatusException> {
+            order.placeStock(productStocks)
+        }
+    }
+
+    @Test
+    fun `applyCoupon - 쿠폰 적용`() {
+        val updatedAt = Instant.now()
+        val originalAmount = BigDecimal.valueOf(1_500)
+        val discountAmount = BigDecimal.valueOf(500)
+        val expectTotalAmount = BigDecimal.valueOf(1_000)
+        val order = OrderMock.order(
+            status = OrderStatus.STOCK_ALLOCATED,
+            couponId = null,
+            totalAmount = originalAmount,
+            originalAmount = originalAmount,
+            discountAmount = BigDecimal.ZERO,
+            updatedAt = updatedAt,
+        )
+        val couponId = CouponMock.id()
+        val coupon = CouponMock.coupon(
+            id = couponId,
+            discountAmount = discountAmount,
+        )
+
+        order.applyCoupon(coupon)
+
+        assertAll(
+            { assertThat(order.couponId).isEqualTo(couponId) },
+            { assertThat(order.status).isEqualTo(OrderStatus.STOCK_ALLOCATED) },
+            { assertThat(order.originalAmount).isEqualByComparingTo(order.originalAmount) },
+            { assertThat(order.discountAmount).isEqualByComparingTo(discountAmount) },
+            { assertThat(order.totalAmount).isEqualByComparingTo(expectTotalAmount) },
+            { assertThat(order.updatedAt).isAfter(updatedAt) },
+        )
+    }
+
+    @Test
+    fun `applyCoupon - 같은 쿠폰이 적용되어 있으면 업데이트 되지 않는다`() {
+        val couponId = CouponId(1L)
+        val coupon = CouponMock.coupon(
+            id = couponId,
+        )
+        val updatedAt = Instant.now()
+        val order = OrderMock.order(
+            status = OrderStatus.STOCK_ALLOCATED,
+            couponId = couponId,
+            updatedAt = updatedAt,
+        )
+
+        order.applyCoupon(coupon)
+
+        assertAll(
+            { assertThat(order.couponId).isEqualTo(couponId) },
+            { assertThat(order.discountAmount).isEqualByComparingTo(order.discountAmount) },
+            { assertThat(order.totalAmount).isEqualByComparingTo(order.totalAmount) },
+        )
+    }
+
+    @Test
+    fun `applyCoupon - 다른 쿠폰이 적용되어 있으면 AlreadyCouponAppliedException 발생`() {
+        val couponId = CouponId(2L)
+        val coupon = CouponMock.coupon(
+            id = couponId,
+        )
+        val order = OrderMock.order(
+            status = OrderStatus.STOCK_ALLOCATED,
+            couponId = CouponId(1L),
+        )
+
+        shouldThrow<AlreadyCouponAppliedException> {
+            order.applyCoupon(coupon)
+        }
+    }
+
+    @Test
+    fun `applyCoupon - 주문 상태가 STOCK_ALLOCATED가 아니면 InvalidOrderStatusException 발생`() {
+        val coupon = CouponMock.coupon(
+            id = CouponMock.id(),
+        )
+        val order = OrderMock.order(
+            status = OrderStatus.COMPLETED,
+        )
+
+        assertThrows<InvalidOrderStatusException> {
+            order.applyCoupon(coupon)
         }
     }
 }

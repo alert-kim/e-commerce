@@ -8,9 +8,12 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
+import kr.hhplus.be.server.domain.coupon.Coupon
+import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
+import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
 import kr.hhplus.be.server.mock.UserMock
@@ -130,6 +133,44 @@ class OrderServiceTest {
 
         shouldThrow<NotFoundOrderException> {
             service.placeStock(command)
+        }
+
+        verify(exactly = 0) {
+            repository.save(any())
+        }
+    }
+
+    @Test
+    fun `applyCoupon  - 쿠폰 적용`() {
+        val orderId = OrderMock.id()
+        val order = mockk<Order>()
+        val orderSheet = mockk<OrderSheet>(relaxed = true)
+        val command = ApplyCouponCommand(
+            orderSheet = orderSheet,
+            coupon = CouponMock.coupon()
+        )
+        every { repository.findById(orderId.value) } returns order
+        every { repository.save(any()) } returns orderId
+
+        service.applyCoupon(command)
+
+        verify {
+            repository.save(any())
+        }
+    }
+
+    @Test
+    fun `applyCoupon - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
+        val orderId = OrderMock.id()
+        val orderSheet = mockk<OrderSheet>(relaxed = true)
+        every { repository.findById(orderId.value) } returns null
+        every { orderSheet.orderId } returns orderId
+
+        shouldThrow<NotFoundOrderException> {
+            service.applyCoupon(ApplyCouponCommand(
+                orderSheet = orderSheet,
+                coupon = CouponMock.coupon(),
+            ))
         }
 
         verify(exactly = 0) {
