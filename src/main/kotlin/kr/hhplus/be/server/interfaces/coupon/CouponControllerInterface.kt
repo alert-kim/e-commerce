@@ -16,7 +16,6 @@ import kr.hhplus.be.server.interfaces.UserApiErrorCode.NOT_FOUND_USER_CODE
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
 import kr.hhplus.be.server.interfaces.coupon.response.CouponSourcesResponse
-import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponsResponse
 import org.springframework.http.ResponseEntity
