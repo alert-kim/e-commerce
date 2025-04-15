@@ -1,8 +1,6 @@
 package kr.hhplus.be.server.mock
 
-import kr.hhplus.be.server.domain.coupon.Coupon
-import kr.hhplus.be.server.domain.coupon.CouponId
-import kr.hhplus.be.server.domain.coupon.CouponSourceId
+import kr.hhplus.be.server.domain.coupon.*
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -31,4 +29,23 @@ object CouponMock {
         usedAt = usedAt,
         updatedAt = updatedAt,
     )
+
+    fun sourceQueryModel(
+        id: CouponSourceId = sourceId(),
+        name: String = "쿠폰",
+        status: CouponSourceStatus = CouponSourceStatus.ACTIVE,
+        quantity: Int = 10,
+        discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now(),
+    ): CouponSourceQueryModel =
+        CouponSourceQueryModel(
+            id = id,
+            name = name,
+            status = status,
+            quantity = quantity,
+            discountAmount = discountAmount,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+        )
 }

@@ -13,10 +13,13 @@ import kr.hhplus.be.server.interfaces.CouponErrorCode.NOT_FOUND_COUPON_CODE
 import kr.hhplus.be.server.interfaces.CouponErrorCode.OUT_OF_STOCK_COUPON_CODE
 import kr.hhplus.be.server.interfaces.ErrorResponse
 import kr.hhplus.be.server.interfaces.UserApiErrorCode.NOT_FOUND_USER_CODE
+import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
+import kr.hhplus.be.server.interfaces.coupon.response.CouponSourcesResponse
 import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.UserCouponsResponse
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 
@@ -36,7 +39,7 @@ interface CouponControllerInterface {
                     Content(
                         mediaType = "application/json",
                         schema = Schema(
-                            implementation = CouponsResponse::class,
+                            implementation = CouponSourcesResponse::class,
                         )
                     )
                 ]
@@ -44,8 +47,8 @@ interface CouponControllerInterface {
         ]
     )
     @GetMapping("/coupons")
-    fun getCoupons(
-    ): CouponsResponse
+    fun getCouponSources(
+    ): ResponseEntity<ServerApiResponse>
 
     @Operation(
         summary = "유저 쿠폰 조회",
