@@ -48,4 +48,23 @@ object CouponMock {
             createdAt = createdAt,
             updatedAt = updatedAt,
         )
+
+    fun source(
+        id: CouponSourceId? = sourceId(),
+        name: String = "쿠폰",
+        status: CouponSourceStatus = CouponSourceStatus.ACTIVE,
+        quantity: Int = 10,
+        discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now(),
+    ): CouponSource =
+        CouponSource(
+            id = id,
+            name = name,
+            status = status,
+            quantity = quantity,
+            discountAmount = discountAmount,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+        )
 }

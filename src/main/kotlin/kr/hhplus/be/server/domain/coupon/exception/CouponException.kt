@@ -36,3 +36,8 @@ class NotOwnedCouponException(
 ) : CouponException() {
     override val message: String = "쿠폰(${id.value})을 소유하고 있지 않습니다. 소유자: ${ownerId.value}, 요청자: ${userId.value}"
 }
+
+class RequiredCouponSourceIdException(
+) : CouponException() {
+    override val message: String = "쿠폰 소스 ID가 필요합니다."
+}
