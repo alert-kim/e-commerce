@@ -1,19 +1,24 @@
 package kr.hhplus.be.server.application.coupon
 
 import kr.hhplus.be.server.domain.coupon.CouponQueryModel
+import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.CouponSourceQueryModel
 import kr.hhplus.be.server.domain.coupon.CouponSourceService
 import kr.hhplus.be.server.domain.user.UserId
+import kr.hhplus.be.server.domain.user.UserService
 import org.springframework.stereotype.Service
 
 @Service
 class CouponFacade(
+    private val couponService: CouponService,
     private val couponSourceService: CouponSourceService,
+    private val userService: UserService,
 ) {
     fun getAllIssuable(): List<CouponSourceQueryModel> =
         couponSourceService.getAllIssuable().map { CouponSourceQueryModel.from(it) }
 
     fun getUserCoupons(userId: Long): List<CouponQueryModel> {
-        TODO("Not yet implemented")
+        val userId = userService.get(userId).requireId()
+        return couponService.getAllUnused(userId).map { CouponQueryModel.from(it) }
     }
 }

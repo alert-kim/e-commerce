@@ -13,4 +13,18 @@ data class CouponQueryModel(
     val usedAt: Instant?,
     val createdAt: Instant,
     val updatedAt: Instant,
-)
+) {
+    companion object {
+        fun from(coupon: Coupon): CouponQueryModel =
+            CouponQueryModel(
+                id = coupon.requireId(),
+                userId = coupon.userId,
+                name = coupon.name,
+                couponSourceId = coupon.couponSourceId,
+                discountAmount = coupon.discountAmount,
+                usedAt = coupon.usedAt,
+                createdAt = coupon.createdAt,
+                updatedAt = coupon.updatedAt,
+            )
+    }
+}
