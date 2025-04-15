@@ -22,7 +22,6 @@ class CouponService(
         )
     }
 
-    fun getAllUnused(userId: UserId): List<Coupon> {
-        TODO()
-    }
+    fun getAllUnused(userId: UserId): List<Coupon> =
+        repository.findAllByUserIdAndUsedAtIsNull(userId)
 }

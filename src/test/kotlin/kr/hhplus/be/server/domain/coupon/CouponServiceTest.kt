@@ -70,4 +70,17 @@ class CouponServiceTest {
             service.use(UseCouponCommand(couponId.value, userId))
         }
     }
+
+    @Test
+    fun `getUnused - 해당 유저의 usedAt이 null인 쿠폰 목록 조회`() {
+        val userId = UserMock.id()
+        val coupons = List(3) { CouponMock.coupon(id = CouponMock.id(), userId = userId) }
+        every { repository.findAllByUserIdAndUsedAtIsNull(userId) } returns coupons
+
+        service.getAllUnused(userId)
+
+        verify {
+            repository.findAllByUserIdAndUsedAtIsNull(userId)
+        }
+    }
 }
