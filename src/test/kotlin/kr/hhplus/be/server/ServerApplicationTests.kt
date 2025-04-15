@@ -3,6 +3,7 @@ package kr.hhplus.be.server
 import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceRepository
 import kr.hhplus.be.server.domain.coupon.CouponRepository
+import kr.hhplus.be.server.domain.coupon.CouponSourceRepository
 import kr.hhplus.be.server.domain.order.OrderRepository
 import kr.hhplus.be.server.domain.payment.PaymentRepository
 import kr.hhplus.be.server.domain.product.ProductRepository
@@ -15,10 +16,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 class ServerApplicationTests {
 
 	@MockitoBean
+	lateinit var balanceRepository: BalanceRepository
+
+	@MockitoBean
 	lateinit var couponRepository: CouponRepository
 
 	@MockitoBean
-	lateinit var balanceRepository: BalanceRepository
+	lateinit var couponSourceRepository: CouponSourceRepository
 
 	@MockitoBean
 	lateinit var balanceRecordService: BalanceRecordService
