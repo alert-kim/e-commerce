@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.get
 
 @WebMvcTest(ProductController::class)
 @ExtendWith(MockKExtension::class)
-class DeductionItemControllerTest {
+class ProductControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc

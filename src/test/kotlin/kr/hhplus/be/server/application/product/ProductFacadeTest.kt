@@ -22,7 +22,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 
 @ExtendWith(MockKExtension::class)
-class DeductionItemFacadeTest {
+class ProductFacadeTest {
     @InjectMockKs
     private lateinit var facade: ProductFacade
 

@@ -26,15 +26,7 @@ class ProductController(
     ) = handleRequest(
         block = {
             val productsPaged = productFacade.getAllOnSalePaged(page = page, pageSize = pageSize)
-
-            ProductsResponse(
-                totalCount = productsPaged.totalElements,
-                page = productsPaged.number,
-                pageSize = productsPaged.size,
-                products = productsPaged.content.map { product ->
-                    ProductResponse.from(product)
-                }
-            )
+            ProductsResponse.from(productsPaged)
         },
         errorSpec = {
             when (it) {
