@@ -5,7 +5,7 @@ import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
 
-data class OrderQueryModel (
+data class OrderQueryModel(
     val id: OrderId,
     val userId: UserId,
     val status: OrderStatus,
@@ -18,8 +18,8 @@ data class OrderQueryModel (
     val updatedAt: Instant,
 ) {
     companion object {
-        fun from(order: Order): OrderQueryModel {
-            return OrderQueryModel(
+        fun from(order: Order): OrderQueryModel =
+            OrderQueryModel(
                 id = order.requireId(),
                 userId = order.userId,
                 status = order.status,
@@ -31,6 +31,5 @@ data class OrderQueryModel (
                 createdAt = order.createdAt,
                 updatedAt = order.updatedAt
             )
-        }
     }
 }

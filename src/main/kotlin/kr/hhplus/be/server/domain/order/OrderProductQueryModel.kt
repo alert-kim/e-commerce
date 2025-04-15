@@ -13,8 +13,8 @@ data class OrderProductQueryModel (
     val createdAt: Instant,
 ) {
     companion object {
-        fun from(orderProduct: OrderProduct): OrderProductQueryModel {
-            return OrderProductQueryModel(
+        fun from(orderProduct: OrderProduct): OrderProductQueryModel =
+             OrderProductQueryModel(
                 orderId = orderProduct.orderId,
                 productId = orderProduct.productId,
                 quantity = orderProduct.quantity,
@@ -22,6 +22,5 @@ data class OrderProductQueryModel (
                 totalPrice = orderProduct.totalPrice,
                 createdAt = orderProduct.createdAt
             )
-        }
     }
 }
