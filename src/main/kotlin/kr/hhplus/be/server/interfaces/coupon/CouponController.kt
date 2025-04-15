@@ -1,14 +1,15 @@
 package kr.hhplus.be.server.interfaces.coupon
 
 import kr.hhplus.be.server.application.coupon.CouponFacade
+import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorSpec
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import kr.hhplus.be.server.interfaces.common.handleRequest
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
+import kr.hhplus.be.server.interfaces.coupon.response.CouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.CouponSourcesResponse
-import kr.hhplus.be.server.interfaces.coupon.response.UserCouponResponse
-import kr.hhplus.be.server.interfaces.coupon.response.UserCouponsResponse
+import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
@@ -22,7 +23,7 @@ class CouponController(
 
     @GetMapping("/coupons")
     override fun getCouponSources(
-    ): ResponseEntity<ServerApiResponse>  = handleRequest(
+    ): ResponseEntity<ServerApiResponse> = handleRequest(
         block = {
             val coupons = couponFacade.getAllIssuable()
             CouponSourcesResponse.from(coupons)
@@ -34,37 +35,33 @@ class CouponController(
         }
     )
 
-    @GetMapping("/user/{userId}/coupons")
+    @GetMapping("/users/{userId}/coupons")
     override fun getUserCoupons(
         @PathVariable userId: Long,
-    ): UserCouponsResponse =
-        UserCouponsResponse(
-            coupons = listOf(
-                UserCouponResponse(
-                    id = 1L,
-                    name = "쿠폰1",
-                    quantity = 10,
-                    maxDiscountAmount = BigDecimal.valueOf(10_000),
-                    discountRate = null,
-                    discountAmount = BigDecimal.valueOf(1_000),
-                    usableFrom = Instant.parse("2023-01-01T00:00:00Z"),
-                    usableTo = Instant.parse("2025-12-31T23:59:59Z"),
-                ),
-            )
-        )
+    ) = handleRequest(
+        block = {
+            val coupons = couponFacade.getUserCoupons(userId)
+            CouponsResponse.from(coupons)
+        },
+        errorSpec = {
+            when (it) {
+                is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
+                else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+        }
+    )
 
     @PostMapping("/coupons:issue")
     override fun issueCoupon(
         @RequestBody request: IssueCouponRequest,
-    ): UserCouponResponse =
-        UserCouponResponse(
+    ): CouponResponse =
+        CouponResponse(
             id = 1L,
+            userId = 2L,
             name = "쿠폰1",
-            quantity = 10,
-            maxDiscountAmount = BigDecimal.valueOf(10_000),
-            discountRate = null,
-            discountAmount = BigDecimal.valueOf(1_000),
-            usableFrom = Instant.parse("2023-01-01T00:00:00Z"),
-            usableTo = Instant.parse("2025-12-31T23:59:59Z"),
+            discountAmount = BigDecimal.valueOf(10_000),
+            usedAt = null,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now(),
         )
 }

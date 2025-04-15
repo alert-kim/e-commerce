@@ -15,11 +15,14 @@ import kr.hhplus.be.server.interfaces.ErrorResponse
 import kr.hhplus.be.server.interfaces.UserApiErrorCode.NOT_FOUND_USER_CODE
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
+import kr.hhplus.be.server.interfaces.coupon.response.CouponResponse
 import kr.hhplus.be.server.interfaces.coupon.response.CouponSourcesResponse
-import kr.hhplus.be.server.interfaces.coupon.response.UserCouponResponse
-import kr.hhplus.be.server.interfaces.coupon.response.UserCouponsResponse
+import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 
 
 @Tag(name = "Coupon API", description = "쿠폰 관련 API")
@@ -62,17 +65,25 @@ interface CouponControllerInterface {
                     Content(
                         mediaType = "application/json",
                         schema = Schema(
-                            implementation = UserCouponsResponse::class,
+                            implementation = CouponsResponse::class,
                         )
                     )
                 ]
             ),
+            ApiResponse(
+                responseCode = "404",
+                description = "리소스를 찾을 수 없음",
+                content = [Content(
+                    examples = [ExampleObject(value = """{"code":"NOT_FOUND_USER"}""")],
+                    schema = Schema(implementation = ErrorResponse::class)
+                )]
+            )
         ]
     )
     @GetMapping("/user/{userId}/coupons")
     fun getUserCoupons(
         @PathVariable userId: Long,
-    ): UserCouponsResponse
+    ): ResponseEntity<ServerApiResponse>
 
     @Operation(
         summary = "쿠폰 발급",
@@ -87,7 +98,7 @@ interface CouponControllerInterface {
                     Content(
                         mediaType = "application/json",
                         schema = Schema(
-                            implementation = UserCouponResponse::class,
+                            implementation = CouponResponse::class,
                             description = "발급된 유저 쿠폰"
                         )
                     )
@@ -126,7 +137,7 @@ interface CouponControllerInterface {
                                 value = NOT_FOUND_COUPON_CODE,
                                 summary = "NOT_FOUND_COUPON"
                             ),
-                             ExampleObject(
+                            ExampleObject(
                                 name = "찾을 수 없는 유저",
                                 value = NOT_FOUND_USER_CODE,
                                 summary = "NOT_FOUND_USER"
@@ -159,5 +170,5 @@ interface CouponControllerInterface {
     @PostMapping("/coupons:issue")
     fun issueCoupon(
         @RequestBody request: IssueCouponRequest,
-    ): UserCouponResponse
+    ): CouponResponse
 }

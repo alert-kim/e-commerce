@@ -10,6 +10,26 @@ object CouponMock {
 
     fun sourceId(): CouponSourceId = CouponSourceId(IdMock.value())
 
+    fun couponQueryModel(
+        id: CouponId = id(),
+        userId: UserId = UserMock.id(),
+        name: String = "쿠폰",
+        couponSourceId: CouponSourceId = sourceId(),
+        discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
+        usedAt: Instant? = null,
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now(),
+    ) = CouponQueryModel(
+        id = id,
+        userId = userId,
+        name = name,
+        couponSourceId = couponSourceId,
+        discountAmount = discountAmount,
+        createdAt = createdAt,
+        usedAt = usedAt,
+        updatedAt = updatedAt,
+    )
+
     fun coupon(
         id: CouponId? = id(),
         userId: UserId = UserMock.id(),
