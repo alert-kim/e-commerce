@@ -11,8 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.BELOW_MIN_BALANCE_CODE
 import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.EXCEED_MAX_BALANCE_CODE
 import kr.hhplus.be.server.interfaces.ErrorResponse
-import kr.hhplus.be.server.interfaces.OrderErrorCode.INVALID_ORDER_PRICE_CODE
-import kr.hhplus.be.server.interfaces.OrderErrorCode.OUT_OF_PRODUCT_STOCK_CODE
 import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
 import kr.hhplus.be.server.interfaces.balance.response.BalanceResponse
 import org.springframework.http.ResponseEntity

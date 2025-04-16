@@ -7,24 +7,23 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import kr.hhplus.be.server.interfaces.ErrorResponse
-import kr.hhplus.be.server.interfaces.OrderErrorCode.INVALID_ORDER_PRICE_CODE
-import kr.hhplus.be.server.interfaces.OrderErrorCode.OUT_OF_PRODUCT_STOCK_CODE
-import kr.hhplus.be.server.interfaces.UserApiErrorCode.NOT_FOUND_USER_CODE
-import kr.hhplus.be.server.interfaces.order.reqeust.OrderRequest
-import kr.hhplus.be.server.interfaces.order.response.OrderResponse
-import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.interfaces.BalanceApiErrorCode.INSUFFICIENT_BALANCE_CODE
 import kr.hhplus.be.server.interfaces.CouponErrorCode.ALREADY_USED_COUPON_CODE
 import kr.hhplus.be.server.interfaces.CouponErrorCode.EXPIRED_COUPON_CODE
 import kr.hhplus.be.server.interfaces.CouponErrorCode.NOT_FOUND_COUPON_CODE
 import kr.hhplus.be.server.interfaces.CouponErrorCode.NOT_OWNED_COUPON_CODE
+import kr.hhplus.be.server.interfaces.ErrorResponse
+import kr.hhplus.be.server.interfaces.OrderErrorCode.INVALID_ORDER_PRICE_CODE
+import kr.hhplus.be.server.interfaces.ProductErrorCode.NOT_FOUND_PRODUCT_CODE
+import kr.hhplus.be.server.interfaces.ProductErrorCode.OUT_OF_PRODUCT_STOCK_CODE
+import kr.hhplus.be.server.interfaces.UserApiErrorCode.NOT_FOUND_USER_CODE
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
+import kr.hhplus.be.server.interfaces.order.reqeust.OrderRequest
+import kr.hhplus.be.server.interfaces.order.response.OrderResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import java.time.Instant
 
 @RequestMapping("/orders")
 @Tag(name = "Order API", description = "주문 관련 API")
@@ -116,8 +115,8 @@ interface OrderControllerInterface {
                             ),
                             ExampleObject(
                                 name = "찾을 수 없는 상품",
-                                value = NOT_FOUND_COUPON_CODE,
-                                summary = "NOT_FOUND_COUPON"
+                                value = NOT_FOUND_PRODUCT_CODE,
+                                summary = "NOT_FOUND_PRODUCT"
                             ),
                             ExampleObject(
                                 name = "찾을 수 없는 쿠폰",

@@ -21,12 +21,11 @@ object OrderErrorCode {
     const val ALREADY_PAID_ORDER_CODE: String = """{"code":"ALREADY_PAID_ORDER"}"""
     const val NOT_FOUND_ORDER_CODE: String = """{"code":"NOT_FOUND_ORDER"}"""
     const val INVALID_ORDER_PRICE_CODE : String = """{"code":"INVALID_ORDER_PRICE"}"""
-    const val OUT_OF_PRODUCT_STOCK_CODE : String = """{"code":"OUT_OF_PRODUCT_STOCK"}"""
 }
 
 object ProductErrorCode {
     const val NOT_FOUND_PRODUCT_CODE: String = """{"code":"NOT_FOUND_PRODUCT"}"""
-    const val OUT_OF_STOCK_PRODUCT_CODE: String = """{"code":"OUT_OF_STOCK_PRODUCT"}"""
+    const val OUT_OF_PRODUCT_STOCK_CODE : String = """{"code":"OUT_OF_PRODUCT_STOCK"}"""
 }
 
 object UserApiErrorCode {

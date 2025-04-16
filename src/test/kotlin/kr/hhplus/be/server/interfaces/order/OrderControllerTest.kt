@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kr.hhplus.be.server.application.order.OrderFacade
+import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.ExpiredCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
@@ -141,6 +142,20 @@ class OrderControllerTest {
         }.andExpect {
             status { isBadRequest() }
             jsonPath("$.errorCode") { value(ErrorCode.EXPIRED_COUPON.name) }
+        }
+    }
+
+    @Test
+    fun `주문 - 400 - 잔고 부족`() {
+        val request = request()
+        every { orderFacade.order(any()) } throws InsufficientBalanceException(1L, BigDecimal.ZERO, BigDecimal.ZERO)
+
+        mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.errorCode") { value(ErrorCode.INSUFFICIENT_BALANCE.name) }
         }
     }
 
