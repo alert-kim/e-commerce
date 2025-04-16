@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.interfaces.coupon
 
 import kr.hhplus.be.server.application.coupon.CouponFacade
+import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
+import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorSpec
@@ -12,8 +14,6 @@ import kr.hhplus.be.server.interfaces.coupon.response.CouponSourcesResponse
 import kr.hhplus.be.server.interfaces.coupon.response.CouponsResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.math.BigDecimal
-import java.time.Instant
 
 
 @RestController
@@ -21,15 +21,36 @@ class CouponController(
     private val couponFacade: CouponFacade,
 ) : CouponControllerInterface {
 
-    @GetMapping("/coupons")
+    @GetMapping("/couponSources")
     override fun getCouponSources(
     ): ResponseEntity<ServerApiResponse> = handleRequest(
         block = {
-            val coupons = couponFacade.getAllIssuable()
+            val coupons = couponFacade.getAllSourcesIssuable()
             CouponSourcesResponse.from(coupons)
         },
         errorSpec = {
             when (it) {
+                else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+        }
+    )
+
+    @PostMapping("/coupons")
+    override fun issueCoupon(
+        @RequestBody request: IssueCouponRequest,
+    ) = handleRequest(
+        block = {
+            val coupon = couponFacade.issueCoupon(
+                couponSourceId = request.couponSourceId,
+                userId = request.userId,
+            )
+            CouponResponse.from(coupon)
+        },
+        errorSpec = {
+            when (it) {
+                is OutOfStockCouponSourceException -> ErrorSpec.badRequest(ErrorCode.OUT_OF_STOCK_COUPON_SOURCE)
+                is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
+                is NotFoundCouponSourceException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_COUPON_SOURCE)
                 else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
             }
         }
@@ -40,7 +61,7 @@ class CouponController(
         @PathVariable userId: Long,
     ) = handleRequest(
         block = {
-            val coupons = couponFacade.getUserCoupons(userId)
+            val coupons = couponFacade.getCoupons(userId)
             CouponsResponse.from(coupons)
         },
         errorSpec = {
@@ -51,17 +72,4 @@ class CouponController(
         }
     )
 
-    @PostMapping("/coupons:issue")
-    override fun issueCoupon(
-        @RequestBody request: IssueCouponRequest,
-    ): CouponResponse =
-        CouponResponse(
-            id = 1L,
-            userId = 2L,
-            name = "쿠폰1",
-            discountAmount = BigDecimal.valueOf(10_000),
-            usedAt = null,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now(),
-        )
 }

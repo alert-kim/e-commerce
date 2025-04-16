@@ -4,7 +4,6 @@ import kr.hhplus.be.server.domain.coupon.CouponQueryModel
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.CouponSourceQueryModel
 import kr.hhplus.be.server.domain.coupon.CouponSourceService
-import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import org.springframework.stereotype.Service
 
@@ -14,10 +13,17 @@ class CouponFacade(
     private val couponSourceService: CouponSourceService,
     private val userService: UserService,
 ) {
-    fun getAllIssuable(): List<CouponSourceQueryModel> =
+    fun issueCoupon(
+        couponSourceId: Long,
+        userId: Long,
+    ): CouponQueryModel {
+        TODO()
+    }
+
+    fun getAllSourcesIssuable(): List<CouponSourceQueryModel> =
         couponSourceService.getAllIssuable().map { CouponSourceQueryModel.from(it) }
 
-    fun getUserCoupons(userId: Long): List<CouponQueryModel> {
+    fun getCoupons(userId: Long): List<CouponQueryModel> {
         val userId = userService.get(userId).requireId()
         return couponService.getAllUnused(userId).map { CouponQueryModel.from(it) }
     }

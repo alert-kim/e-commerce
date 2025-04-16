@@ -9,7 +9,6 @@ import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.CouponSourceService
 import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
-import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.mock.UserMock
 import org.junit.jupiter.api.Test
@@ -31,11 +30,11 @@ class CouponFacadeTest {
     private lateinit var userService: UserService
 
     @Test
-    fun `getAllIssuable - 발급 가능 쿠폰 조회`() {
+    fun `getAllIssuableSources - 발급 가능 쿠폰 조회`() {
         val couponSources = List(3) { CouponMock.source(id = CouponMock.sourceId()) }
         every { couponSourceService.getAllIssuable() } returns couponSources
 
-        val result = couponFacade.getAllIssuable()
+        val result = couponFacade.getAllSourcesIssuable()
 
         assertThat(result.size).isEqualTo(couponSources.size)
         couponSources.forEachIndexed { index, couponSource ->
@@ -47,14 +46,14 @@ class CouponFacadeTest {
     }
 
     @Test
-    fun `getUserCoupons - 사용자 쿠폰 조회`() {
+    fun `getCoupons - 사용자 쿠폰 조회`() {
         val userId = UserMock.id()
         val user = UserMock.user(id = userId)
         val coupons = List(3) { CouponMock.coupon(id = CouponMock.id()) }
         every { userService.get(userId.value) } returns user
         every { couponService.getAllUnused(userId) } returns coupons
 
-        val result = couponFacade.getUserCoupons(userId.value)
+        val result = couponFacade.getCoupons(userId.value)
 
         assertThat(result).hasSize(coupons.size)
         coupons.forEachIndexed { index, coupon ->

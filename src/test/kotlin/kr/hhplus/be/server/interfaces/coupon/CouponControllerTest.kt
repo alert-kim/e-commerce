@@ -6,9 +6,15 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kr.hhplus.be.server.application.coupon.CouponFacade
+import kr.hhplus.be.server.domain.coupon.CouponSourceId
 import kr.hhplus.be.server.domain.coupon.CouponSourceQueryModel
+import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
+import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
+import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
+import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
+import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
 import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.UserMock
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
@@ -55,9 +61,9 @@ class CouponControllerTest {
                 name = "상품${it + 1}",
             )
         }
-        every { couponFacade.getAllIssuable() } returns coupons
+        every { couponFacade.getAllSourcesIssuable() } returns coupons
 
-        mockMvc.get("/coupons")
+        mockMvc.get("/couponSources")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.coupons") { hasSize<Any>(coupons.size) }
@@ -75,9 +81,9 @@ class CouponControllerTest {
     @Test
     fun `발급 가능 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
         val coupons = emptyList<CouponSourceQueryModel>()
-        every { couponFacade.getAllIssuable() } returns coupons
+        every { couponFacade.getAllSourcesIssuable() } returns coupons
 
-        mockMvc.get("/coupons")
+        mockMvc.get("/couponSources")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.coupons") { hasSize<Any>(0) }
@@ -90,7 +96,7 @@ class CouponControllerTest {
         val coupons = List(3) {
             CouponMock.couponQueryModel(userId = userId)
         }
-        every { couponFacade.getUserCoupons(userId.value) } returns coupons
+        every { couponFacade.getCoupons(userId.value) } returns coupons
 
         mockMvc.get("/users/${userId.value}/coupons")
             .andExpect {
@@ -115,7 +121,7 @@ class CouponControllerTest {
     @Test
     fun `내 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
         val userId = UserMock.id()
-        every { couponFacade.getUserCoupons(userId.value) } returns emptyList()
+        every { couponFacade.getCoupons(userId.value) } returns emptyList()
 
         mockMvc.get("/users/${userId.value}/coupons")
             .andExpect {
@@ -127,7 +133,7 @@ class CouponControllerTest {
     @Test
     fun `내 쿠폰 목록 조회 - 404 - 유저 없음`() {
         val userId = UserMock.id()
-        every { couponFacade.getUserCoupons(userId.value) } returns emptyList()
+        every { couponFacade.getCoupons(userId.value) } returns emptyList()
 
         mockMvc.get("/users/${userId.value}/coupons")
             .andExpect {
@@ -139,12 +145,113 @@ class CouponControllerTest {
     @Test
     fun `내 쿠폰 목록 조회 - 404 - 찾을 수 없는 유저`() {
         val userId = UserMock.id()
-        every { couponFacade.getUserCoupons(userId.value) } throws NotFoundUserException()
+        every { couponFacade.getCoupons(userId.value) } throws NotFoundUserException()
 
         mockMvc.get("/users/${userId.value}/coupons")
             .andExpect {
                 status { isNotFound() }
                 jsonPath("$.errorCode") { value(ErrorCode.NOT_FOUND_USER.name) }
             }
+    }
+
+    @Test
+    fun `쿠폰 발급 - 200`() {
+        val couponSourceId = CouponMock.sourceId()
+        val userId = UserMock.id()
+        val coupon = CouponMock.couponQueryModel()
+        val request = IssueCouponRequest(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value,
+        )
+        every {
+            couponFacade.issueCoupon(
+                couponSourceId = couponSourceId.value,
+                userId = userId.value,
+            )
+        } returns coupon
+
+        mockMvc.post("/coupons") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+                status { isOk() }
+                jsonPath("$.id") { value(coupon.id.value) }
+                jsonPath("$.userId") { value(coupon.userId.value) }
+                jsonPath("$.name") { value(coupon.name) }
+                jsonPath("$.discountAmount") { value(coupon.discountAmount.toString()) }
+                if (coupon.usedAt == null) {
+                    jsonPath("$.usedAt") { doesNotExist() }
+                } else {
+                    jsonPath("$.usedAt") { value(coupon.usedAt.toString()) }
+                }
+                jsonPath("$.createdAt") { value(coupon.createdAt.toString()) }
+                jsonPath("$.updatedAt") { value(coupon.updatedAt.toString()) }
+            }
+    }
+
+    @Test
+    fun `쿠폰 발급 - 400 - 쿠폰 재고 부족`() {
+        val couponSourceId = CouponMock.sourceId()
+        val userId = UserMock.id()
+        val request = IssueCouponRequest(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value,
+        )
+        every { couponFacade.issueCoupon(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value,
+        ) } throws OutOfStockCouponSourceException(couponSourceId, 1, 0L)
+
+        mockMvc.post("/coupons") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.errorCode") { value(ErrorCode.OUT_OF_STOCK_COUPON_SOURCE.name) }
+        }
+    }
+
+    @Test
+    fun `쿠폰 발급 - 404 - 찾을 수 없는 유저`() {
+        val couponSourceId = CouponMock.sourceId()
+        val userId = UserMock.id()
+        val request = IssueCouponRequest(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value,
+        )
+        every { couponFacade.issueCoupon(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value,
+        ) } throws NotFoundUserException("")
+
+        mockMvc.post("/coupons") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isNotFound() }
+            jsonPath("$.errorCode") { value(ErrorCode.NOT_FOUND_USER.name) }
+        }
+    }
+
+    @Test
+    fun `쿠폰 발급 - 404 - 찾을 수 없는 쿠폰 소스`() {
+        val couponSourceId = CouponMock.sourceId()
+        val userId = UserMock.id()
+        val request = IssueCouponRequest(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value,
+        )
+        every { couponFacade.issueCoupon(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value,
+        ) } throws NotFoundCouponSourceException(couponSourceId)
+
+        mockMvc.post("/coupons") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isNotFound() }
+            jsonPath("$.errorCode") { value(ErrorCode.NOT_FOUND_COUPON_SOURCE.name) }
+        }
     }
 }

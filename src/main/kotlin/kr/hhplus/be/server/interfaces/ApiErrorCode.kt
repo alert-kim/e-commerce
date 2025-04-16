@@ -14,6 +14,10 @@ object CouponErrorCode {
     const val NOT_FOUND_COUPON_CODE: String = """{"code":"NOT_FOUND_COUPON"}"""
     const val NOT_OWNED_COUPON_CODE: String = """{"code":"NOT_OWNED_COUPON"}"""
     const val OUT_OF_STOCK_COUPON_CODE: String = """{"code":"OUT_OF_STOCK_COUPON"}"""
+
+    // source
+    const val NOT_FOUND_COUPON_SOURCE_CODE: String = """{"code":"NOT_FOUND_COUPON_SOURCE"}"""
+    const val OUT_OF_STOCK_COUPON_SOURCE_CODE: String = """{"code":"OUT_OF_STOCK_COUPON_SOURCE"}"""
 }
 
 object OrderErrorCode {
@@ -46,6 +50,9 @@ enum class ErrorCode(val message: String) {
     ALREADY_USED_COUPON("이미 사용된 쿠폰입니다."),
     EXPIRED_COUPON("쿠폰 사용 기간이 만료되었습니다."),
     NOT_OWNED_COUPON("쿠폰을 소유자가 아닙니다."),
+    // coupon_source
+    NOT_FOUND_COUPON_SOURCE("쿠폰 소스를 찾을 수 없습니다."),
+    OUT_OF_STOCK_COUPON_SOURCE("쿠폰 소스의 재고가 부족합니다."),
 
     // order
     INVALID_ORDER_PRICE("잘못된 주문 금액입니다."),
