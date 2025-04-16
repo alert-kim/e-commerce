@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.coupon
 
 import kr.hhplus.be.server.application.coupon.CouponFacade
+import kr.hhplus.be.server.application.coupon.command.IssueCouponFacadeCommand
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
@@ -41,8 +42,10 @@ class CouponController(
     ) = handleRequest(
         block = {
             val coupon = couponFacade.issueCoupon(
+                IssueCouponFacadeCommand(
                 couponSourceId = request.couponSourceId,
                 userId = request.userId,
+                )
             )
             CouponResponse.from(coupon)
         },

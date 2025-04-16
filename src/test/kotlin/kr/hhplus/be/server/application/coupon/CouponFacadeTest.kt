@@ -5,8 +5,12 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import kr.hhplus.be.server.application.coupon.command.IssueCouponFacadeCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.CouponSourceService
+import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
+import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
+import kr.hhplus.be.server.domain.coupon.result.IssueCouponResult
 import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import kr.hhplus.be.server.domain.user.UserService
@@ -28,6 +32,29 @@ class CouponFacadeTest {
 
     @MockK(relaxed = true)
     private lateinit var userService: UserService
+
+    @Test
+    fun `issueCoupon - 쿠폰 발급`() {
+        val couponSourceId = CouponMock.sourceId()
+        val userId = UserMock.id()
+        val issuedCoupon = CouponMock.issuedCoupon()
+        val coupon = CouponMock.coupon(id = CouponMock.id())
+        every { couponSourceService.issue(any()) } returns IssueCouponResult(issuedCoupon)
+        every { userService.get(userId.value) } returns UserMock.user(id = userId)
+        every { couponService.create(any()) } returns coupon
+
+        val result = couponFacade.issueCoupon(IssueCouponFacadeCommand(
+            couponSourceId = couponSourceId.value,
+            userId = userId.value
+        ))
+
+        assertThat(result.id).isEqualTo(coupon.id)
+        verify {
+            userService.get(userId.value)
+            couponSourceService.issue(IssueCouponCommand(couponSourceId.value))
+            couponService.create(CreateCouponCommand(userId, issuedCoupon))
+        }
+    }
 
     @Test
     fun `getAllIssuableSources - 발급 가능 쿠폰 조회`() {

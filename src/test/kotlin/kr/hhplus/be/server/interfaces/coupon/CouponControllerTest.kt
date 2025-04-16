@@ -6,12 +6,10 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kr.hhplus.be.server.application.coupon.CouponFacade
-import kr.hhplus.be.server.domain.coupon.CouponSourceId
+import kr.hhplus.be.server.application.coupon.command.IssueCouponFacadeCommand
 import kr.hhplus.be.server.domain.coupon.CouponSourceQueryModel
-import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
-import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
@@ -165,8 +163,10 @@ class CouponControllerTest {
         )
         every {
             couponFacade.issueCoupon(
-                couponSourceId = couponSourceId.value,
-                userId = userId.value,
+                IssueCouponFacadeCommand(
+                    couponSourceId = couponSourceId.value,
+                    userId = userId.value
+                ),
             )
         } returns coupon
 
@@ -174,19 +174,19 @@ class CouponControllerTest {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
-                status { isOk() }
-                jsonPath("$.id") { value(coupon.id.value) }
-                jsonPath("$.userId") { value(coupon.userId.value) }
-                jsonPath("$.name") { value(coupon.name) }
-                jsonPath("$.discountAmount") { value(coupon.discountAmount.toString()) }
-                if (coupon.usedAt == null) {
-                    jsonPath("$.usedAt") { doesNotExist() }
-                } else {
-                    jsonPath("$.usedAt") { value(coupon.usedAt.toString()) }
-                }
-                jsonPath("$.createdAt") { value(coupon.createdAt.toString()) }
-                jsonPath("$.updatedAt") { value(coupon.updatedAt.toString()) }
+            status { isOk() }
+            jsonPath("$.id") { value(coupon.id.value) }
+            jsonPath("$.userId") { value(coupon.userId.value) }
+            jsonPath("$.name") { value(coupon.name) }
+            jsonPath("$.discountAmount") { value(coupon.discountAmount.toString()) }
+            if (coupon.usedAt == null) {
+                jsonPath("$.usedAt") { doesNotExist() }
+            } else {
+                jsonPath("$.usedAt") { value(coupon.usedAt.toString()) }
             }
+            jsonPath("$.createdAt") { value(coupon.createdAt.toString()) }
+            jsonPath("$.updatedAt") { value(coupon.updatedAt.toString()) }
+        }
     }
 
     @Test
@@ -197,10 +197,14 @@ class CouponControllerTest {
             couponSourceId = couponSourceId.value,
             userId = userId.value,
         )
-        every { couponFacade.issueCoupon(
-            couponSourceId = couponSourceId.value,
-            userId = userId.value,
-        ) } throws OutOfStockCouponSourceException(couponSourceId, 1, 0L)
+        every {
+            couponFacade.issueCoupon(
+                IssueCouponFacadeCommand(
+                    couponSourceId = couponSourceId.value,
+                    userId = userId.value,
+                )
+            )
+        } throws OutOfStockCouponSourceException(couponSourceId, 1, 0L)
 
         mockMvc.post("/coupons") {
             contentType = MediaType.APPLICATION_JSON
@@ -219,10 +223,14 @@ class CouponControllerTest {
             couponSourceId = couponSourceId.value,
             userId = userId.value,
         )
-        every { couponFacade.issueCoupon(
-            couponSourceId = couponSourceId.value,
-            userId = userId.value,
-        ) } throws NotFoundUserException("")
+        every {
+            couponFacade.issueCoupon(
+                IssueCouponFacadeCommand(
+                    couponSourceId = couponSourceId.value,
+                    userId = userId.value,
+                )
+            )
+        } throws NotFoundUserException("")
 
         mockMvc.post("/coupons") {
             contentType = MediaType.APPLICATION_JSON
@@ -241,10 +249,14 @@ class CouponControllerTest {
             couponSourceId = couponSourceId.value,
             userId = userId.value,
         )
-        every { couponFacade.issueCoupon(
-            couponSourceId = couponSourceId.value,
-            userId = userId.value,
-        ) } throws NotFoundCouponSourceException(couponSourceId)
+        every {
+            couponFacade.issueCoupon(
+                IssueCouponFacadeCommand(
+                    couponSourceId = couponSourceId.value,
+                    userId = userId.value,
+                )
+            )
+        } throws NotFoundCouponSourceException(couponSourceId)
 
         mockMvc.post("/coupons") {
             contentType = MediaType.APPLICATION_JSON

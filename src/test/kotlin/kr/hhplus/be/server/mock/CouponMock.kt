@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.coupon.*
+import kr.hhplus.be.server.domain.coupon.result.IssuedCoupon
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -49,6 +50,19 @@ object CouponMock {
         usedAt = usedAt,
         updatedAt = updatedAt,
     )
+
+    fun issuedCoupon(
+        name: String = "쿠폰",
+        couponSourceId: CouponSourceId = sourceId(),
+        discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
+        createdAt: Instant = Instant.now(),
+    ): IssuedCoupon =
+        IssuedCoupon(
+            name = name,
+            couponSourceId = couponSourceId,
+            discountAmount = discountAmount,
+            createdAt = createdAt,
+        )
 
     fun sourceQueryModel(
         id: CouponSourceId = sourceId(),

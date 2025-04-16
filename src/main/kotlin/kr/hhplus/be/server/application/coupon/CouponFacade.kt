@@ -1,11 +1,15 @@
 package kr.hhplus.be.server.application.coupon
 
+import kr.hhplus.be.server.application.coupon.command.IssueCouponFacadeCommand
 import kr.hhplus.be.server.domain.coupon.CouponQueryModel
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.CouponSourceQueryModel
 import kr.hhplus.be.server.domain.coupon.CouponSourceService
+import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
+import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
 import kr.hhplus.be.server.domain.user.UserService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CouponFacade(
@@ -13,11 +17,13 @@ class CouponFacade(
     private val couponSourceService: CouponSourceService,
     private val userService: UserService,
 ) {
+
     fun issueCoupon(
-        couponSourceId: Long,
-        userId: Long,
+        command: IssueCouponFacadeCommand
     ): CouponQueryModel {
-        TODO()
+        val userId = userService.get(command.userId).requireId()
+        val issuedCoupon = couponSourceService.issue(IssueCouponCommand(command.couponSourceId)).coupon
+        return couponService.create(CreateCouponCommand(userId, issuedCoupon)).let { CouponQueryModel.from(it) }
     }
 
     fun getAllSourcesIssuable(): List<CouponSourceQueryModel> =
