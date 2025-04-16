@@ -1,14 +1,18 @@
 package kr.hhplus.be.server.domain.coupon
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
+import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
+import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
@@ -29,6 +33,37 @@ class CouponSourceServiceTest {
     @BeforeEach
     fun setUp() {
         clearMocks(repository)
+    }
+
+    @Test
+    fun `issue - 쿠폰 발급`() {
+        val couponSourceId = CouponSourceId(1L)
+        val couponSource = mockk<CouponSource>()
+        val issuedCoupon = CouponMock.issuedCoupon()
+        every { repository.findById(couponSourceId.value) } returns couponSource
+        every { couponSource.issue() } returns issuedCoupon
+
+        val result = service.issue(IssueCouponCommand(couponSourceId.value))
+
+        assertThat(result.coupon).isEqualTo(issuedCoupon)
+        verify {
+            repository.findById(couponSourceId.value)
+            repository.save(any())
+        }
+    }
+
+    @Test
+    fun `issue - 찾을 수 없는 쿠폰 소스`() {
+        val couponSourceId = CouponSourceId(1L)
+        every { repository.findById(couponSourceId.value) } returns null
+
+        shouldThrow<NotFoundCouponSourceException> {
+            service.issue(IssueCouponCommand(couponSourceId.value))
+        }
+
+        verify(exactly = 0) {
+            repository.save(any())
+        }
     }
 
     @Test

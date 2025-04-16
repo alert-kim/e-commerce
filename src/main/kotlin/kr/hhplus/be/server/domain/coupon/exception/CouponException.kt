@@ -45,15 +45,15 @@ class RequiredCouponSourceIdException(
 }
 
 class NotFoundCouponSourceException(
-    id: CouponSourceId,
+    val detail: String,
 ) : CouponException() {
-    override val message: String = "쿠폰 소스(${id.value})을 찾을 수 없습니다."
+    override val message: String = "쿠폰 소스를 찾을 수 없습니다. $detail"
 }
 
 class OutOfStockCouponSourceException(
     sourceId: CouponSourceId,
     required: Int,
-    remaining: Long,
+    remaining: Int,
 ) : CouponException() {
     override val message: String = "쿠폰 소스($sourceId)의 재고($remaining)가 부족합니다. 필요 수량: $required"
 }

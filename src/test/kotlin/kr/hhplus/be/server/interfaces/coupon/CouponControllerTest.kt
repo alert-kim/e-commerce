@@ -204,7 +204,7 @@ class CouponControllerTest {
                     userId = userId.value,
                 )
             )
-        } throws OutOfStockCouponSourceException(couponSourceId, 1, 0L)
+        } throws OutOfStockCouponSourceException(couponSourceId, 1, 0)
 
         mockMvc.post("/coupons") {
             contentType = MediaType.APPLICATION_JSON
@@ -256,7 +256,7 @@ class CouponControllerTest {
                     userId = userId.value,
                 )
             )
-        } throws NotFoundCouponSourceException(couponSourceId)
+        } throws NotFoundCouponSourceException("")
 
         mockMvc.post("/coupons") {
             contentType = MediaType.APPLICATION_JSON
