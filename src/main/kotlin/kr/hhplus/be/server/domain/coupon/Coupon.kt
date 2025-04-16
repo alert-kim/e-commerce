@@ -39,4 +39,23 @@ class Coupon(
 
     fun calculateDiscountAmount(totalAmount: BigDecimal): BigDecimal =
         totalAmount.min(discountAmount)
+
+    companion object {
+        fun new(
+            userId: UserId,
+            couponSourceId: CouponSourceId,
+            name: String,
+            discountAmount: BigDecimal,
+            createdAt: Instant,
+        ): Coupon = Coupon(
+            id = null,
+            userId = userId,
+            name = name,
+            couponSourceId = couponSourceId,
+            discountAmount = discountAmount,
+            usedAt = null,
+            createdAt = createdAt,
+            updatedAt = createdAt,
+        )
+    }
 }

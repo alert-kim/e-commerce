@@ -23,7 +23,7 @@ class CouponFacade(
     ): CouponQueryModel {
         val userId = userService.get(command.userId).requireId()
         val issuedCoupon = couponSourceService.issue(IssueCouponCommand(command.couponSourceId)).coupon
-        return couponService.create(CreateCouponCommand(userId, issuedCoupon)).let { CouponQueryModel.from(it) }
+        return couponService.create(CreateCouponCommand(userId, issuedCoupon)).let { CouponQueryModel.from(it.coupon) }
     }
 
     fun getAllSourcesIssuable(): List<CouponSourceQueryModel> =

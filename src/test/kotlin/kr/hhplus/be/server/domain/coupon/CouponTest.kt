@@ -7,6 +7,7 @@ import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.Instant
@@ -28,6 +29,32 @@ class CouponTest {
         assertThrows<RequiredCouponIdException> {
             coupon.requireId()
         }
+    }
+
+    @Test
+    fun `new - 쿠폰 생성`() {
+        val userId = UserId(1L)
+        val couponSourceId = CouponSourceId(1L)
+        val name = "쿠폰 이름"
+        val discountAmount = BigDecimal.valueOf(1000)
+        val createdAt = Instant.now()
+
+        val coupon = Coupon.new(
+            userId = userId,
+            couponSourceId = couponSourceId,
+            name = name,
+            discountAmount = discountAmount,
+            createdAt = createdAt,
+        )
+
+        assertAll(
+            { assertThat(coupon.id).isNull() },
+            { assertThat(coupon.userId).isEqualTo(userId) },
+            { assertThat(coupon.couponSourceId).isEqualTo(couponSourceId) },
+            { assertThat(coupon.name).isEqualTo(name) },
+            { assertThat(coupon.discountAmount).isEqualByComparingTo(discountAmount) },
+            { assertThat(coupon.createdAt).isEqualTo(createdAt) },
+        )
     }
 
     @Test

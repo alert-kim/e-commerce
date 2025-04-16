@@ -10,6 +10,7 @@ import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.CouponSourceService
 import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
+import kr.hhplus.be.server.domain.coupon.result.CreateCouponResult
 import kr.hhplus.be.server.domain.coupon.result.IssueCouponResult
 import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
@@ -41,7 +42,7 @@ class CouponFacadeTest {
         val coupon = CouponMock.coupon(id = CouponMock.id())
         every { couponSourceService.issue(any()) } returns IssueCouponResult(issuedCoupon)
         every { userService.get(userId.value) } returns UserMock.user(id = userId)
-        every { couponService.create(any()) } returns coupon
+        every { couponService.create(any()) } returns CreateCouponResult(coupon)
 
         val result = couponFacade.issueCoupon(IssueCouponFacadeCommand(
             couponSourceId = couponSourceId.value,
