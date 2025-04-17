@@ -6,18 +6,18 @@ import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
-import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
-import kr.hhplus.be.server.domain.order.command.PayOrderCommand
-import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
+import kr.hhplus.be.server.domain.order.command.*
+import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEventRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventType
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 
@@ -31,6 +31,9 @@ class OrderServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var eventRepository: OrderEventRepository
+
+    @MockK(relaxed = true)
+    private lateinit var client: OrderSnapshotClient
 
     @MockK(relaxed = true)
     private lateinit var objectMapper: ObjectMapper
@@ -225,6 +228,38 @@ class OrderServiceTest {
 
         verify(exactly = 0) {
             repository.save(any())
+        }
+    }
+
+    @Test
+    fun `sendOrderCompleted - 주문 완료 전송`() {
+        val orderId = OrderMock.id()
+        val order = OrderMock.order(id = orderId, status = OrderStatus.COMPLETED)
+        val command = SendOrderCompletedCommand(
+            orderSnapshot = OrderSnapshot.from(order),
+        )
+
+        service.sendOrderCompleted(command)
+
+        verify {
+            client.send(command.orderSnapshot)
+        }
+    }
+
+    @Test
+    fun `sendOrderCompleted - 완료 되지 않은 주문 에러 - InvalidOrderStatusException 발생`() {
+        val orderId = OrderMock.id()
+        val order = OrderMock.order(id = orderId, status = OrderStatus.READY)
+        val command = SendOrderCompletedCommand(
+            orderSnapshot = OrderSnapshot.from(order),
+        )
+
+        assertThrows<InvalidOrderStatusException> {
+            service.sendOrderCompleted(command)
+        }
+
+        verify(exactly = 0) {
+            client.send(any())
         }
     }
 

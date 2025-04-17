@@ -16,6 +16,7 @@ import java.time.Instant
 class OrderService(
     private val repository: OrderRepository,
     private val eventRepository: OrderEventRepository,
+    private val client: OrderSnapshotClient,
     private val objectMapper: ObjectMapper,
 ) {
 
@@ -79,6 +80,8 @@ class OrderService(
     fun sendOrderCompleted(
         command: SendOrderCompletedCommand,
     ) {
+        val snapshot = command.orderSnapshot.checkCompleted()
+        client.send(snapshot)
     }
 
     fun get(
