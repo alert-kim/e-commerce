@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
+import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
@@ -13,6 +14,9 @@ import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
+import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderEventType
+import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductService
@@ -39,6 +43,19 @@ class OrderFacade(
         placeProduct(orderSheet)
         pay(orderSheet)
         return orderService.get(orderId.value).let { OrderQueryModel.from(it) }
+    }
+
+    fun sendOrderCompletionData(
+        command: SendOrderFacadeCommand,
+    ) {
+       orderService.sendOrderCompleted(SendOrderCompletedCommand(command.orderSnapshot))
+    }
+
+    fun getAllEventsNotHandledInOrder(
+        schedulerId: String,
+        eventType: OrderEventType,
+    ): List<OrderEvent> {
+        TODO()
     }
 
     private fun verifyUser(

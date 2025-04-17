@@ -76,6 +76,11 @@ class OrderService(
         eventRepository.save(event)
     }
 
+    fun sendOrderCompleted(
+        command: SendOrderCompletedCommand,
+    ) {
+    }
+
     fun get(
         id: Long,
     ): Order =

@@ -1,8 +1,11 @@
 package kr.hhplus.be.server.domain.order.dto
 
+import kr.hhplus.be.server.domain.order.OrderStatus
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class OrderSnapshotTest {
 
@@ -31,6 +34,29 @@ class OrderSnapshotTest {
             assertThat(product.unitPrice).isEqualByComparingTo(expect.unitPrice)
             assertThat(product.totalPrice).isEqualByComparingTo(expect.totalPrice)
             assertThat(product.createdAt).isEqualTo(expect.createdAt)
+        }
+    }
+
+    @Test
+    fun `주문 스냅샷 완료 확인 - 완료 상태인 경우 정상 처리`() {
+        val orderId = OrderMock.id()
+        val order = OrderMock.order(id = orderId, status = OrderStatus.COMPLETED)
+        val orderSnapshot = OrderSnapshot.from(order)
+
+        val result = orderSnapshot.checkCompleted()
+
+        assertThat(result).isEqualTo(orderSnapshot)
+    }
+
+    @Test
+    fun `주문 스냅샷 완료 확인 - 완료 상태가 아닐 경우 - InvalidOrderStatusException 발생`() {
+        val orderId = OrderMock.id()
+        val status = OrderStatus.entries.filter { it != OrderStatus.COMPLETED }.random()
+        val order = OrderMock.order(id = orderId, status = status)
+        val orderSnapshot = OrderSnapshot.from(order)
+
+        assertThrows<InvalidOrderStatusException> {
+            orderSnapshot.checkCompleted()
         }
     }
 }

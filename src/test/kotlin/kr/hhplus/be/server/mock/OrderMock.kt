@@ -2,6 +2,9 @@ package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
+import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
+import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
@@ -118,5 +121,17 @@ object OrderMock {
         originalAmount = originalAmount,
         discountAmount = discountAmount,
         totalAmount = totalAmount,
+    )
+
+    fun event(
+        orderId: OrderId = id(),
+        type: OrderEventType = OrderEventType.COMPLETED,
+        snapshot: OrderSnapshot = OrderSnapshot.from(order()),
+        createdAt: Instant = Instant.now(),
+    ): OrderEvent = OrderEvent(
+        orderId = orderId,
+        type = type,
+        snapshot = snapshot,
+        createdAt = createdAt,
     )
 }

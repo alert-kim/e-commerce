@@ -1,7 +1,9 @@
 package kr.hhplus.be.server.domain.order.dto
 
 import kr.hhplus.be.server.domain.order.Order
+import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderStatus
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -17,6 +19,17 @@ data class OrderSnapshot(
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {
+
+    fun checkCompleted(): OrderSnapshot {
+        if (status != OrderStatus.COMPLETED) {
+            throw InvalidOrderStatusException(
+                id = OrderId(id),
+                expect = OrderStatus.COMPLETED,
+                status = status,
+            )
+        }
+        return this
+    }
 
     data class OrderProductSnapshot(
         val orderId: Long,
