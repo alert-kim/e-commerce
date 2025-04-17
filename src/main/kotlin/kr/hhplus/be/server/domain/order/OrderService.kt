@@ -1,13 +1,22 @@
 package kr.hhplus.be.server.domain.order
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.hhplus.be.server.domain.order.command.*
+import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
+import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderEventRepository
+import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class OrderService(
     private val repository: OrderRepository,
+    private val eventRepository: OrderEventRepository,
+    private val objectMapper: ObjectMapper,
 ) {
 
     fun createOrder(
@@ -57,7 +66,14 @@ class OrderService(
         val order = get(payment.orderId.value)
 
         order.pay()
-        repository.save(order)
+        val orderId = repository.save(order)
+        val event = OrderEvent(
+            orderId = orderId,
+            type = OrderEventType.COMPLETED,
+            snapshot = OrderSnapshot.from(order),
+            createdAt = Instant.now(),
+        )
+        eventRepository.save(event)
     }
 
     fun get(

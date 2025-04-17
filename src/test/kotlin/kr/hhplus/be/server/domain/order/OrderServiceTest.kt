@@ -1,18 +1,17 @@
 package kr.hhplus.be.server.domain.order
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
-import io.mockk.clearMocks
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.verify
-import kr.hhplus.be.server.domain.coupon.Coupon
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
+import kr.hhplus.be.server.domain.order.event.OrderEventRepository
+import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
@@ -30,9 +29,15 @@ class OrderServiceTest {
     @MockK(relaxed = true)
     private lateinit var repository: OrderRepository
 
+    @MockK(relaxed = true)
+    private lateinit var eventRepository: OrderEventRepository
+
+    @MockK(relaxed = true)
+    private lateinit var objectMapper: ObjectMapper
+
     @BeforeEach
     fun setUp() {
-        clearMocks(repository)
+        clearMocks(repository, eventRepository)
     }
 
     @Test
@@ -179,7 +184,7 @@ class OrderServiceTest {
     @Test
     fun `pay  - 결제`() {
         val orderId = OrderMock.id()
-        val order = mockk<Order>(relaxed = true)
+        val order = OrderMock.order(id = orderId)
         val payment = PaymentMock.payment(
             orderId = orderId,
             amount = BigDecimal.ZERO,
@@ -194,6 +199,10 @@ class OrderServiceTest {
 
         verify {
             repository.save(any())
+            eventRepository.save(withArg {
+                assertThat(it.orderId).isEqualTo(orderId)
+                assertThat(it.type).isEqualTo(OrderEventType.COMPLETED)
+            })
         }
     }
 

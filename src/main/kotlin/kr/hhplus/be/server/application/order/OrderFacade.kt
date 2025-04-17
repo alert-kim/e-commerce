@@ -20,7 +20,6 @@ import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class OrderFacade(
