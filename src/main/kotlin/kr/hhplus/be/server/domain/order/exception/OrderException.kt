@@ -47,3 +47,8 @@ class AlreadyCouponAppliedException(
 ) : OrderException() {
     override val message: String = "주문(${id.value})에 쿠폰(${couponId.value})이 이미 적용되어 있습니다 (적용 시도 쿠폰 : ${newCouponId.value})"
 }
+
+// event
+class RequiredOrderEventIdException : OrderException() {
+    override val message: String = "주문 이벤트 ID가 필요합니다."
+}

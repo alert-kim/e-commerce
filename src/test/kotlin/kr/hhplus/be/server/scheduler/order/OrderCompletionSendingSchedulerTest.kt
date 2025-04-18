@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.order.OrderFacade
+import kr.hhplus.be.server.application.order.command.ConsumeOrderEventFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.mock.OrderMock
@@ -41,6 +42,12 @@ class OrderCompletionSendingSchedulerTest {
             orderFacade.sendOrderCompletionData(
                 withArg<SendOrderFacadeCommand> {
                     assertThat(it.orderSnapshot).isIn(orderSnapshots)
+                }
+            )
+            orderFacade.consumeEvent(
+                withArg<ConsumeOrderEventFacadeCommand> {
+                    assertThat(it.consumerId).isEqualTo(OrderCompletionSendingScheduler.SCHEDULER_ID)
+                    assertThat(it.event).isIn(orderEvents)
                 }
             )
         }

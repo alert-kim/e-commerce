@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.order.event
 
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
+import kr.hhplus.be.server.domain.order.exception.RequiredOrderEventIdException
 import java.time.Instant
 
 class OrderEvent(
@@ -10,4 +11,6 @@ class OrderEvent(
     val type: OrderEventType,
     val snapshot: OrderSnapshot,
     val createdAt: Instant,
-)
+) {
+    fun requireId(): OrderEventId = id ?: throw RequiredOrderEventIdException()
+}

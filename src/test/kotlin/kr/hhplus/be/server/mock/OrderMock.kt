@@ -4,6 +4,7 @@ import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
 import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderEventId
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.user.UserId
@@ -123,12 +124,16 @@ object OrderMock {
         totalAmount = totalAmount,
     )
 
+    fun eventId(): OrderEventId = OrderEventId(IdMock.value())
+
     fun event(
+        id: OrderEventId? = eventId(),
         orderId: OrderId = id(),
         type: OrderEventType = OrderEventType.COMPLETED,
         snapshot: OrderSnapshot = OrderSnapshot.from(order()),
         createdAt: Instant = Instant.now(),
     ): OrderEvent = OrderEvent(
+        id = id,
         orderId = orderId,
         type = type,
         snapshot = snapshot,

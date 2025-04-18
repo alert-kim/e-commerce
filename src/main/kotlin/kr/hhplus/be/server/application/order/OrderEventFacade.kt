@@ -1,8 +1,6 @@
 package kr.hhplus.be.server.application.order
 
-import kr.hhplus.be.server.application.order.command.ConsumeOrderEventFacadeCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
-import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
@@ -17,7 +15,6 @@ import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventType
-import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductService
@@ -27,7 +24,7 @@ import kr.hhplus.be.server.domain.user.UserService
 import org.springframework.stereotype.Service
 
 @Service
-class OrderFacade(
+class OrderEventFacade(
     private val balanceService: BalanceService,
     private val couponService: CouponService,
     private val orderService: OrderService,
@@ -35,6 +32,7 @@ class OrderFacade(
     private val productService: ProductService,
     private val userService: UserService,
 ) {
+
     fun order(
         command: OrderFacadeCommand,
     ): OrderQueryModel {
@@ -46,24 +44,11 @@ class OrderFacade(
         return orderService.get(orderId.value).let { OrderQueryModel.from(it) }
     }
 
-    fun sendOrderCompletionData(
-        command: SendOrderFacadeCommand,
-    ) {
-       orderService.sendOrderCompleted(SendOrderCompletedCommand(command.orderSnapshot))
-    }
-
-    fun consumeEvent(
-        command: ConsumeOrderEventFacadeCommand,
-    ) {
-        orderService.consumeEvent(ConsumeOrderEventCommand(command.consumerId, command.event))
-    }
-
     fun getAllEventsNotHandledInOrder(
         schedulerId: String,
         eventType: OrderEventType,
-    ): List<OrderEvent> {
-        TODO()
-    }
+    ): List<OrderEvent> =
+        orderService.getAllEventsNotHandledInOrder(schedulerId, eventType)
 
     private fun verifyUser(
         userId: Long,

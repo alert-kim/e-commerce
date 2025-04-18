@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.order
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEvent
@@ -81,9 +80,22 @@ class OrderService(
         client.send(snapshot)
     }
 
+    fun consumeEvent(
+        command: ConsumeOrderEventCommand,
+    ) {
+        TODO("Not yet implemented")
+    }
+
     fun get(
         id: Long,
     ): Order =
         repository.findById(id)
             ?: throw NotFoundOrderException("by id: $id")
+
+    fun getAllEventsNotHandledInOrder(
+        schedulerId: String,
+        eventType: OrderEventType,
+    ): List<OrderEvent> {
+        TODO()
+    }
 }
