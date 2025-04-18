@@ -29,7 +29,7 @@ class OrderCompletionSendingSchedulerTest {
             OrderMock.event()
         }
         every {
-            orderFacade.getAllEventsNotHandledInOrder(
+            orderFacade.getAllEventsNotConsumedInOrder(
                 OrderCompletionSendingScheduler.SCHEDULER_ID,
                 OrderEventType.COMPLETED
             )

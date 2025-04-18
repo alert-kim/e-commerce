@@ -5,5 +5,5 @@ interface OrderEventConsumerOffsetRepository {
 
     fun update(update: OrderEventConsumerOffset)
 
-    fun find(consumerId: String): OrderEventConsumerOffset?
+    fun find(consumerId: String, eventType: OrderEventType): OrderEventConsumerOffset?
 }

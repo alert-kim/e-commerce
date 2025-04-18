@@ -149,7 +149,7 @@ object OrderMock {
         updatedAt: Instant = Instant.now(),
     ): OrderEventConsumerOffset = OrderEventConsumerOffset(
         consumerId = consumerId,
-        offset = eventId,
+        value = eventId,
         eventType = eventType,
         createdAt = createdAt,
         updatedAt = updatedAt,

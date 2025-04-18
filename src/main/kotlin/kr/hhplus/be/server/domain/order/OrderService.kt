@@ -82,18 +82,18 @@ class OrderService(
     fun consumeEvent(
         command: ConsumeOrderEventCommand,
     ) {
-        val offset = eventConsumerOffsetRepository.find(command.consumerId)
+        val offset = eventConsumerOffsetRepository.find(command.consumerId, command.event.type)
         when(offset) {
             null -> eventConsumerOffsetRepository.save(OrderEventConsumerOffset(
                 consumerId = command.consumerId,
-                offset = command.event.requireId(),
+                value = command.event.requireId(),
                 eventType = command.event.type,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
             ))
             else -> eventConsumerOffsetRepository.update(OrderEventConsumerOffset(
                 consumerId = command.consumerId,
-                offset = command.event.requireId(),
+                value = command.event.requireId(),
                 eventType = command.event.type,
                 createdAt = offset.createdAt,
                 updatedAt = command.event.createdAt,
@@ -107,10 +107,19 @@ class OrderService(
         repository.findById(id)
             ?: throw NotFoundOrderException("by id: $id")
 
-    fun getAllEventsNotHandledInOrder(
-        schedulerId: String,
+    fun getAllEventsNotConsumedInOrder(
+        consumerId: String,
         eventType: OrderEventType,
     ): List<OrderEvent> {
-        TODO()
+        val offset = eventConsumerOffsetRepository.find(
+            consumerId = consumerId,
+            eventType = eventType,
+        )
+        return when(offset) {
+            null -> eventRepository.findAllOrderByIdAsc()
+            else -> eventRepository.findAllByIdGreaterThanOrderByIdAsc(
+                id = offset.value,
+            )
+        }
     }
 }

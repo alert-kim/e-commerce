@@ -58,12 +58,14 @@ class OrderFacade(
         orderService.consumeEvent(ConsumeOrderEventCommand(command.consumerId, command.event))
     }
 
-    fun getAllEventsNotHandledInOrder(
-        schedulerId: String,
+    fun getAllEventsNotConsumedInOrder(
+        consumerId: String,
         eventType: OrderEventType,
-    ): List<OrderEvent> {
-        TODO()
-    }
+    ): List<OrderEvent> =
+        orderService.getAllEventsNotConsumedInOrder(
+            consumerId = consumerId,
+            eventType = eventType,
+        )
 
     private fun verifyUser(
         userId: Long,
