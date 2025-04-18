@@ -8,7 +8,6 @@ import kr.hhplus.be.server.domain.order.event.OrderEventRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -17,9 +16,7 @@ class OrderService(
     private val repository: OrderRepository,
     private val eventRepository: OrderEventRepository,
     private val client: OrderSnapshotClient,
-    private val objectMapper: ObjectMapper,
 ) {
-
     fun createOrder(
         command: CreateOrderCommand,
     ): CreateOrderResult {
@@ -35,7 +32,7 @@ class OrderService(
 
     fun placeStock(
         command: PlaceStockCommand,
-    )  {
+    ) {
         val orderId = command.orderSheet.orderId
         val order = get(orderId.value)
 
