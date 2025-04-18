@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.balance.BalanceRepository
 import kr.hhplus.be.server.domain.coupon.CouponRepository
 import kr.hhplus.be.server.domain.coupon.CouponSourceRepository
 import kr.hhplus.be.server.domain.order.OrderRepository
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventRepository
 import kr.hhplus.be.server.domain.payment.PaymentRepository
 import kr.hhplus.be.server.domain.product.ProductRepository
@@ -33,6 +34,9 @@ class ServerApplicationTests {
 
 	@MockitoBean
 	lateinit var orderEventRepository: OrderEventRepository
+
+	@MockitoBean
+	lateinit var orderEventConsumerOffsetRepository: OrderEventConsumerOffsetRepository
 
 	@MockitoBean
 	lateinit var paymentRepository: PaymentRepository

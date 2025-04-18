@@ -2,9 +2,7 @@ package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
-import kr.hhplus.be.server.domain.order.event.OrderEvent
-import kr.hhplus.be.server.domain.order.event.OrderEventRepository
-import kr.hhplus.be.server.domain.order.event.OrderEventType
+import kr.hhplus.be.server.domain.order.event.*
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import org.springframework.stereotype.Service
@@ -14,6 +12,7 @@ import java.time.Instant
 class OrderService(
     private val repository: OrderRepository,
     private val eventRepository: OrderEventRepository,
+    private val eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository,
     private val client: OrderSnapshotClient,
 ) {
     fun createOrder(
@@ -83,7 +82,23 @@ class OrderService(
     fun consumeEvent(
         command: ConsumeOrderEventCommand,
     ) {
-        TODO("Not yet implemented")
+        val offset = eventConsumerOffsetRepository.find(command.consumerId)
+        when(offset) {
+            null -> eventConsumerOffsetRepository.save(OrderEventConsumerOffset(
+                consumerId = command.consumerId,
+                offset = command.event.requireId(),
+                eventType = command.event.type,
+                createdAt = Instant.now(),
+                updatedAt = Instant.now(),
+            ))
+            else -> eventConsumerOffsetRepository.update(OrderEventConsumerOffset(
+                consumerId = command.consumerId,
+                offset = command.event.requireId(),
+                eventType = command.event.type,
+                createdAt = offset.createdAt,
+                updatedAt = command.event.createdAt,
+            ))
+        }
     }
 
     fun get(

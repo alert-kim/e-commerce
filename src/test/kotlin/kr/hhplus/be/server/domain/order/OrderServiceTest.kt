@@ -8,6 +8,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
@@ -31,6 +32,9 @@ class OrderServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var eventRepository: OrderEventRepository
+
+    @MockK(relaxed = true)
+    private lateinit var eveentConsumerOffsetRepository: OrderEventConsumerOffsetRepository
 
     @MockK(relaxed = true)
     private lateinit var client: OrderSnapshotClient
@@ -260,6 +264,49 @@ class OrderServiceTest {
 
         verify(exactly = 0) {
             client.send(any())
+        }
+    }
+
+    @Test
+    fun `consumeEvent - 이벤트 처리 - 첫 처리인 경우 새로운 offset저장`() {
+        val eventId = OrderMock.eventId()
+        val event = OrderMock.event(id = eventId)
+        val command = ConsumeOrderEventCommand(
+            consumerId = "test",
+            event = event,
+        )
+        every { eveentConsumerOffsetRepository.find(command.consumerId) } returns null
+
+        service.consumeEvent(command)
+
+        verify {
+            eveentConsumerOffsetRepository.save(withArg {
+                assertThat(it.consumerId).isEqualTo(command.consumerId)
+                assertThat(it.offset).isEqualTo(eventId)
+                assertThat(it.eventType).isEqualTo(event.type)
+            })
+        }
+    }
+
+    @Test
+    fun `consumeEvent - 이벤트 처리 - 이미 offset이 있는 경우 update`() {
+        val oldEventId = OrderMock.eventId()
+        val eventId = OrderMock.eventId()
+        val event = OrderMock.event(id = eventId)
+        val command = ConsumeOrderEventCommand(
+            consumerId = "test",
+            event = event,
+        )
+        every { eveentConsumerOffsetRepository.find(command.consumerId) } returns
+                OrderMock.eventConsumerOffset(eventId = oldEventId)
+
+        service.consumeEvent(command)
+
+        verify {
+            eveentConsumerOffsetRepository.update(withArg {
+                assertThat(it.consumerId).isEqualTo(command.consumerId)
+                assertThat(it.offset).isEqualTo(eventId)
+            })
         }
     }
 
