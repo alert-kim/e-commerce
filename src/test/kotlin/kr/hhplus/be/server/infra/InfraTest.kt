@@ -1,12 +1,12 @@
-package kr.hhplus.be.server
+package kr.hhplus.be.server.infra
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-class ServerApplicationTests {
-
+class InfraTest {
     @Test
-    fun contextLoads() {
+    fun test() {
     }
 }
