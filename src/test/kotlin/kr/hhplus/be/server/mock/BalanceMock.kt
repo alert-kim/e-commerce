@@ -4,7 +4,7 @@ import kr.hhplus.be.server.domain.balance.BalanceAmount
 
 import kr.hhplus.be.server.domain.balance.Balance
 import kr.hhplus.be.server.domain.balance.BalanceId
-import kr.hhplus.be.server.domain.balance.dto.BalanceQueryModel
+import kr.hhplus.be.server.domain.balance.BalanceView
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.bigDecimal
 import io.kotest.property.arbitrary.next
@@ -36,13 +36,13 @@ object BalanceMock {
         updatedAt = updatedAt,
     )
 
-    fun queryModel(
+    fun view(
         id: BalanceId = id(),
         userId: UserId = UserMock.id(),
         amount: BigDecimal = amount().value,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
-    ) = BalanceQueryModel(
+    ) = BalanceView(
         id = id,
         userId = userId,
         amount = amount,

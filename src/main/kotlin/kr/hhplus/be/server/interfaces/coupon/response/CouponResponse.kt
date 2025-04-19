@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.coupon.response
 
-import kr.hhplus.be.server.domain.coupon.CouponQueryModel
+import kr.hhplus.be.server.domain.coupon.CouponView
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
 import java.time.Instant
@@ -15,7 +15,7 @@ data class CouponResponse(
     val updatedAt: Instant,
 ): ServerApiResponse {
     companion object {
-        fun from(coupon: CouponQueryModel) =
+        fun from(coupon: CouponView) =
             CouponResponse(
                 id = coupon.id.value,
                 userId = coupon.userId.value,

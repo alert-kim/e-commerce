@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.balance.response
 
-import kr.hhplus.be.server.domain.balance.dto.BalanceQueryModel
+import kr.hhplus.be.server.domain.balance.BalanceView
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
@@ -15,7 +15,7 @@ data class BalanceResponse(
     companion object {
         fun of(
             userId: UserId,
-            balance: BalanceQueryModel?,
+            balance: BalanceView?,
         ) = when (balance) {
             null -> default(userId)
             else -> BalanceResponse(

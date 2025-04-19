@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.client
 
 import kr.hhplus.be.server.domain.order.OrderSnapshotClient
-import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
+import kr.hhplus.be.server.domain.order.OrderSnapshot
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component

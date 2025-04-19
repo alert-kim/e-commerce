@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class CouponSourcesResponseTest {
     @Test
     fun `쿠폰 소스 대한 응답 생성`() {
-        val couponSources = List(3) { CouponMock.sourceQueryModel() }
+        val couponSources = List(3) { CouponMock.sourceView() }
 
         val response = CouponSourcesResponse.from(couponSources)
 

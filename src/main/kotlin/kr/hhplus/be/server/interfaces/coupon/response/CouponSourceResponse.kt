@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.coupon.response
 
-import kr.hhplus.be.server.domain.coupon.CouponSourceQueryModel
+import kr.hhplus.be.server.domain.coupon.CouponSourceView
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -14,7 +14,7 @@ data class CouponSourceResponse(
 ) {
     companion object {
         fun from(
-            coupon: CouponSourceQueryModel
+            coupon: CouponSourceView
         ): CouponSourceResponse =
             CouponSourceResponse(
                 id = coupon.id.value,

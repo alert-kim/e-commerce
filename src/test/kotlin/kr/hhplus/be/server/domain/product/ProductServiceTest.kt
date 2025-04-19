@@ -15,6 +15,7 @@ import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -66,7 +67,7 @@ class ProductServiceTest {
             assertThat(product.name).isEqualTo(products[index].name)
             assertThat(product.description).isEqualTo(products[index].description)
             assertThat(product.price).isEqualByComparingTo(products[index].price)
-            assertThat(product.stock.quantity).isEqualTo(products[index].stock.quantity)
+            assertThat(product.stock).isEqualTo(products[index].stock.quantity)
             assertThat(product.createdAt).isEqualTo(products[index].createdAt)
         }
         verify {

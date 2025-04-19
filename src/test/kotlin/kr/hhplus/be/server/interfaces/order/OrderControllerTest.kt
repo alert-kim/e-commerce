@@ -59,7 +59,7 @@ class OrderControllerTest {
     @Test
     fun `주문 - 200`() {
         val request = request()
-        val order = OrderMock.orderQueryModel()
+        val order = OrderMock.view()
         every { orderFacade.order(any()) } returns order
 
         mockMvc.post("/orders") {

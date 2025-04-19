@@ -2,6 +2,7 @@ package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.coupon.*
 import kr.hhplus.be.server.domain.coupon.result.IssuedCoupon
+import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -11,7 +12,7 @@ object CouponMock {
 
     fun sourceId(): CouponSourceId = CouponSourceId(IdMock.value())
 
-    fun couponQueryModel(
+    fun view(
         id: CouponId = id(),
         userId: UserId = UserMock.id(),
         name: String = "쿠폰",
@@ -20,7 +21,7 @@ object CouponMock {
         usedAt: Instant? = null,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
-    ) = CouponQueryModel(
+    ) = CouponView(
         id = id,
         userId = userId,
         name = name,
@@ -64,7 +65,7 @@ object CouponMock {
             createdAt = createdAt,
         )
 
-    fun sourceQueryModel(
+    fun sourceView(
         id: CouponSourceId = sourceId(),
         name: String = "쿠폰",
         status: CouponSourceStatus = CouponSourceStatus.ACTIVE,
@@ -72,8 +73,8 @@ object CouponMock {
         discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
-    ): CouponSourceQueryModel =
-        CouponSourceQueryModel(
+    ): CouponSourceView =
+        CouponSourceView(
             id = id,
             name = name,
             status = status,

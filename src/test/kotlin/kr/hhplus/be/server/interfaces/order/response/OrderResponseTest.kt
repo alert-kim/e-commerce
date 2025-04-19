@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class OrderResponseTest {
     @Test
     fun `주문에 대한 변환 생성`() {
-        val order = OrderMock.orderQueryModel()
+        val order = OrderMock.view()
 
         val orderResponse = OrderResponse.from(order)
 

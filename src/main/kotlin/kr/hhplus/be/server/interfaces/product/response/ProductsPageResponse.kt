@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.product.response
 
-import kr.hhplus.be.server.domain.product.ProductQueryModel
+import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import org.springframework.data.domain.Page
 
@@ -12,7 +12,7 @@ class ProductsPageResponse(
 ) : ServerApiResponse {
     companion object {
         fun from(
-            products: Page<ProductQueryModel>,
+            products: Page<ProductView>,
         ) = ProductsPageResponse(
                 totalCount = products.totalElements,
                 page = products.number,

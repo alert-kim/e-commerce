@@ -58,8 +58,8 @@ class BalanceControllerTest {
 
     @Test
     fun `잔고 조회 - 200 OK`() {
-        val user = UserMock.queryModel()
-        val balance = BalanceMock.queryModel(userId = user.id)
+        val user = UserMock.view()
+        val balance = BalanceMock.view(userId = user.id)
         every { userFacade.get(user.id.value) } returns user
         every { balanceFacade.getOrNullByUerId(user.id) } returns balance
 
@@ -96,7 +96,7 @@ class BalanceControllerTest {
 
     @Test
     fun `잔고 조회 - 유저의 잔고가 없는 경우 잔고를 0으로 반환한다`() {
-        val user = UserMock.queryModel()
+        val user = UserMock.view()
         every { userFacade.get(user.id.value) } returns user
         every { balanceFacade.getOrNullByUerId(user.id) } returns null
 
@@ -119,7 +119,7 @@ class BalanceControllerTest {
         val userId = UserMock.id()
         val balanceId = BalanceMock.id()
         val request = ChargeApiRequest(userId = userId.value, amount = BigDecimal.valueOf(1_000))
-        val chargedBalance = BalanceMock.queryModel(userId = userId, amount = BigDecimal.valueOf(2_000))
+        val chargedBalance = BalanceMock.view(userId = userId, amount = BigDecimal.valueOf(2_000))
         every { balanceFacade.charge(ChargeBalanceFacadeCommand(userId = userId.value, amount = request.amount)) } returns chargedBalance
 
         mockMvc.post("/balances/charge") {

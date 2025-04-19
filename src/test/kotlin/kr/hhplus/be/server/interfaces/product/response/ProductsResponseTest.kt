@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.product.response
 
-import kr.hhplus.be.server.domain.product.PopularProductsQueryModel
+import kr.hhplus.be.server.domain.product.PopularProductsView
 import kr.hhplus.be.server.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test
 class ProductsResponseTest {
     @Test
     fun `상품 목록에 대한 응답 생성`() {
-        val products = List(3) { ProductMock.queryModel() }
+        val products = List(3) { ProductMock.view() }
 
-        val response = ProductsResponse.from(PopularProductsQueryModel(products))
+        val response = ProductsResponse.from(PopularProductsView(products))
 
         assertThat(response.products).hasSize(products.size)
         response.products.forEachIndexed { index, productResponse ->
@@ -25,7 +25,7 @@ class ProductsResponseTest {
 
     @Test
     fun `빈 리스트인 경우 빈 리스트 응답`() {
-        val response = ProductsResponse.from(PopularProductsQueryModel(emptyList()))
+        val response = ProductsResponse.from(PopularProductsView(emptyList()))
 
         assertThat(response.products).isEmpty()
     }

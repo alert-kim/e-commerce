@@ -6,9 +6,11 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
+import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
@@ -32,6 +34,28 @@ class CouponServiceTest {
     }
 
     @Test
+    fun `create - 쿠폰 생성`() {
+        val userId = UserMock.id()
+        val issuedCoupon = CouponMock.issuedCoupon()
+        val couponId = CouponMock.id()
+        every { repository.save(any()) } returns couponId
+
+        val result = service.create(CreateCouponCommand(userId, issuedCoupon))
+
+        assertThat(result.id).isEqualTo(couponId)
+        assertThat(result.userId).isEqualTo(userId)
+        assertThat(result.couponSourceId).isEqualTo(issuedCoupon.couponSourceId)
+        assertThat(result.name).isEqualTo(issuedCoupon.name)
+        assertThat(result.discountAmount).isEqualByComparingTo(issuedCoupon.discountAmount)
+        assertThat(result.createdAt).isEqualTo(issuedCoupon.createdAt)
+        verify {
+            repository.save(withArg {
+                assertThat(it.userId).isEqualTo(userId)
+            })
+        }
+    }
+
+    @Test
     fun `use - 쿠폰 사용`() {
         val couponId = CouponMock.id()
         val coupon = CouponMock.coupon(id = couponId, usedAt = null)
@@ -39,8 +63,8 @@ class CouponServiceTest {
 
         val result = service.use(UseCouponCommand(couponId.value, coupon.userId))
 
-        assertThat(result.coupon.id).isEqualTo(coupon.id)
-        assertThat(result.coupon.usedAt).isNotNull()
+        assertThat(result.id).isEqualTo(coupon.id)
+        assertThat(result.usedAt).isNotNull()
         verify {
             repository.findById(couponId.value)
             repository.save(withArg {

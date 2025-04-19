@@ -48,9 +48,9 @@ class BalanceServiceTest {
         val result = service.charge(command)
 
         assertAll(
-            { assertThat(result.balanceId).isEqualTo(newBalanceId) },
+            { assertThat(result).isEqualTo(newBalanceId) },
         )
-        assertThat(result.balanceId).isEqualTo(newBalanceId)
+        assertThat(result).isEqualTo(newBalanceId)
         verify {
             repository.save(withArg<Balance> {
                 assertThat(it.userId).isEqualTo(userId)
@@ -71,7 +71,7 @@ class BalanceServiceTest {
 
         val result = service.charge(command)
 
-        assertThat(result.balanceId).isEqualTo(existingBalance.id)
+        assertThat(result).isEqualTo(existingBalance.id)
         verify {
             repository.save(withArg<Balance> {
                 assertThat(it.id).isEqualTo(existingBalance.id)
@@ -106,7 +106,7 @@ class BalanceServiceTest {
 
         val result = service.use(command)
 
-        assertThat(result.amount).isEqualTo(UsedBalanceAmount(balanceId, BalanceAmount(useAmount)))
+        assertThat(result).isEqualTo(UsedBalanceAmount(balanceId, BalanceAmount(useAmount)))
         verify {
             repository.save(withArg<Balance> {
                 assertThat(it.id).isEqualTo(existingBalance.id)

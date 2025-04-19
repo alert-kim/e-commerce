@@ -9,12 +9,12 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
-import kr.hhplus.be.server.domain.order.event.OrderEventRepository
+import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
+import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertAll
@@ -186,7 +186,7 @@ class OrderServiceTest {
     fun `pay  - 결제`() {
         val orderId = OrderMock.id()
         val order = OrderMock.order(id = orderId)
-        val payment = PaymentMock.queryModel(
+        val payment = PaymentMock.view(
             orderId = orderId,
             amount = BigDecimal.ZERO,
         )
@@ -211,7 +211,7 @@ class OrderServiceTest {
     @Test
     fun `pay - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
         val orderId = OrderMock.id()
-        val payment = PaymentMock.queryModel(
+        val payment = PaymentMock.view(
             orderId = orderId,
             amount = BigDecimal.ZERO,
         )

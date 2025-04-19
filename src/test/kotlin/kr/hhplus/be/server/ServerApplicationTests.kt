@@ -2,15 +2,15 @@ package kr.hhplus.be.server
 
 import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceRepository
-import kr.hhplus.be.server.domain.coupon.CouponRepository
-import kr.hhplus.be.server.domain.coupon.CouponSourceRepository
-import kr.hhplus.be.server.domain.order.OrderRepository
+import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
+import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
+import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
-import kr.hhplus.be.server.domain.order.event.OrderEventRepository
+import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.payment.PaymentRepository
-import kr.hhplus.be.server.domain.product.ProductDailySaleRepository
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.domain.product.ProductRepository
-import kr.hhplus.be.server.domain.user.UserRepository
+import kr.hhplus.be.server.domain.user.repository.UserRepository
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean

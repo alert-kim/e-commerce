@@ -9,18 +9,13 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
-import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
-import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
-import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
+import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 class CouponSourceServiceTest {
@@ -45,7 +40,7 @@ class CouponSourceServiceTest {
 
         val result = service.issue(IssueCouponCommand(couponSourceId.value))
 
-        assertThat(result.coupon).isEqualTo(issuedCoupon)
+        assertThat(result).isEqualTo(issuedCoupon)
         verify {
             repository.findById(couponSourceId.value)
             repository.save(any())
@@ -73,7 +68,9 @@ class CouponSourceServiceTest {
 
         val result = service.getAllIssuable()
 
-        assertThat(result).isEqualTo(couponSources)
+        result.forEachIndexed { index, source ->
+            assertThat(source.id).isEqualTo(couponSources[index].id)
+        }
         verify {
             repository.findAllByStatus(withArg {
                 assertThat(it).isEqualTo(CouponSourceStatus.ACTIVE)

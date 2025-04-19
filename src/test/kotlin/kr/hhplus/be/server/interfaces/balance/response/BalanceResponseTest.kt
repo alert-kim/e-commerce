@@ -11,7 +11,7 @@ class BalanceResponseTest {
 
     @Test
     fun `잔액에 대한 응답 생성`() {
-        val balance = BalanceMock.queryModel()
+        val balance = BalanceMock.view()
 
         val response = BalanceResponse.of(balance.userId, balance)
 

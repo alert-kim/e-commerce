@@ -1,12 +1,11 @@
 package kr.hhplus.be.server.domain.order
 
-import kr.hhplus.be.server.domain.coupon.Coupon
 import kr.hhplus.be.server.domain.coupon.CouponId
-import kr.hhplus.be.server.domain.coupon.UsedCoupon
+import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
-import kr.hhplus.be.server.domain.product.ProductStockAllocated
+import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant

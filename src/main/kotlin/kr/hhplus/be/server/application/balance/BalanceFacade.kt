@@ -6,7 +6,7 @@ import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.BalanceTransactionType
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.command.CreateBalanceRecord
-import kr.hhplus.be.server.domain.balance.dto.BalanceQueryModel
+import kr.hhplus.be.server.domain.balance.BalanceView
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import org.springframework.stereotype.Service
@@ -17,14 +17,14 @@ class BalanceFacade(
     private val balanceRecordService: BalanceRecordService,
     private val userService: UserService,
 ) {
-    fun charge(command: ChargeBalanceFacadeCommand): BalanceQueryModel {
+    fun charge(command: ChargeBalanceFacadeCommand): BalanceView {
         val user = userService.get(command.userId)
         val balanceId = balanceService.charge(
             ChargeBalanceCommand(
-                userId = user.requireId(),
+                userId = user.id,
                 amount = command.amount,
             )
-        ).balanceId
+        )
         balanceRecordService.record(
             CreateBalanceRecord(
                 balanceId = balanceId,
@@ -32,9 +32,9 @@ class BalanceFacade(
                 type = BalanceTransactionType.CHARGE,
             )
         )
-        return balanceService.get(balanceId.value).let { BalanceQueryModel.from(it) }
+        return balanceService.get(balanceId.value).let { BalanceView.from(it) }
     }
 
-    fun getOrNullByUerId(userId: UserId): BalanceQueryModel? =
-        balanceService.getOrNullByUerId(userId)?.let { BalanceQueryModel.from(it) }
+    fun getOrNullByUerId(userId: UserId): BalanceView? =
+        balanceService.getOrNullByUerId(userId)
 }

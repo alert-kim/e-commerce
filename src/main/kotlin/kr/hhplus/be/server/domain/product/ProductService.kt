@@ -4,6 +4,7 @@ import kr.hhplus.be.server.domain.common.createPageRequest
 import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.domain.product.result.AllocatedStockResult
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
@@ -58,19 +59,20 @@ class ProductService(
         }
     }
 
-    fun getAllByStatusOnPaged(status: ProductStatus, page: Int, pageSize: Int): Page<Product> {
+    fun getAllByStatusOnPaged(status: ProductStatus, page: Int, pageSize: Int): Page<ProductView> {
         val pageable =
             createPageRequest(page = page, pageSize = pageSize, sort = Sort.by(Sort.Direction.DESC, "createdAt"))
         return repository.findAllByStatus(status, pageable)
+            .map { ProductView.from(it) }
     }
 
-    fun getPopularProducts(): PopularProducts {
+    fun getPopularProducts(): PopularProductsView {
         val popularProductIds = dailySaleRepository.findTopNProductsByQuantity(
             startDate = PopularProducts.getStartDay(),
             endDate = PopularProducts.getEndDay(),
             limit = PopularProducts.MAX_SIZE,
         ).map { it.productId.value }
         val products = repository.findAllByIds(popularProductIds)
-        return PopularProducts(products)
+        return PopularProductsView(products.map { ProductView.from(it) })
     }
 }

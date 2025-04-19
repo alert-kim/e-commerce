@@ -10,8 +10,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.PopularProductsQueryModel
-import kr.hhplus.be.server.domain.product.ProductQueryModel
+import kr.hhplus.be.server.domain.product.PopularProductsView
+import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.mock.ProductMock
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
@@ -55,7 +55,7 @@ class ProductControllerTest {
         val pageSize = 20
         val totalCount = 50L
         val products = List(pageSize) {
-            ProductMock.queryModel(
+            ProductMock.view(
                 name = "상품${it + 1}",
 
                 )
@@ -92,7 +92,7 @@ class ProductControllerTest {
         val page = 0
         val pageSize = 20
         val totalCount = 0L
-        val products = emptyList<ProductQueryModel>()
+        val products = emptyList<ProductView>()
         every { productFacade.getAllOnSalePaged(page, pageSize) } returns PageImpl(
             products,
             Pageable.unpaged(),
@@ -146,11 +146,11 @@ class ProductControllerTest {
     @Test
     fun `인기 상품 조회 - 200`() {
         val products = List(5) {
-            ProductMock.queryModel(
+            ProductMock.view(
                 name = "상품${it + 1}",
             )
         }
-        every { productFacade.getPopularProducts() } returns PopularProductsQueryModel(products)
+        every { productFacade.getPopularProducts() } returns PopularProductsView(products)
 
         mockMvc.get("/products/popular")
             .andExpect {

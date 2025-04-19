@@ -8,7 +8,7 @@ import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderId
-import kr.hhplus.be.server.domain.order.OrderQueryModel
+import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
@@ -36,13 +36,13 @@ class OrderFacade(
 ) {
     fun order(
         command: OrderFacadeCommand,
-    ): OrderQueryModel {
+    ): OrderView {
         val userId = verifyUser(command.userId)
         val orderId = createOrder(userId)
         placeProduct(orderId,command)
         applyCoupon(orderId, command)
         pay(orderId)
-        return orderService.get(orderId.value).let { OrderQueryModel.from(it) }
+        return orderService.get(orderId.value)
     }
 
     fun sendOrderCompletionData(
@@ -69,7 +69,7 @@ class OrderFacade(
     private fun verifyUser(
         userId: Long,
     ): UserId =
-        userService.get(userId).requireId()
+        userService.get(userId).id
 
     private fun placeProduct(
         orderId: OrderId,
@@ -100,7 +100,7 @@ class OrderFacade(
         if (command.couponId != null) {
             val usedCoupon = couponService.use(
                 UseCouponCommand(command.couponId, UserId(command.userId))
-            ).coupon
+            )
             orderService.applyCoupon(ApplyCouponCommand(orderId, usedCoupon))
         }
     }
@@ -115,15 +115,15 @@ class OrderFacade(
                 userId = order.userId,
                 amount = order.totalAmount,
             )
-        ).amount
+        )
 
         val payment = paymentService.pay(
             PayCommand(
                 userId = order.userId,
-                orderId = order.requireId(),
+                orderId = order.id,
                 amount = usedAmount,
             )
-        ).payment
+        )
 
         orderService.pay(PayOrderCommand(payment))
     }

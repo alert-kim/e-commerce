@@ -2,7 +2,7 @@ package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.user.User
 import kr.hhplus.be.server.domain.user.UserId
-import kr.hhplus.be.server.domain.user.dto.UserQueryModel
+import kr.hhplus.be.server.domain.user.UserView
 import java.time.Instant
 
 object UserMock {
@@ -19,11 +19,11 @@ object UserMock {
         createdAt = createdAt,
     )
 
-    fun queryModel(
+    fun view(
         id: UserId = id(),
         name: String = "홍길동",
         createdAt: Instant = Instant.now(),
-    ): UserQueryModel = UserQueryModel(
+    ): UserView = UserView(
         id = id,
         name = name,
         createdAt = createdAt,

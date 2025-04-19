@@ -12,6 +12,7 @@ import kr.hhplus.be.server.application.product.command.AggregateProductDailySale
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
+import kr.hhplus.be.server.domain.product.PopularProducts
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
 import kr.hhplus.be.server.util.TimeZone
@@ -123,7 +124,7 @@ class ProductFacadeTest {
         val pageSize = 10
         val pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
         val products = List(pageSize) {
-            ProductMock.product()
+            ProductMock.view()
         }
         val totalCount = products.size * 2L
         val productPage = PageImpl(products, pageable, totalCount)
@@ -146,7 +147,7 @@ class ProductFacadeTest {
             assertThat(productQueryModel.name).isEqualTo(products[index].name)
             assertThat(productQueryModel.description).isEqualTo(products[index].description)
             assertThat(productQueryModel.price).isEqualByComparingTo(products[index].price)
-            assertThat(productQueryModel.stock).isEqualByComparingTo(products[index].stock.quantity)
+            assertThat(productQueryModel.stock).isEqualByComparingTo(products[index].stock)
             assertThat(productQueryModel.createdAt).isEqualTo(products[index].createdAt)
         }
         verify {
@@ -158,7 +159,7 @@ class ProductFacadeTest {
     fun `getAllOnSalePaged - 판매 중인 상품이 없는 경우 빈 페이지 반환`() {
         val page = 0
         val pageSize = 10
-        val productPage = PageImpl(emptyList<Product>())
+        val productPage = PageImpl(emptyList<ProductView>())
         every { service.getAllByStatusOnPaged(ProductStatus.ON_SALE, any(), any()) } returns productPage
 
         val result = facade.getAllOnSalePaged(page, pageSize)
@@ -179,40 +180,5 @@ class ProductFacadeTest {
         shouldThrow<InvalidPageRequestArgumentException> {
             facade.getAllOnSalePaged(page, pageSize)
         }
-    }
-
-    @Test
-    fun `getPopularProducts - 인기 상품 반환`() {
-        val products = List(5) {
-            ProductMock.product()
-        }
-        every {
-            service.getPopularProducts()
-        } returns PopularProducts(products)
-
-        val result = facade.getPopularProducts().products
-
-        assertThat(result).hasSize(products.size)
-        result.forEachIndexed { index, productQueryModel ->
-            assertThat(productQueryModel.id).isEqualTo(products[index].id)
-            assertThat(productQueryModel.status).isEqualTo(products[index].status)
-            assertThat(productQueryModel.name).isEqualTo(products[index].name)
-            assertThat(productQueryModel.description).isEqualTo(products[index].description)
-            assertThat(productQueryModel.price).isEqualByComparingTo(products[index].price)
-            assertThat(productQueryModel.stock).isEqualByComparingTo(products[index].stock.quantity)
-            assertThat(productQueryModel.createdAt).isEqualTo(products[index].createdAt)
-        }
-        verify {
-            service.getPopularProducts()
-        }
-    }
-
-    @Test
-    fun `getPopularProducts - 인기 상품이 없는 경우 빈 페이지 반환`() {
-        every { service.getPopularProducts() } returns PopularProducts(emptyList())
-
-        val result = facade.getPopularProducts()
-
-        assertThat(result.products).isEmpty()
     }
 }

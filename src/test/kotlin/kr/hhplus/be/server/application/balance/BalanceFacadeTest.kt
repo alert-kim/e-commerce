@@ -11,7 +11,6 @@ import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
-import kr.hhplus.be.server.domain.balance.result.ChargeBalanceResult
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.mock.BalanceMock
@@ -44,42 +43,12 @@ class BalanceFacadeTest {
     }
 
     @Test
-    fun `조회 - 유저 Id로 잔고를 조회해 반환한다`() {
-        val userId = UserMock.id()
-        val balance = BalanceMock.balance(userId = userId)
-        every { balanceService.getOrNullByUerId(userId) } returns balance
-
-        val result = facade.getOrNullByUerId(userId)
-
-        assertAll(
-            { assertThat(result).isNotNull() },
-            { assertThat(result?.id).isEqualTo(balance.id) },
-            { assertThat(result?.userId).isEqualTo(balance.userId) },
-            { assertThat(result?.amount).isEqualByComparingTo(balance.amount) },
-            { assertThat(result?.createdAt).isEqualTo(balance.createdAt) },
-            { assertThat(result?.updatedAt).isEqualTo(balance.updatedAt) }
-        )
-        verify { balanceService.getOrNullByUerId(userId) }
-    }
-
-    @Test
-    fun `조회 - 해당 유저의 잔고가 없는 경우, null이 반환된다`() {
-        val userId = UserMock.id()
-        every { balanceService.getOrNullByUerId(userId) } returns null
-
-        val result = facade.getOrNullByUerId(userId)
-
-        assertThat(result).isNull()
-        verify { balanceService.getOrNullByUerId(userId) }
-    }
-
-    @Test
     fun `충전 - 해당 잔고에 충전 후에 잔고를 반환한다`() {
         val userId = UserMock.id()
         val balanceId = BalanceMock.id()
         val command = ChargeBalanceFacadeCommand(amount = BigDecimal.valueOf(1_000), userId = userId.value)
         val chargedBalance = BalanceMock.balance(id = balanceId, userId = userId)
-        every { userService.get(userId.value) } returns UserMock.user(id = userId)
+        every { userService.get(userId.value) } returns UserMock.view(id = userId)
         every {
             balanceService.charge(
                 ChargeBalanceCommand(
@@ -87,7 +56,7 @@ class BalanceFacadeTest {
                     amount = command.amount,
                 )
             )
-        } returns ChargeBalanceResult(balanceId)
+        } returns balanceId
         every { balanceService.get(balanceId.value) } returns chargedBalance
 
         val result = facade.charge(command)
@@ -130,7 +99,7 @@ class BalanceFacadeTest {
     fun `충전 - 잔고 충전에 실패할 경우(잔고 초과) 발생한 예외를 던지며, 충전을 하지 않고, 기록도 남기지 않는다`() {
         val userId = UserMock.id()
         val command = ChargeBalanceFacadeCommand(amount = BigDecimal.valueOf(1_000), userId = userId.value)
-        every { userService.get(userId.value) } returns UserMock.user(id = userId)
+        every { userService.get(userId.value) } returns UserMock.view(id = userId)
         every { balanceService.charge(ChargeBalanceCommand(userId, command.amount)) } throws ExceedMaxBalanceAmountException(command.amount)
 
         assertThrows<ExceedMaxBalanceAmountException> {

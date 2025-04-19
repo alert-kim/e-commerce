@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.order.event
 
 import kr.hhplus.be.server.domain.order.OrderId
-import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
+import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderEventIdException
 import java.time.Instant
 

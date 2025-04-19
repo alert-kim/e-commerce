@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.product.*
+import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -51,7 +52,7 @@ object ProductMock {
         updatedAt = updatedAt,
     )
 
-    fun queryModel(
+    fun view(
         id: ProductId = id(),
         name: String = "상품명",
         description: String = "상품 설명",
@@ -59,7 +60,7 @@ object ProductMock {
         stock: Long = 10,
         status: ProductStatus = ProductStatus.ON_SALE,
         createdAt: Instant = Instant.now(),
-    ) = ProductQueryModel(
+    ) = ProductView(
         id = id,
         name = name,
         description = description,

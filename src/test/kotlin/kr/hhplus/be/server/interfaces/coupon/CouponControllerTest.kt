@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kr.hhplus.be.server.application.coupon.CouponFacade
 import kr.hhplus.be.server.application.coupon.command.IssueCouponFacadeCommand
-import kr.hhplus.be.server.domain.coupon.CouponSourceQueryModel
+import kr.hhplus.be.server.domain.coupon.CouponSourceView
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
@@ -55,7 +55,7 @@ class CouponControllerTest {
     @Test
     fun `발급 가능 쿠폰 목록 조회 - 200`() {
         val coupons = List(3) {
-            CouponMock.sourceQueryModel(
+            CouponMock.sourceView(
                 name = "상품${it + 1}",
             )
         }
@@ -78,7 +78,7 @@ class CouponControllerTest {
 
     @Test
     fun `발급 가능 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
-        val coupons = emptyList<CouponSourceQueryModel>()
+        val coupons = emptyList<CouponSourceView>()
         every { couponFacade.getAllSourcesIssuable() } returns coupons
 
         mockMvc.get("/couponSources")
@@ -92,7 +92,7 @@ class CouponControllerTest {
     fun `내 쿠폰 목록 조회 - 200`() {
         val userId = UserMock.id()
         val coupons = List(3) {
-            CouponMock.couponQueryModel(userId = userId)
+            CouponMock.view(userId = userId)
         }
         every { couponFacade.getCoupons(userId.value) } returns coupons
 
@@ -156,7 +156,7 @@ class CouponControllerTest {
     fun `쿠폰 발급 - 200`() {
         val couponSourceId = CouponMock.sourceId()
         val userId = UserMock.id()
-        val coupon = CouponMock.couponQueryModel()
+        val coupon = CouponMock.view()
         val request = IssueCouponRequest(
             couponSourceId = couponSourceId.value,
             userId = userId.value,

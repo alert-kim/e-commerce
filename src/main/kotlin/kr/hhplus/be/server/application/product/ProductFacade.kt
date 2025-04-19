@@ -32,17 +32,8 @@ class ProductFacade(
         )
     }
 
-    fun getAllOnSalePaged(page: Int, pageSize: Int): Page<ProductQueryModel> {
-        val products = service.getAllByStatusOnPaged(status = ProductStatus.ON_SALE, page = page, pageSize = pageSize)
-        return products.map { product ->
-            ProductQueryModel.from(product)
-        }
-    }
+    fun getAllOnSalePaged(page: Int, pageSize: Int): Page<ProductView> =
+         service.getAllByStatusOnPaged(status = ProductStatus.ON_SALE, page = page, pageSize = pageSize)
 
-    fun getPopularProducts(): PopularProductsQueryModel =
-        PopularProductsQueryModel(
-            products = service.getPopularProducts().products.map { product ->
-                ProductQueryModel.from(product)
-            }
-        )
+    fun getPopularProducts(): PopularProductsView = service.getPopularProducts()
 }

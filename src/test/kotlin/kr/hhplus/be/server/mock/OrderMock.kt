@@ -2,7 +2,7 @@ package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
-import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
+import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
 import kr.hhplus.be.server.domain.order.event.OrderEventId
@@ -15,7 +15,7 @@ import java.time.Instant
 object OrderMock {
     fun id(): OrderId = OrderId(IdMock.value())
 
-    fun orderProduct(
+    fun product(
         orderId: OrderId = id(),
         productId: Long = IdMock.value(),
         quantity: Int = 1,
@@ -39,7 +39,7 @@ object OrderMock {
         originalAmount: BigDecimal = BigDecimal.valueOf(2_000),
         discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
         totalAmount: BigDecimal = BigDecimal.valueOf(1_000),
-        products: List<OrderProduct> = listOf(orderProduct()),
+        products: List<OrderProduct> = listOf(product()),
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = Order(
@@ -55,14 +55,14 @@ object OrderMock {
         updatedAt = updatedAt,
     )
 
-    fun orderProductQueryModel(
+    fun productView(
         orderId: OrderId = id(),
         productId: Long = IdMock.value(),
         quantity: Int = 1,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
-    ): OrderProductQueryModel = OrderProductQueryModel(
+    ): OrderProductView = OrderProductView(
         orderId = orderId,
         productId = ProductId(productId),
         quantity = quantity,
@@ -71,7 +71,7 @@ object OrderMock {
         createdAt = createdAt,
     )
 
-    fun orderQueryModel(
+    fun view(
         id: OrderId = id(),
         userId: UserId = UserMock.id(),
         status: OrderStatus = OrderStatus.STOCK_ALLOCATED,
@@ -79,10 +79,10 @@ object OrderMock {
         originalAmount: BigDecimal = BigDecimal.valueOf(2_000),
         discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
         totalAmount: BigDecimal = BigDecimal.valueOf(1_000),
-        products: List<OrderProductQueryModel> = listOf(orderProductQueryModel()),
+        products: List<OrderProductView> = listOf(productView()),
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
-    ) = OrderQueryModel(
+    ) = OrderView(
         id = id,
         userId = userId,
         status = status,

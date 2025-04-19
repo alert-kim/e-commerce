@@ -15,7 +15,7 @@ class PopularProductTest {
 
     @Test
     fun `인기 상품은 정해진 수보다 같거나 작아야 한다`() {
-        val size = Arb.int(0.. PopularProducts.MAX_SIZE).next()
+        val size = Arb.int(0..PopularProducts.MAX_SIZE).next()
         val porducts = List(size) {
             ProductMock.product()
         }

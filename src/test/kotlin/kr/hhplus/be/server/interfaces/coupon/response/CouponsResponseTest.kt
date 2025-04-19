@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.coupon.response
 
-import kr.hhplus.be.server.domain.coupon.CouponQueryModel
+import kr.hhplus.be.server.domain.coupon.CouponView
 import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 class CouponsResponseTest {
     @Test
     fun `내 쿠폰 목록에 대한 응답 생성`() {
-        val coupons = List(3) { CouponMock.couponQueryModel() }
+        val coupons = List(3) { CouponMock.view() }
 
         val response = CouponsResponse.from(coupons)
 
@@ -27,7 +27,7 @@ class CouponsResponseTest {
 
     @Test
     fun `빈 리스트인 경우 빈 리스트 응답`() {
-        val coupons = emptyList<CouponQueryModel>()
+        val coupons = emptyList<CouponView>()
 
         val response = CouponsResponse.from(coupons)
 

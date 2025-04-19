@@ -1,9 +1,10 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.*
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
+import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
+import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -31,7 +32,7 @@ class OrderService(
     fun placeStock(
         command: PlaceStockCommand,
     ) {
-        val order = get(command.orderId.value)
+        val order = doGet(command.orderId.value)
 
         order.placeStock(
             stocks = command.stocks,
@@ -42,7 +43,7 @@ class OrderService(
     fun applyCoupon(
         command: ApplyCouponCommand,
     ) {
-        val order = get(command.orderId.value)
+        val order = doGet(command.orderId.value)
 
         order.applyCoupon(command.usedCoupon)
 
@@ -53,7 +54,7 @@ class OrderService(
         command: PayOrderCommand,
     ) {
         val payment = command.payment
-        val order = get(payment.orderId.value)
+        val order = doGet(payment.orderId.value)
 
         order.pay()
         val orderId = repository.save(order)
@@ -77,29 +78,32 @@ class OrderService(
         command: ConsumeOrderEventCommand,
     ) {
         val offset = eventConsumerOffsetRepository.find(command.consumerId, command.event.type)
-        when(offset) {
-            null -> eventConsumerOffsetRepository.save(OrderEventConsumerOffset(
-                consumerId = command.consumerId,
-                value = command.event.requireId(),
-                eventType = command.event.type,
-                createdAt = Instant.now(),
-                updatedAt = Instant.now(),
-            ))
-            else -> eventConsumerOffsetRepository.update(OrderEventConsumerOffset(
-                consumerId = command.consumerId,
-                value = command.event.requireId(),
-                eventType = command.event.type,
-                createdAt = offset.createdAt,
-                updatedAt = command.event.createdAt,
-            ))
+        when (offset) {
+            null -> eventConsumerOffsetRepository.save(
+                OrderEventConsumerOffset(
+                    consumerId = command.consumerId,
+                    value = command.event.requireId(),
+                    eventType = command.event.type,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                )
+            )
+
+            else -> eventConsumerOffsetRepository.update(
+                OrderEventConsumerOffset(
+                    consumerId = command.consumerId,
+                    value = command.event.requireId(),
+                    eventType = command.event.type,
+                    createdAt = offset.createdAt,
+                    updatedAt = command.event.createdAt,
+                )
+            )
         }
     }
 
     fun get(
         id: Long,
-    ): Order =
-        repository.findById(id)
-            ?: throw NotFoundOrderException("by id: $id")
+    ): OrderView = OrderView.from(doGet(id))
 
     fun getAllEventsNotConsumedInOrder(
         consumerId: String,
@@ -109,11 +113,17 @@ class OrderService(
             consumerId = consumerId,
             eventType = eventType,
         )
-        return when(offset) {
+        return when (offset) {
             null -> eventRepository.findAllOrderByIdAsc()
             else -> eventRepository.findAllByIdGreaterThanOrderByIdAsc(
                 id = offset.value,
             )
         }
     }
+
+    private fun doGet(
+        id: Long,
+    ): Order =
+        repository.findById(id)
+            ?: throw NotFoundOrderException("by id: $id")
 }

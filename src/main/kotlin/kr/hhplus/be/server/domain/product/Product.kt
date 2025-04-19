@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.product
 
 import kr.hhplus.be.server.domain.product.excpetion.RequiredProductIdException
+import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import java.math.BigDecimal
 import java.time.Instant
 

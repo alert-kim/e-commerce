@@ -10,12 +10,9 @@ import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
-import kr.hhplus.be.server.domain.balance.result.UseBalanceResult
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
-import kr.hhplus.be.server.domain.coupon.result.CouponUsedResult
-import kr.hhplus.be.server.domain.order.OrderQueryModel
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
@@ -24,10 +21,9 @@ import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
-import kr.hhplus.be.server.domain.payment.result.PayResult
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductService
-import kr.hhplus.be.server.domain.product.ProductStockAllocated
+import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.product.result.AllocatedStockResult
 import kr.hhplus.be.server.domain.user.UserId
@@ -69,7 +65,7 @@ class OrderFacadeTest {
         val usedCoupon = CouponMock.usedCoupon(id = couponId)
         val command = orderFacadeCommand(couponId = couponId.value)
         val userId = UserId(command.userId)
-        val user = UserMock.user(id = userId)
+        val user = UserMock.view(id = userId)
         val orderId = OrderMock.id()
         val stockAllocated = command.orderProducts.map {
             ProductStockAllocated(
@@ -82,28 +78,26 @@ class OrderFacadeTest {
             balanceId = BalanceMock.id(),
             amount = BalanceAmount(command.totalAmount),
         )
-        val payment = PaymentMock.queryModel(
+        val payment = PaymentMock.view(
             orderId = orderId,
             userId = userId,
             amount = command.totalAmount,
             createdAt = Instant.now()
         )
-        val order = OrderMock.order(id = orderId, userId = userId, couponId = couponId)
+        val order = OrderMock.view(id = orderId, userId = userId, couponId = couponId)
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns CreateOrderResult(orderId)
         every { productService.allocateStocks(any<AllocateStocksCommand>()) } returns AllocatedStockResult(
             stocks = stockAllocated,
         )
-        every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns CouponUsedResult(usedCoupon)
-        every { balanceService.use(any<UseBalanceCommand>()) } returns UseBalanceResult(usedAmount)
-        every { paymentService.pay(any<PayCommand>()) } returns PayResult(payment)
+        every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns usedCoupon
+        every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
+        every { paymentService.pay(any<PayCommand>()) } returns payment
         every { orderService.get(orderId.value) } returns order
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isEqualTo(
-            OrderQueryModel.from(order)
-        )
+        assertThat(result).isEqualTo(order)
         verifyOrder {
             userService.get(command.userId)
             orderService.createOrder(
@@ -166,7 +160,7 @@ class OrderFacadeTest {
     fun `order - 쿠폰이 없는 경우`() {
         val command = orderFacadeCommand(couponId = null)
         val userId = UserId(command.userId)
-        val user = UserMock.user(id = userId)
+        val user = UserMock.view(id = userId)
         val orderId = OrderMock.id()
         val stockAllocated = command.orderProducts.map {
             ProductStockAllocated(
@@ -179,26 +173,24 @@ class OrderFacadeTest {
             balanceId = BalanceMock.id(),
             amount = BalanceAmount(command.totalAmount),
         )
-        val payment = PaymentMock.queryModel(
+        val payment = PaymentMock.view(
             orderId = orderId,
             userId = userId,
             amount = command.totalAmount,
         )
-        val order = OrderMock.order(id = orderId, userId = userId, couponId = null)
+        val order = OrderMock.view(id = orderId, userId = userId, couponId = null)
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns CreateOrderResult(orderId)
         every { productService.allocateStocks(any<AllocateStocksCommand>()) } returns AllocatedStockResult(
             stocks = stockAllocated,
         )
-        every { balanceService.use(any<UseBalanceCommand>()) } returns UseBalanceResult(usedAmount)
-        every { paymentService.pay(any<PayCommand>()) } returns PayResult(payment)
+        every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
+        every { paymentService.pay(any<PayCommand>()) } returns payment
         every { orderService.get(orderId.value) } returns order
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isEqualTo(
-            OrderQueryModel.from(order)
-        )
+        assertThat(result).isEqualTo(order)
         verifyOrder {
             userService.get(command.userId)
             orderService.createOrder(

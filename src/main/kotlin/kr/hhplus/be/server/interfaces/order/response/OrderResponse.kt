@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.interfaces.order.response
 
-import kr.hhplus.be.server.domain.order.OrderProductQueryModel
-import kr.hhplus.be.server.domain.order.OrderQueryModel
+import kr.hhplus.be.server.domain.order.OrderProductView
+import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
@@ -26,7 +26,7 @@ data class OrderResponse(
     ) {
         companion object {
             fun from(
-                orderProduct: OrderProductQueryModel,
+                orderProduct: OrderProductView,
             ): OrderProductResponse =
                 with(orderProduct) {
                     OrderProductResponse(
@@ -41,7 +41,7 @@ data class OrderResponse(
 
     companion object {
         fun from(
-            order: OrderQueryModel,
+            order: OrderView,
         ): OrderResponse =
             with(order) {
                 OrderResponse(

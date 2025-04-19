@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.interfaces.product.response
 
-import kr.hhplus.be.server.domain.product.PopularProductsQueryModel
-import kr.hhplus.be.server.domain.product.ProductQueryModel
+import kr.hhplus.be.server.domain.product.PopularProductsView
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 
 class ProductsResponse(
@@ -9,7 +8,7 @@ class ProductsResponse(
 ) : ServerApiResponse {
     companion object {
         fun from(
-            popularProducts: PopularProductsQueryModel
+            popularProducts: PopularProductsView
         ) = ProductsResponse(
             products = popularProducts.products.map { product ->
                 ProductResponse.from(product)

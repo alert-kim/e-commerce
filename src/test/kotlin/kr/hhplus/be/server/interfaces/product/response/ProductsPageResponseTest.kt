@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.product.response
 
-import kr.hhplus.be.server.domain.product.ProductQueryModel
+import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort
 class ProductsPageResponseTest {
     @Test
     fun `상품 목록에 대한 응답 생성`() {
-        val products = List(3) { ProductMock.queryModel() }
+        val products = List(3) { ProductMock.view() }
         val pageNumber = 0
         val pageSize = 10
         val pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
@@ -36,7 +36,7 @@ class ProductsPageResponseTest {
 
     @Test
     fun `빈 리스트인 경우 빈 리스트 응답`() {
-        val products = emptyList<ProductQueryModel>()
+        val products = emptyList<ProductView>()
         val pageNumber = 0
         val pageSize = 10
         val pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))

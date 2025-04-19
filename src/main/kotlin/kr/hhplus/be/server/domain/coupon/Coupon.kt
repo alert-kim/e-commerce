@@ -3,6 +3,7 @@ package kr.hhplus.be.server.domain.coupon
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
+import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant

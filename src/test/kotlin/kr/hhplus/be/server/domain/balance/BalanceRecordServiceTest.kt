@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.domain.balance.command.CreateBalanceRecord
+import kr.hhplus.be.server.domain.balance.repository.BalanceRecordRepository
 import kr.hhplus.be.server.mock.BalanceMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

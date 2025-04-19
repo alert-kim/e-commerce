@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.balance
 
 import kr.hhplus.be.server.domain.balance.command.CreateBalanceRecord
+import kr.hhplus.be.server.domain.balance.repository.BalanceRecordRepository
 import org.springframework.stereotype.Service
 
 @Service

@@ -39,6 +39,9 @@ class PaymentServiceTest {
             ),
         )
 
+        assertThat(result.orderId).isEqualTo(orderId)
+        assertThat(result.userId).isEqualTo(userId)
+        assertThat(result.amount).isEqualByComparingTo(amount.value)
         verify {
             repository.save(
                 withArg {
