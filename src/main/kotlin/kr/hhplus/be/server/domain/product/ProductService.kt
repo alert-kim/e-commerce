@@ -64,6 +64,13 @@ class ProductService(
     }
 
     fun getPopularProducts(): List<Product> {
-        TODO()
+        val popularProductIds = dailySaleRepository.findTopNProductsByQuantity(
+            startDate = PopularProducts.getStartDay(),
+            endDate = PopularProducts.getEndDay(),
+            limit = PopularProducts.MAX_SIZE,
+        ).map { it.productId.value }
+        println("popularProductIds: ${popularProductIds.size}")
+        val products = repository.findAllByIds(popularProductIds)
+        return PopularProducts(products).products
     }
 }

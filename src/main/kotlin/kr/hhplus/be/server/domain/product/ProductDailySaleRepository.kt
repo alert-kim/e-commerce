@@ -8,6 +8,12 @@ interface ProductDailySaleRepository {
         date: LocalDate,
     ): ProductDailySale?
 
+    fun findTopNProductsByQuantity(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        limit: Int,
+    ): List<ProductDailySale>
+
     fun save(sale: ProductDailySale)
 
     fun update(sale: ProductDailySale)

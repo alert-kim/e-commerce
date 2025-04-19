@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.domain.product
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.next
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -247,6 +250,28 @@ class ProductServiceTest {
                 assertThat(it.date).isEqualTo(date)
                 assertThat(it.quantity).isEqualTo(newSaleQuantity)
             })
+        }
+    }
+
+    @Test
+    fun `getPopularProducts - 인기 상품 조회`() {
+        val products = List(Arb.int(1..PopularProducts.MAX_SIZE).next()) {
+            ProductMock.product()
+        }
+        val sales = products.map { ProductMock.dailySale(productId = it.requireId()) }
+        val productsIds = products.map { it.requireId().value }
+        every { saleRepository.findTopNProductsByQuantity(
+            startDate = PopularProducts.getStartDay(),
+            endDate = PopularProducts.getEndDay(),
+            limit = PopularProducts.MAX_SIZE,
+        ) } returns sales
+        every { repository.findAllByIds(productsIds) } returns products
+
+        val result = service.getPopularProducts()
+
+        assertThat(result).hasSize(products.size)
+        result.forEachIndexed { index, product ->
+            assertThat(product.id).isEqualTo(products[index].id)
         }
     }
 }
