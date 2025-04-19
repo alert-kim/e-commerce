@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.payment
 
+import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.payment.exception.RequiredPaymentIdException
 import kr.hhplus.be.server.domain.user.UserId
@@ -20,12 +21,12 @@ class Payment(
         fun new(
             userId: UserId,
             orderId: OrderId,
-            amount: BigDecimal,
+            amount: UsedBalanceAmount,
         ): Payment =
             Payment(
                 userId = userId,
                 orderId = orderId,
-                amount = amount,
+                amount = amount.value,
                 createdAt = Instant.now(),
             )
     }

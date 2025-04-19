@@ -61,9 +61,13 @@ class CouponTest {
     fun `use - 쿠폰 사용`() {
         val coupon = CouponMock.coupon(usedAt = null)
 
-        coupon.use(coupon.userId)
+        val usedCoupon = coupon.use(coupon.userId)
 
         assertThat(coupon.usedAt).isNotNull
+        assertThat(usedCoupon.id).isEqualTo(coupon.id)
+        assertThat(usedCoupon.userId).isEqualTo(coupon.userId)
+        assertThat(usedCoupon.discountAmount).isEqualByComparingTo(coupon.discountAmount)
+        assertThat(usedCoupon.usedAt).isEqualTo(coupon.usedAt)
     }
 
     @Test

@@ -118,12 +118,12 @@ class OrderTest {
             updatedAt = updatedAt,
         )
         val couponId = CouponMock.id()
-        val coupon = CouponMock.coupon(
+        val usedCoupon = CouponMock.usedCoupon(
             id = couponId,
             discountAmount = discountAmount,
         )
 
-        order.applyCoupon(coupon)
+        order.applyCoupon(usedCoupon)
 
         assertAll(
             { assertThat(order.couponId).isEqualTo(couponId) },
@@ -138,7 +138,7 @@ class OrderTest {
     @Test
     fun `applyCoupon - 같은 쿠폰이 적용되어 있으면 업데이트 되지 않는다`() {
         val couponId = CouponId(1L)
-        val coupon = CouponMock.coupon(
+        val usedCoupon = CouponMock.usedCoupon(
             id = couponId,
         )
         val updatedAt = Instant.now()
@@ -148,7 +148,7 @@ class OrderTest {
             updatedAt = updatedAt,
         )
 
-        order.applyCoupon(coupon)
+        order.applyCoupon(usedCoupon)
 
         assertAll(
             { assertThat(order.couponId).isEqualTo(couponId) },
@@ -160,7 +160,7 @@ class OrderTest {
     @Test
     fun `applyCoupon - 다른 쿠폰이 적용되어 있으면 AlreadyCouponAppliedException 발생`() {
         val couponId = CouponId(2L)
-        val coupon = CouponMock.coupon(
+        val usedCoupon = CouponMock.usedCoupon(
             id = couponId,
         )
         val order = OrderMock.order(
@@ -169,13 +169,13 @@ class OrderTest {
         )
 
         shouldThrow<AlreadyCouponAppliedException> {
-            order.applyCoupon(coupon)
+            order.applyCoupon(usedCoupon)
         }
     }
 
     @Test
     fun `applyCoupon - 주문 상태가 STOCK_ALLOCATED가 아니면 InvalidOrderStatusException 발생`() {
-        val coupon = CouponMock.coupon(
+        val usedCoupon = CouponMock.usedCoupon(
             id = CouponMock.id(),
         )
         val order = OrderMock.order(
@@ -183,7 +183,7 @@ class OrderTest {
         )
 
         assertThrows<InvalidOrderStatusException> {
-            order.applyCoupon(coupon)
+            order.applyCoupon(usedCoupon)
         }
     }
 

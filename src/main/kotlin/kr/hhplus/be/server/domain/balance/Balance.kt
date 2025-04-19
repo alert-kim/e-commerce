@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.balance
 
 import kr.hhplus.be.server.domain.balance.exception.RequiredBalanceIdException
+import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -28,9 +29,13 @@ class Balance (
         this.updatedAt = Instant.now()
     }
 
-    fun use(amount: BalanceAmount) {
+    fun use(amount: BalanceAmount): UsedBalanceAmount  {
         this._amount = this._amount.minus(amount)
         this.updatedAt = Instant.now()
+        return UsedBalanceAmount(
+            balanceId = requireId(),
+            amount = amount,
+        )
     }
 
     fun requireId(): BalanceId =

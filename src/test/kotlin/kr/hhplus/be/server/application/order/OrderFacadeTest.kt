@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.order
+package kr.hhplus.be.server.application.order
 
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -6,13 +6,17 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import io.mockk.verifyOrder
-import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
+import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
+import kr.hhplus.be.server.domain.balance.result.UseBalanceResult
+import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.coupon.result.CouponUsedResult
+import kr.hhplus.be.server.domain.order.OrderQueryModel
+import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
@@ -28,10 +32,7 @@ import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.product.result.AllocatedStockResult
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.mock.PaymentMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -65,7 +66,7 @@ class OrderFacadeTest {
     @Test
     fun `order - 쿠폰이 있는 경우`() {
         val couponId = CouponMock.id()
-        val coupon = CouponMock.coupon(id = couponId)
+        val usedCoupon = CouponMock.usedCoupon(id = couponId)
         val command = orderFacadeCommand(couponId = couponId.value)
         val userId = UserId(command.userId)
         val user = UserMock.user(id = userId)
@@ -77,20 +78,24 @@ class OrderFacadeTest {
                 unitPrice = it.unitPrice
             )
         }
-        val payment = PaymentMock.payment(
+        val usedAmount = UsedBalanceAmount(
+            balanceId = BalanceMock.id(),
+            amount = BalanceAmount(command.totalAmount),
+        )
+        val payment = PaymentMock.queryModel(
             orderId = orderId,
             userId = userId,
             amount = command.totalAmount,
             createdAt = Instant.now()
         )
         val order = OrderMock.order(id = orderId, userId = userId, couponId = couponId)
-        val orderSheet = createOrderSheet(orderId, command)
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns CreateOrderResult(orderId)
         every { productService.allocateStocks(any<AllocateStocksCommand>()) } returns AllocatedStockResult(
             stocks = stockAllocated,
         )
-        every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns CouponUsedResult(coupon)
+        every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns CouponUsedResult(usedCoupon)
+        every { balanceService.use(any<UseBalanceCommand>()) } returns UseBalanceResult(usedAmount)
         every { paymentService.pay(any<PayCommand>()) } returns PayResult(payment)
         every { orderService.get(orderId.value) } returns order
 
@@ -131,7 +136,7 @@ class OrderFacadeTest {
             orderService.applyCoupon(
                 ApplyCouponCommand(
                     orderId = orderId,
-                    coupon = coupon,
+                    usedCoupon = usedCoupon,
                 )
             )
             orderService.get(orderId.value)
@@ -145,7 +150,7 @@ class OrderFacadeTest {
                 PayCommand(
                     userId = userId,
                     orderId = orderId,
-                    amount = order.totalAmount
+                    amount = usedAmount,
                 )
             )
             orderService.pay(
@@ -170,7 +175,11 @@ class OrderFacadeTest {
                 unitPrice = it.unitPrice
             )
         }
-        val payment = PaymentMock.payment(
+        val usedAmount = UsedBalanceAmount(
+            balanceId = BalanceMock.id(),
+            amount = BalanceAmount(command.totalAmount),
+        )
+        val payment = PaymentMock.queryModel(
             orderId = orderId,
             userId = userId,
             amount = command.totalAmount,
@@ -181,6 +190,7 @@ class OrderFacadeTest {
         every { productService.allocateStocks(any<AllocateStocksCommand>()) } returns AllocatedStockResult(
             stocks = stockAllocated,
         )
+        every { balanceService.use(any<UseBalanceCommand>()) } returns UseBalanceResult(usedAmount)
         every { paymentService.pay(any<PayCommand>()) } returns PayResult(payment)
         every { orderService.get(orderId.value) } returns order
 
@@ -223,7 +233,7 @@ class OrderFacadeTest {
                 PayCommand(
                     userId = userId,
                     orderId = orderId,
-                    amount = order.totalAmount
+                    amount = usedAmount,
                 )
             )
             orderService.pay(
@@ -262,26 +272,5 @@ class OrderFacadeTest {
             originalAmount = BigDecimal.valueOf(50_000),
             discountAmount = BigDecimal.valueOf(10_000),
             totalAmount = BigDecimal.valueOf(60_000)
-        )
-
-    private fun createOrderSheet(
-        orderId: OrderId,
-        command: OrderFacadeCommand
-    ): OrderSheet =
-        OrderSheet(
-            orderId = orderId,
-            userId = UserId(command.userId),
-            orderProducts = command.orderProducts.map {
-                OrderSheet.OrderProduct(
-                    productId = it.productId,
-                    quantity = it.quantity,
-                    unitPrice = it.unitPrice,
-                    totalPrice = it.totalPrice
-                )
-            },
-            couponId = command.couponId,
-            originalAmount = command.originalAmount,
-            discountAmount = command.discountAmount,
-            totalAmount = command.totalAmount
         )
 }

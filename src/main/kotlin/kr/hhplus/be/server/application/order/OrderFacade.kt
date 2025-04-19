@@ -10,7 +10,6 @@ import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderQueryModel
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.OrderSheet
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
@@ -40,9 +39,9 @@ class OrderFacade(
     ): OrderQueryModel {
         val userId = verifyUser(command.userId)
         val orderId = createOrder(userId)
-        val orderSheet = createOrderSheet(orderId, userId, command)
-        placeProduct(orderSheet)
-        pay(orderSheet)
+        placeProduct(orderId,command)
+        applyCoupon(orderId, command)
+        pay(orderId)
         return orderService.get(orderId.value).let { OrderQueryModel.from(it) }
     }
 
@@ -73,11 +72,12 @@ class OrderFacade(
         userService.get(userId).requireId()
 
     private fun placeProduct(
-        sheet: OrderSheet,
+        orderId: OrderId,
+        command: OrderFacadeCommand,
     ) {
         val allocated = productService.allocateStocks(
             AllocateStocksCommand(
-                needStocks = sheet.orderProducts.map {
+                needStocks = command.orderProducts.map {
                     AllocateStocksCommand.NeedStock(
                         productId = it.productId,
                         quantity = it.quantity,
@@ -87,33 +87,41 @@ class OrderFacade(
         )
         orderService.placeStock(
             PlaceStockCommand(
-                orderId = sheet.orderId,
+                orderId = orderId,
                 stocks = allocated.stocks,
             )
         )
     }
 
-    private fun pay(
-        orderSheet: OrderSheet,
+    private fun applyCoupon(
+        orderId: OrderId,
+        command: OrderFacadeCommand,
     ) {
-        if (orderSheet.couponId != null) {
-            val coupon = couponService.use(UseCouponCommand(orderSheet.couponId, orderSheet.userId))
-            orderService.applyCoupon(ApplyCouponCommand(orderSheet.orderId, coupon.value))
+        if (command.couponId != null) {
+            val usedCoupon = couponService.use(
+                UseCouponCommand(command.couponId, UserId(command.userId))
+            ).coupon
+            orderService.applyCoupon(ApplyCouponCommand(orderId, usedCoupon))
         }
-        val order = orderService.get(orderSheet.orderId.value)
+    }
 
-        balanceService.use(
+    private fun pay(
+        orderId: OrderId,
+    ) {
+        val order = orderService.get(orderId.value)
+
+        val usedAmount = balanceService.use(
             UseBalanceCommand(
                 userId = order.userId,
                 amount = order.totalAmount,
             )
-        )
+        ).amount
 
         val payment = paymentService.pay(
             PayCommand(
                 userId = order.userId,
                 orderId = order.requireId(),
-                amount = order.totalAmount,
+                amount = usedAmount,
             )
         ).payment
 
@@ -128,28 +136,4 @@ class OrderFacade(
                 userId = userId,
             ),
         ).orderId
-
-    private fun createOrderSheet(
-        orderId: OrderId,
-        userId: UserId,
-        command: OrderFacadeCommand,
-    ): OrderSheet =
-        with(command) {
-            OrderSheet(
-                orderId = orderId,
-                userId = userId,
-                orderProducts = orderProducts.map {
-                    OrderSheet.OrderProduct(
-                        productId = it.productId,
-                        quantity = it.quantity,
-                        unitPrice = it.unitPrice,
-                        totalPrice = it.totalPrice,
-                    )
-                },
-                couponId = couponId,
-                originalAmount = originalAmount,
-                discountAmount = discountAmount,
-                totalAmount = totalAmount,
-            )
-        }
 }

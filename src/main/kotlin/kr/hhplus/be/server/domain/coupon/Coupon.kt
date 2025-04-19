@@ -6,7 +6,6 @@ import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
-import kotlin.math.min
 
 class Coupon(
     val id: CouponId?,
@@ -27,14 +26,21 @@ class Coupon(
     fun requireId(): CouponId =
         id ?: throw RequiredCouponIdException()
 
-    fun use(userId: UserId) {
+    fun use(userId: UserId): UsedCoupon {
         if (this.userId != userId) {
             throw NotOwnedCouponException(id = requireId(), ownerId = this.userId, userId = userId)
         }
         if (usedAt != null) {
             throw AlreadyUsedCouponException(id = requireId())
         }
-        usedAt = Instant.now()
+        val usedAt = Instant.now()
+        this.usedAt = usedAt
+        return UsedCoupon(
+            id = requireId(),
+            userId = userId,
+            discountAmount = discountAmount,
+            usedAt = usedAt,
+        )
     }
 
     fun calculateDiscountAmount(totalAmount: BigDecimal): BigDecimal =

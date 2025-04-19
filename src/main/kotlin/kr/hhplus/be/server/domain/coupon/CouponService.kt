@@ -29,12 +29,10 @@ class CouponService(
         val coupon = repository.findById(command.couponId)
             ?: throw NotFoundCouponException("by id: ${command.couponId}")
 
-        coupon.use(command.userId)
+        val usedCoupon = coupon.use(command.userId)
         repository.save(coupon)
 
-        return CouponUsedResult(
-            value = coupon,
-        )
+        return CouponUsedResult(usedCoupon)
     }
 
     fun getAllUnused(userId: UserId): List<Coupon> =

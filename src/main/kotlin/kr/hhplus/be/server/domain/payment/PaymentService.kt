@@ -15,6 +15,6 @@ class PaymentService(
             amount = command.amount,
         )
         repository.save(payment)
-        return PayResult(payment)
+        return PayResult(PaymentQueryModel.from(payment))
     }
 }

@@ -3,6 +3,7 @@ package kr.hhplus.be.server.mock
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.payment.Payment
 import kr.hhplus.be.server.domain.payment.PaymentId
+import kr.hhplus.be.server.domain.payment.PaymentQueryModel
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -25,4 +26,19 @@ object PaymentMock {
             amount = amount,
             createdAt = createdAt,
         )
+
+    fun queryModel(
+        id: PaymentId = id(),
+        userId: UserId = UserMock.id(),
+        orderId: OrderId = OrderMock.id(),
+        amount: BigDecimal = BigDecimal.valueOf(1_000),
+        createdAt: Instant = Instant.now(),
+    ): PaymentQueryModel =
+        PaymentQueryModel(
+            id = id,
+            userId = userId,
+            orderId = orderId,
+            amount = amount.toString(),
+            createdAt = createdAt.toString(),
+    )
 }

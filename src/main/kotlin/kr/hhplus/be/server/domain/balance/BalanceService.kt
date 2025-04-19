@@ -4,6 +4,8 @@ import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
 import kr.hhplus.be.server.domain.balance.result.ChargeBalanceResult
+import kr.hhplus.be.server.domain.balance.result.UseBalanceResult
+import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.user.UserId
 import org.springframework.stereotype.Service
 
@@ -35,11 +37,12 @@ class BalanceService(
         )
     }
 
-    fun use(command: UseBalanceCommand) {
+    fun use(command: UseBalanceCommand): UseBalanceResult {
         val balance = repository.findByUserId(command.userId)
             ?: throw NotFoundBalanceException("by userId: ${command.userId}")
 
-        balance.use(BalanceAmount(command.amount))
+        val usedAmount = balance.use(BalanceAmount(command.amount))
         repository.save(balance)
+        return UseBalanceResult(usedAmount)
     }
 }

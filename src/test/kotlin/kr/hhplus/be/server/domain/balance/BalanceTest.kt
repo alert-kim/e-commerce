@@ -58,8 +58,10 @@ class BalanceTest {
         val balance = BalanceMock.balance(amount = initialAmount)
         val useAmount = BigDecimal.valueOf(500)
 
-        balance.use(BalanceAmount(useAmount))
+        val result = balance.use(BalanceAmount(useAmount))
 
+        assertThat(result.balanceId).isEqualTo(balance.id)
+        assertThat(result.amount.value).isEqualByComparingTo(useAmount)
         assertThat(balance.amount).isEqualByComparingTo(initialAmount.minus(useAmount))
         assertThat(balance.updatedAt).isAfter(balance.createdAt)
     }

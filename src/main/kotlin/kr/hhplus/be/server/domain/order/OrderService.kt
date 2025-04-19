@@ -44,7 +44,7 @@ class OrderService(
     ) {
         val order = get(command.orderId.value)
 
-        order.applyCoupon(command.coupon)
+        order.applyCoupon(command.usedCoupon)
 
         repository.save(order)
     }

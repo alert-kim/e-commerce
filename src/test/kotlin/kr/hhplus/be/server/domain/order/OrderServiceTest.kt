@@ -151,7 +151,7 @@ class OrderServiceTest {
         val order = mockk<Order>(relaxed = true)
         val command = ApplyCouponCommand(
             orderId = orderId,
-            coupon = CouponMock.coupon()
+            usedCoupon = CouponMock.usedCoupon()
         )
         every { repository.findById(orderId.value) } returns order
         every { repository.save(any()) } returns orderId
@@ -172,7 +172,7 @@ class OrderServiceTest {
             service.applyCoupon(
                 ApplyCouponCommand(
                     orderId = orderId,
-                    coupon = CouponMock.coupon(),
+                    usedCoupon = CouponMock.usedCoupon(),
                 )
             )
         }
@@ -186,7 +186,7 @@ class OrderServiceTest {
     fun `pay  - 결제`() {
         val orderId = OrderMock.id()
         val order = OrderMock.order(id = orderId)
-        val payment = PaymentMock.payment(
+        val payment = PaymentMock.queryModel(
             orderId = orderId,
             amount = BigDecimal.ZERO,
         )
@@ -211,7 +211,7 @@ class OrderServiceTest {
     @Test
     fun `pay - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
         val orderId = OrderMock.id()
-        val payment = PaymentMock.payment(
+        val payment = PaymentMock.queryModel(
             orderId = orderId,
             amount = BigDecimal.ZERO,
         )

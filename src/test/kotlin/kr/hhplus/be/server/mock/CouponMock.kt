@@ -103,4 +103,16 @@ object CouponMock {
             createdAt = createdAt,
             updatedAt = updatedAt,
         )
+
+    fun usedCoupon(
+        id: CouponId = id(),
+        userId: UserId = UserMock.id(),
+        discountAmount: BigDecimal = BigDecimal.valueOf(1_000),
+        usedAt: Instant = Instant.now(),
+    ): UsedCoupon = UsedCoupon(
+        id = id,
+        userId = userId,
+        discountAmount = discountAmount,
+        usedAt = usedAt,
+    )
 }

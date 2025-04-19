@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.coupon.Coupon
 import kr.hhplus.be.server.domain.coupon.CouponId
+import kr.hhplus.be.server.domain.coupon.UsedCoupon
 import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
@@ -70,7 +71,7 @@ class Order(
         updatedAt = Instant.now()
     }
 
-    fun applyCoupon(coupon: Coupon) {
+    fun applyCoupon(coupon: UsedCoupon) {
         if (status != OrderStatus.STOCK_ALLOCATED) {
             throw InvalidOrderStatusException(
                 id = requireId(),
@@ -78,7 +79,7 @@ class Order(
                 expect = OrderStatus.READY,
             )
         }
-        val newCouponId = coupon.requireId()
+        val newCouponId = coupon.id
         when(val originalCouponId = this.couponId) {
             null -> Unit
             newCouponId -> return

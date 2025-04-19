@@ -13,6 +13,7 @@ import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
+import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
@@ -96,15 +97,16 @@ class BalanceServiceTest {
 
     @Test
     fun `use - 잔고 사용`() {
-        val existingBalanceId = BalanceMock.id()
-        val existingBalance = BalanceMock.balance(id = existingBalanceId, amount = BigDecimal.valueOf(3_000))
+        val balanceId = BalanceMock.id()
+        val existingBalance = BalanceMock.balance(id = balanceId, amount = BigDecimal.valueOf(3_000))
         val originalAmount = existingBalance.amount
         val useAmount = BigDecimal.valueOf(1_000)
         val command = UseBalanceCommand(userId = existingBalance.userId, amount = useAmount)
         every { repository.findByUserId(command.userId) } returns existingBalance
 
-        service.use(command)
+        val result = service.use(command)
 
+        assertThat(result.amount).isEqualTo(UsedBalanceAmount(balanceId, BalanceAmount(useAmount)))
         verify {
             repository.save(withArg<Balance> {
                 assertThat(it.id).isEqualTo(existingBalance.id)

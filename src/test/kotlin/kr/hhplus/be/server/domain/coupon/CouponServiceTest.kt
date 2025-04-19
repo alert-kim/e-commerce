@@ -39,8 +39,8 @@ class CouponServiceTest {
 
         val result = service.use(UseCouponCommand(couponId.value, coupon.userId))
 
-        assertThat(result.value.id).isEqualTo(coupon.id)
-        assertThat(result.value.usedAt).isNotNull()
+        assertThat(result.coupon.id).isEqualTo(coupon.id)
+        assertThat(result.coupon.usedAt).isNotNull()
         verify {
             repository.findById(couponId.value)
             repository.save(withArg {
