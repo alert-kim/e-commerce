@@ -48,6 +48,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework:spring-webflux:6.2.5")
 
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
@@ -57,10 +58,21 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
+	testImplementation("io.mockk:mockk:1.13.7")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("io.kotest:kotest-property:5.7.2")
+	testImplementation("org.wiremock:wiremock-jetty12:3.9.2")
+	testImplementation("org.eclipse.jetty:jetty-reactive-httpclient:4.0.0")
+	testImplementation("org.wiremock.integrations:wiremock-spring-boot:3.6.0")
+	testImplementation("commons-codec:commons-codec")
 
 	// Swagger
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+
+	// Jackson
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
 }
 
 tasks.withType<Test> {

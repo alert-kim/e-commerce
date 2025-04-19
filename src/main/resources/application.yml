@@ -20,7 +20,10 @@ spring:
     properties:
       hibernate.timezone.default_storage: NORMALIZE_UTC
       hibernate.jdbc.time_zone: UTC
-
+order:
+  snapshot:
+    client:
+      base-url: https://example.com/api
 ---
 spring.config.activate.on-profile: local, test
 
