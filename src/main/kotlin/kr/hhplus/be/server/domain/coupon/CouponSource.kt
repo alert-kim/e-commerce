@@ -10,6 +10,7 @@ class CouponSource(
     val id: CouponSourceId?,
     val name: String,
     val discountAmount: BigDecimal,
+    val initialQuantity: Int,
     val createdAt: Instant,
     status: CouponSourceStatus,
     quantity: Int,

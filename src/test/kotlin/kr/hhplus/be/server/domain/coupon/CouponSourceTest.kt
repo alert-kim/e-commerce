@@ -24,6 +24,7 @@ class CouponSourceTest {
                 discountAmount = BigDecimal.valueOf(1000),
                 status = CouponSourceStatus.OUT_OF_STOCK,
                 quantity = -1,
+                initialQuantity = 0,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
             )

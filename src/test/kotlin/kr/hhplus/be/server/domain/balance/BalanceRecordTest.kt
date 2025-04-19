@@ -1,7 +1,5 @@
 package kr.hhplus.be.server.domain.balance
 
-import kr.hhplus.be.server.domain.balance.BalanceRecord
-import kr.hhplus.be.server.domain.balance.BalanceTransactionType
 import kr.hhplus.be.server.mock.BalanceMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -25,7 +23,7 @@ class BalanceRecordTest {
             { assertThat(record.id).isNull() },
             { assertThat(record.balanceId).isEqualTo(balanceId) },
             { assertThat(record.type).isEqualTo(type) },
-            { assertThat(record.balance).isEqualTo(amount) },
+            { assertThat(record.amount).isEqualTo(amount) },
             { assertThat(record.createdAt).isNotNull() },
         )
     }

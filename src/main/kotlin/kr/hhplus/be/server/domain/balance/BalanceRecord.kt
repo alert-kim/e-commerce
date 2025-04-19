@@ -1,15 +1,12 @@
 package kr.hhplus.be.server.domain.balance
 
-import kr.hhplus.be.server.domain.balance.BalanceId
-import kr.hhplus.be.server.domain.balance.BalanceRecordId
-import kr.hhplus.be.server.domain.balance.BalanceTransactionType
 import java.time.Instant
 
 class BalanceRecord(
     val id: BalanceRecordId? = null,
     val balanceId: BalanceId,
     val type: BalanceTransactionType,
-    val balance: BalanceAmount,
+    val amount: BalanceAmount,
     val createdAt: Instant
 ) {
     companion object {
@@ -21,7 +18,7 @@ class BalanceRecord(
             BalanceRecord(
                 balanceId = balanceId,
                 type = type,
-                balance = amount,
+                amount = amount,
                 createdAt = Instant.now()
             )
     }

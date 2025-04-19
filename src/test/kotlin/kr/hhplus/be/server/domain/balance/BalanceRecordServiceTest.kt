@@ -42,7 +42,7 @@ class BalanceRecordServiceTest {
                 assertAll(
                     { assertThat(it.balanceId).isEqualTo(command.balanceId) },
                     { assertThat(it.type).isEqualTo(command.type) },
-                    { assertThat(it.balance.value).isEqualByComparingTo(command.amount) },
+                    { assertThat(it.amount.value).isEqualByComparingTo(command.amount) },
                 )
             })
         }

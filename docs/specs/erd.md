@@ -4,38 +4,46 @@ erDiagram
         int id PK
         varchar(50) name
         timestamp created_at
-        timestamp updated_at
     }
-    USER_BALANCES {
+    BALANCES {
         int id PK
-        int user_id FK
-        decimal balance
+        int user_id
+        decimal amount
         timestamp created_at
         timestamp updated_at
     }
-    USER_BALANCE_RECORDS {
+    BALANCE_RECORDS {
         int id PK
-        int balance_id FK
+        int balance_id
         varchar(10) type
-        decimal balance
+        decimal amount
         timestamp created_at
     }
 
     ORDERS {
         int id PK
-        int user_id FK
+        int user_id
         varchar(25) status
-        decimal total_price
-        timestamp expires_at "(nullable)"
+        int coupon_id "(nullable)"
+        decimal originalAmount
+        decimal discountAmount
+        decimal totalAmount
         timestamp created_at
         timestamp updated_at
     }
-    ORDER_ITEMS {
+    ORDER_PRODUCTS {
         int order_id FK
-        int product_id FK
+        int product_id
         int quantity
         decimal unit_price
         decimal total_price
+        timestamp created_at
+    }
+    ORDER_EVENTS {
+        int id PK
+        int order_id
+        varchar(25) type
+        text snapshot
         timestamp created_at
     }
 
@@ -54,90 +62,66 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    PRODUCT_DAILY_SALES {
+        int product_id
+        date date
+        int quantity
+        timestamp created_at
+        timestamp updated_at
+    }
 
     PAYMENTS {
         int id PK
-        int user_id FK
-        int order_id FK
-        int user_coupon_id FK "(nullable)"
-        varchar(5) status
-        decimal original_amount
-        decimal discount_amount
-        decimal final_amount
+        int user_id
+        int order_id
+        decimal amount
         timestamp created_at
-        timestamp updated_at
     }
     
-    USER_COUPONS {
-        int id PK
-        int user_id FK
-        int coupon_id FK
-        timestamp used_at "(nullable)"
-        timestamp created_at
-        timestamp updated_at
-    }
     COUPONS {
         int id PK
+        int user_id
+        int coupon_source_id FK
+        timestamp used_at "(nullable)"
         varchar(15) name
-        varchar type
-        int max_discount_amount
-        int discount_amount "(nullable)"
-        int discount_rate "(nullable)"
+        deciaml discount_amount
+        timestamp created_at
+        timestamp updated_at
+    }
+    COUPON_SOURCES {
+        int id PK
+        varchar(15) name
+        deciaml discount_amount
         int quantity
         int initial_quantity
-        timestamp usable_from
-        timestamp usable_to
-        timestamp created_at
-        timestamp updated_at
-        timestamp deleted_at "(nullable)"
-    }
-
-    USER_ITEMS {
-        int id PK
-        int user_id FK
-        int order_id FK
-        int product_id FK
         timestamp created_at
         timestamp updated_at
     }
 
-    PRODUCT_INTERVAL_SALE_STATS {
+    PRODUCT_DAILY_SALES {
         int product_id FK
-        int sold_quantity
-        timestamp aggregated_from
-        timestamp aggregated_to
-        timestamp created_at
-    }
-    PRODUCT_DAILY_SALE_STATS {
-        int product_id FK
-        int sold_quantity
-        date aggregated_date
-        timestamp aggregated_at
+        int quantity
+        date date
         timestamp created_at
         timestamp updated_at
     }
     
-    
-    USERS one to one USER_BALANCES: has
+    USERS one to one or zero BALANCES: has
     USERS one to many ORDERS: has
     USERS one to many PAYMENTS: has
-    USERS one to many USER_COUPONS: has
-    USERS one to many USER_ITEMS: has
+    USERS one to many COUPONS: has
     
-    USER_BALANCES one to many USER_BALANCE_RECORDS: has
+    BALANCES one to many BALANCE_RECORDS: has
     
-    ORDERS one to many ORDER_ITEMS: includes
-    ORDER_ITEMS many to one PRODUCTS: references
+    ORDERS one to many ORDER_PRODUCTS: includes
+    ORDER_PRODUCTS many to one PRODUCTS: references
+    ORDERS one to many ORDER_EVENTS: has
 
     PRODUCTS one to one PRODUCT_STOCKS: has_stock
+    PRODUCTS one to many PRODUCT_DAILY_SALES: has
 
     ORDERS one to many PAYMENTS: has
-    PAYMENTS one to one USER_COUPONS: uses
-    USER_COUPONS many to one COUPONS: is_associated_with
+    COUPONS many to one COUPON_SOURCES: is_associated_with
 
-    USER_ITEMS many to one ORDERS: is_associated_with
-    USER_ITEMS many to one PRODUCTS: references
-
-    PRODUCT_DAILY_SALE_STATS many to one PRODUCTS: is_associated_with
-    PRODUCT_INTERVAL_SALE_STATS many to one PRODUCTS: is_associated_with
+    PRODUCT_DAILY_SALES many to one PRODUCTS: is_associated_with
 ```
