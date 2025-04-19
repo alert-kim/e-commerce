@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.scheduler.order
 
 import kr.hhplus.be.server.application.order.OrderFacade
-import kr.hhplus.be.server.application.order.command.ConsumeOrderEventFacadeCommand
+import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import org.springframework.scheduling.annotation.Scheduled
@@ -13,20 +13,19 @@ class OrderCompletionSendingScheduler(
 ) {
     @Scheduled(fixedRate = 10_000)
     fun send() {
-        val events = orderFacade.getAllEventsNotConsumedInOrder(SCHEDULER_ID, OrderEventType.COMPLETED)
+        val events = orderFacade.getAllEventsNotConsumedInOrder(SCHEDULER_ID, eventType)
         events.forEach {
             orderFacade.sendOrderCompletionData(
                 command = SendOrderFacadeCommand(it.snapshot)
             )
             orderFacade.consumeEvent(
-                ConsumeOrderEventFacadeCommand(
+                ConsumeOrderEventsFacadeCommand(
                     consumerId = SCHEDULER_ID,
-                    event = it
+                    events = listOf(it)
                 )
             )
         }
     }
-
 
     companion object {
         val eventType = OrderEventType.COMPLETED

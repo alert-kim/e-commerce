@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.product
 
 import kr.hhplus.be.server.domain.common.createPageRequest
 import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
+import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import kr.hhplus.be.server.domain.product.result.AllocatedStockResult
 import org.springframework.data.domain.Page
@@ -30,6 +31,10 @@ class ProductService(
         return AllocatedStockResult(
             stocks = stocks,
         )
+    }
+
+    fun aggregateProductDailySales(command: RecordProductDailySalesCommand) {
+        TODO()
     }
 
     fun getAllByStatusOnPaged(status: ProductStatus, page: Int, pageSize: Int): Page<Product> {

@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.application.order
 
-import kr.hhplus.be.server.application.order.command.ConsumeOrderEventFacadeCommand
+import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
 import kr.hhplus.be.server.domain.balance.BalanceService
@@ -53,9 +53,9 @@ class OrderFacade(
     }
 
     fun consumeEvent(
-        command: ConsumeOrderEventFacadeCommand,
+        command: ConsumeOrderEventsFacadeCommand,
     ) {
-        orderService.consumeEvent(ConsumeOrderEventCommand(command.consumerId, command.event))
+        orderService.consumeEvent(ConsumeOrderEventCommand.of(command.consumerId, command.events))
     }
 
     fun getAllEventsNotConsumedInOrder(

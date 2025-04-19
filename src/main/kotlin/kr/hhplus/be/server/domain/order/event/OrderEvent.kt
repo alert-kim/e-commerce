@@ -5,7 +5,7 @@ import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderEventIdException
 import java.time.Instant
 
-class OrderEvent(
+data class OrderEvent(
     val id: OrderEventId? = null,
     val orderId: OrderId,
     val type: OrderEventType,

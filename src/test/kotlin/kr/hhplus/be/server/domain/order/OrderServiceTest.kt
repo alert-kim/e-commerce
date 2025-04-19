@@ -268,14 +268,14 @@ class OrderServiceTest {
     }
 
     @Test
-    fun `consumeEvent - 이벤트 처리 - 첫 처리인 경우 새로운 offset저장`() {
+    fun `consumeEvent - 이벤트 처리 (이벤트 개수 1) - 첫 처리인 경우 새로운 offset저장`() {
         val eventId = OrderMock.eventId()
         val event = OrderMock.event(id = eventId)
         val command = ConsumeOrderEventCommand(
             consumerId = "test",
             event = event,
         )
-        every { eveentConsumerOffsetRepository.find(command.consumerId, command.event.type) } returns null
+        every { eveentConsumerOffsetRepository.find(command.consumerId, event.type) } returns null
 
         service.consumeEvent(command)
 
@@ -289,7 +289,7 @@ class OrderServiceTest {
     }
 
     @Test
-    fun `consumeEvent - 이벤트 처리 - 이미 offset이 있는 경우 update`() {
+    fun `consumeEvent - 이벤트 처리 (이벤트 개수1) - 이미 offset이 있는 경우 update`() {
         val oldEventId = OrderMock.eventId()
         val eventId = OrderMock.eventId()
         val event = OrderMock.event(id = eventId)
@@ -297,7 +297,7 @@ class OrderServiceTest {
             consumerId = "test",
             event = event,
         )
-        every { eveentConsumerOffsetRepository.find(command.consumerId, command.event.type) } returns
+        every { eveentConsumerOffsetRepository.find(command.consumerId, event.type) } returns
                 OrderMock.eventConsumerOffset(eventId = oldEventId)
 
         service.consumeEvent(command)
