@@ -118,7 +118,7 @@ class OrderFacadeTest {
             )
             orderService.placeStock(
                 PlaceStockCommand(
-                    orderSheet = createOrderSheet(orderId, command),
+                    orderId = orderId,
                     stocks = stockAllocated,
                 )
             )
@@ -130,7 +130,7 @@ class OrderFacadeTest {
             )
             orderService.applyCoupon(
                 ApplyCouponCommand(
-                    orderSheet = orderSheet,
+                    orderId = orderId,
                     coupon = coupon,
                 )
             )
@@ -208,7 +208,7 @@ class OrderFacadeTest {
             )
             orderService.placeStock(
                 PlaceStockCommand(
-                    orderSheet = createOrderSheet(orderId, command),
+                    orderId = orderId,
                     stocks = stockAllocated,
                 )
             )

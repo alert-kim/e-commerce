@@ -1,11 +1,13 @@
 package kr.hhplus.be.server.domain.order
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.dto.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
@@ -38,9 +40,6 @@ class OrderServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var client: OrderSnapshotClient
-
-    @MockK(relaxed = true)
-    private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
     fun setUp() {
@@ -81,16 +80,14 @@ class OrderServiceTest {
             totalAmount = BigDecimal.ZERO,
             couponId = null,
         )
-        val orderSheet = mockk<OrderSheet>(relaxed = true)
         val stocks = List(3) {
             ProductMock.stockAllocated()
         }
         val totalAmount = stocks.fold(BigDecimal.ZERO) { acc, stock ->
             acc.add(stock.unitPrice.multiply(BigDecimal(stock.quantity)))
         }
-        val command = PlaceStockCommand(orderSheet, stocks)
+        val command = PlaceStockCommand(orderId, stocks)
         every { repository.findById(orderId.value) } returns order
-        every { orderSheet.orderId } returns orderId
         every { repository.save(any()) } returns orderId
 
         service.placeStock(command)
@@ -133,13 +130,11 @@ class OrderServiceTest {
     @Test
     fun `placeStock - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
         val orderId = OrderMock.id()
-        val orderSheet = mockk<OrderSheet>(relaxed = true)
         val stocks = List(3) {
             ProductMock.stockAllocated()
         }
-        val command = PlaceStockCommand(orderSheet, stocks)
+        val command = PlaceStockCommand(orderId, stocks)
         every { repository.findById(orderId.value) } returns null
-        every { orderSheet.orderId } returns orderId
 
         shouldThrow<NotFoundOrderException> {
             service.placeStock(command)
@@ -153,10 +148,9 @@ class OrderServiceTest {
     @Test
     fun `applyCoupon  - 쿠폰 적용`() {
         val orderId = OrderMock.id()
-        val order = mockk<Order>()
-        val orderSheet = mockk<OrderSheet>(relaxed = true)
+        val order = mockk<Order>(relaxed = true)
         val command = ApplyCouponCommand(
-            orderSheet = orderSheet,
+            orderId = orderId,
             coupon = CouponMock.coupon()
         )
         every { repository.findById(orderId.value) } returns order
@@ -172,15 +166,15 @@ class OrderServiceTest {
     @Test
     fun `applyCoupon - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
         val orderId = OrderMock.id()
-        val orderSheet = mockk<OrderSheet>(relaxed = true)
         every { repository.findById(orderId.value) } returns null
-        every { orderSheet.orderId } returns orderId
 
         shouldThrow<NotFoundOrderException> {
-            service.applyCoupon(ApplyCouponCommand(
-                orderSheet = orderSheet,
-                coupon = CouponMock.coupon(),
-            ))
+            service.applyCoupon(
+                ApplyCouponCommand(
+                    orderId = orderId,
+                    coupon = CouponMock.coupon(),
+                )
+            )
         }
 
         verify(exactly = 0) {

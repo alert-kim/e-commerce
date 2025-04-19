@@ -31,14 +31,10 @@ class OrderService(
     fun placeStock(
         command: PlaceStockCommand,
     ) {
-        val orderId = command.orderSheet.orderId
-        val order = get(orderId.value)
-
-        val stocks = command.stocks
-        command.orderSheet.verifyProductPrice(stocks)
+        val order = get(command.orderId.value)
 
         order.placeStock(
-            stocks = stocks,
+            stocks = command.stocks,
         )
         repository.save(order)
     }
@@ -46,9 +42,7 @@ class OrderService(
     fun applyCoupon(
         command: ApplyCouponCommand,
     ) {
-        val orderId = command.orderSheet.orderId
-        val order = get(orderId.value)
-        command.orderSheet.verifyCoupon(command.coupon)
+        val order = get(command.orderId.value)
 
         order.applyCoupon(command.coupon)
 

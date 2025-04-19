@@ -87,7 +87,7 @@ class OrderFacade(
         )
         orderService.placeStock(
             PlaceStockCommand(
-                orderSheet = sheet,
+                orderId = sheet.orderId,
                 stocks = allocated.stocks,
             )
         )
@@ -98,7 +98,7 @@ class OrderFacade(
     ) {
         if (orderSheet.couponId != null) {
             val coupon = couponService.use(UseCouponCommand(orderSheet.couponId, orderSheet.userId))
-            orderService.applyCoupon(ApplyCouponCommand(orderSheet, coupon.value))
+            orderService.applyCoupon(ApplyCouponCommand(orderSheet.orderId, coupon.value))
         }
         val order = orderService.get(orderSheet.orderId.value)
 
