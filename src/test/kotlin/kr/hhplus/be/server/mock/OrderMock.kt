@@ -154,4 +154,20 @@ object OrderMock {
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
+
+    fun orderProductSnapshot(
+        orderId: Long = IdMock.value(),
+        productId: Long = IdMock.value(),
+        quantity: Int = 2,
+        unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
+        totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
+        createdAt: Instant = Instant.now(),
+    ): OrderSnapshot.OrderProductSnapshot = OrderSnapshot.OrderProductSnapshot(
+        orderId = orderId,
+        productId = productId,
+        quantity = quantity,
+        unitPrice = unitPrice,
+        totalPrice = totalPrice,
+        createdAt = createdAt,
+    )
 }

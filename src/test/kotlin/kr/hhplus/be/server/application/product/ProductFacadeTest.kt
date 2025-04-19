@@ -8,11 +8,15 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.Product
 import kr.hhplus.be.server.domain.product.ProductService
 import kr.hhplus.be.server.domain.product.ProductStatus
+import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
+import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class ProductFacadeTest {
@@ -35,6 +40,86 @@ class ProductFacadeTest {
     }
 
     @Test
+    fun `aggregate - 상품 일일 판매량 집계 - 일자별, 상품id별로 판매 수량을 집계한다`() {
+        val today = LocalDate.now(TimeZone.KSTId)
+        val todayInstant = today.atStartOfDay(TimeZone.KSTId).toInstant()
+        val yesterday = today.minusDays(1)
+        val yesterdayInstant = yesterday.atStartOfDay(TimeZone.KSTId).toInstant()
+
+        val sales = listOf(
+            OrderMock.orderProductSnapshot(
+                productId = 1L,
+                quantity = 10,
+                createdAt = yesterdayInstant,
+            ),
+            OrderMock.orderProductSnapshot(
+                productId = 1L,
+                quantity = 10,
+                createdAt = yesterdayInstant,
+            ),
+            OrderMock.orderProductSnapshot(
+                productId = 1L,
+                quantity = 10,
+                createdAt = todayInstant,
+            ),
+            OrderMock.orderProductSnapshot(
+                productId = 2L,
+                quantity = 10,
+                createdAt = todayInstant,
+            ),
+        )
+        val expects = listOf(
+            RecordProductDailySalesCommand.ProductSale(
+                productId = 1L,
+                localDate = yesterday,
+                quantity = 20,
+            ),
+            RecordProductDailySalesCommand.ProductSale(
+                productId = 1L,
+                localDate = today,
+                quantity = 10,
+            ),
+            RecordProductDailySalesCommand.ProductSale(
+                productId = 2L,
+                localDate = today,
+                quantity = 10,
+            )
+        )
+        val command = AggregateProductDailySalesFacadeCommand(
+            sales = sales,
+        )
+
+        facade.aggregate(command)
+
+        verify {
+            service.aggregateProductDailySales(
+                withArg<RecordProductDailySalesCommand> {
+                    it.sales.forEach { productSale ->
+                        val expect =
+                            expects.find { it.productId == productSale.productId && it.localDate == productSale.localDate }
+                        assertThat(productSale.productId).isEqualTo(expect?.productId)
+                        assertThat(productSale.localDate).isEqualTo(expect?.localDate)
+                        assertThat(productSale.quantity).isEqualTo(expect?.quantity)
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `aggregate - 상품 일일 판매량 집계 - 주문 상품이 비어 있으면 집계를 하지 않는다`() {
+        val command = AggregateProductDailySalesFacadeCommand(
+            sales = emptyList(),
+        )
+
+        facade.aggregate(command)
+
+        verify(exactly = 0) {
+            service.aggregateProductDailySales(ofType(RecordProductDailySalesCommand::class))
+        }
+    }
+
+    @Test
     fun `getAllOnSalePaged - 판매 중인 상품 목록을 페이징해서 조회 모델로 반환`() {
         val page = 0
         val pageSize = 10
@@ -44,7 +129,13 @@ class ProductFacadeTest {
         }
         val totalCount = products.size * 2L
         val productPage = PageImpl(products, pageable, totalCount)
-        every { service.getAllByStatusOnPaged(status = ProductStatus.ON_SALE, page = page, pageSize = pageSize) } returns productPage
+        every {
+            service.getAllByStatusOnPaged(
+                status = ProductStatus.ON_SALE,
+                page = page,
+                pageSize = pageSize
+            )
+        } returns productPage
 
         val result = facade.getAllOnSalePaged(page, pageSize)
 
@@ -81,7 +172,11 @@ class ProductFacadeTest {
     fun `getAllOnSalePaged - 유효하지 않은 페이징 요청 값인 경우 InvalidPageRequestArgumentException 발생`() {
         val page = 0
         val pageSize = 0
-        coEvery { service.getAllByStatusOnPaged(any(), any(), any()) } throws InvalidPageRequestArgumentException(0, 0, Sort.by(Sort.Direction.DESC, "createdAt"))
+        coEvery { service.getAllByStatusOnPaged(any(), any(), any()) } throws InvalidPageRequestArgumentException(
+            0,
+            0,
+            Sort.by(Sort.Direction.DESC, "createdAt")
+        )
 
         shouldThrow<InvalidPageRequestArgumentException> {
             facade.getAllOnSalePaged(page, pageSize)
