@@ -10,10 +10,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.Product
-import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductService
-import kr.hhplus.be.server.domain.product.ProductStatus
+import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
@@ -191,9 +188,9 @@ class ProductFacadeTest {
         }
         every {
             service.getPopularProducts()
-        } returns products
+        } returns PopularProducts(products)
 
-        val result = facade.getPopularProducts()
+        val result = facade.getPopularProducts().products
 
         assertThat(result).hasSize(products.size)
         result.forEachIndexed { index, productQueryModel ->
@@ -212,10 +209,10 @@ class ProductFacadeTest {
 
     @Test
     fun `getPopularProducts - 인기 상품이 없는 경우 빈 페이지 반환`() {
-        every { service.getPopularProducts() } returns emptyList()
+        every { service.getPopularProducts() } returns PopularProducts(emptyList())
 
         val result = facade.getPopularProducts()
 
-        assertThat(result).isEmpty()
+        assertThat(result.products).isEmpty()
     }
 }

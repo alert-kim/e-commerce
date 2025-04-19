@@ -40,7 +40,7 @@ class ProductService(
                 productId = newSale.productId,
                 date = newSale.date,
             )
-            when(sale == null) {
+            when (sale == null) {
                 true -> {
                     val sale = ProductDailySale.new(
                         productId = newSale.productId,
@@ -49,6 +49,7 @@ class ProductService(
                     )
                     dailySaleRepository.save(sale)
                 }
+
                 false -> {
                     sale.addQuantity(newSale.quantity)
                     dailySaleRepository.update(sale)
@@ -63,14 +64,13 @@ class ProductService(
         return repository.findAllByStatus(status, pageable)
     }
 
-    fun getPopularProducts(): List<Product> {
+    fun getPopularProducts(): PopularProducts {
         val popularProductIds = dailySaleRepository.findTopNProductsByQuantity(
             startDate = PopularProducts.getStartDay(),
             endDate = PopularProducts.getEndDay(),
             limit = PopularProducts.MAX_SIZE,
         ).map { it.productId.value }
-        println("popularProductIds: ${popularProductIds.size}")
         val products = repository.findAllByIds(popularProductIds)
-        return PopularProducts(products).products
+        return PopularProducts(products)
     }
 }

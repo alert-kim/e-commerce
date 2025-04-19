@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
+import kr.hhplus.be.server.domain.product.PopularProductsQueryModel
 import kr.hhplus.be.server.domain.product.ProductQueryModel
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.mock.ProductMock
@@ -149,7 +150,7 @@ class ProductControllerTest {
                 name = "상품${it + 1}",
             )
         }
-        every { productFacade.getPopularProducts() } returns products
+        every { productFacade.getPopularProducts() } returns PopularProductsQueryModel(products)
 
         mockMvc.get("/products/popular")
             .andExpect {

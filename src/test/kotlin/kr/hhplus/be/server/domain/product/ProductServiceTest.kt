@@ -269,8 +269,8 @@ class ProductServiceTest {
 
         val result = service.getPopularProducts()
 
-        assertThat(result).hasSize(products.size)
-        result.forEachIndexed { index, product ->
+        assertThat(result.products).hasSize(products.size)
+        result.products.forEachIndexed { index, product ->
             assertThat(product.id).isEqualTo(products[index].id)
         }
     }

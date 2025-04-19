@@ -1,10 +1,7 @@
 package kr.hhplus.be.server.application.product
 
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
-import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductQueryModel
-import kr.hhplus.be.server.domain.product.ProductService
-import kr.hhplus.be.server.domain.product.ProductStatus
+import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.util.TimeZone
 import org.springframework.data.domain.Page
@@ -42,10 +39,10 @@ class ProductFacade(
         }
     }
 
-    fun getPopularProducts(): List<ProductQueryModel> {
-        val products = service.getPopularProducts()
-        return products.map { product ->
-            ProductQueryModel.from(product)
-        }
-    }
+    fun getPopularProducts(): PopularProductsQueryModel =
+        PopularProductsQueryModel(
+            products = service.getPopularProducts().products.map { product ->
+                ProductQueryModel.from(product)
+            }
+        )
 }
