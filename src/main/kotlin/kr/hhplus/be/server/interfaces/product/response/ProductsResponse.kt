@@ -5,22 +5,15 @@ import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import org.springframework.data.domain.Page
 
 class ProductsResponse(
-    val totalCount: Long,
-    val page: Int,
-    val pageSize: Int,
     val products: List<ProductResponse>
 ) : ServerApiResponse {
     companion object {
         fun from(
-            products: Page<ProductQueryModel>,
+            products: List<ProductQueryModel>,
         ) = ProductsResponse(
-                totalCount = products.totalElements,
-                page = products.number,
-                pageSize = products.size,
-                products = products.content.map { product ->
-                    ProductResponse.from(product)
-                }
-            )
-
+            products = products.map { product ->
+                ProductResponse.from(product)
+            },
+        )
     }
 }

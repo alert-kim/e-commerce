@@ -9,8 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.hhplus.be.server.interfaces.ErrorResponse
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
-import kr.hhplus.be.server.interfaces.product.response.ProductsResponse
-import org.springframework.data.domain.Pageable
+import kr.hhplus.be.server.interfaces.product.response.ProductsPageResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -31,7 +30,7 @@ interface ProductControllerInterface {
                     Content(
                         mediaType = "application/json",
                         schema = Schema(
-                            implementation = ProductsResponse::class,
+                            implementation = ProductsPageResponse::class,
                         )
                     )
                 ]
@@ -65,13 +64,13 @@ interface ProductControllerInterface {
                     Content(
                         mediaType = "application/json",
                         schema = Schema(
-                            implementation = ProductsResponse::class,
+                            implementation = ProductsPageResponse::class,
                         )
                     )
                 ]
             ),
         ]
     )
-    @GetMapping("/products:popular")
-    fun getPopularProducts(): ProductsResponse
+    @GetMapping("/products/popular")
+    fun getPopularProducts(): ResponseEntity<ServerApiResponse>
 }

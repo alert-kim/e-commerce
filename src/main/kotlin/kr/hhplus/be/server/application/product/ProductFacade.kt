@@ -41,4 +41,8 @@ class ProductFacade(
             ProductQueryModel.from(product)
         }
     }
+
+    fun getPopularProducts(): List<ProductQueryModel> {
+        TODO()
+    }
 }

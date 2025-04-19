@@ -1,18 +1,15 @@
 package kr.hhplus.be.server.interfaces.product
 
-import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.application.product.ProductFacade
-import kr.hhplus.be.server.domain.product.ProductStatus
+import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorSpec
 import kr.hhplus.be.server.interfaces.common.handleRequest
-import kr.hhplus.be.server.interfaces.product.response.ProductResponse
+import kr.hhplus.be.server.interfaces.product.response.ProductsPageResponse
 import kr.hhplus.be.server.interfaces.product.response.ProductsResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
-import java.time.Instant
 
 @RestController
 class ProductController(
@@ -26,7 +23,7 @@ class ProductController(
     ) = handleRequest(
         block = {
             val productsPaged = productFacade.getAllOnSalePaged(page = page, pageSize = pageSize)
-            ProductsResponse.from(productsPaged)
+            ProductsPageResponse.from(productsPaged)
         },
         errorSpec = {
             when (it) {
@@ -36,30 +33,17 @@ class ProductController(
         }
     )
 
-    @GetMapping("/products:popular")
-    override fun getPopularProducts(): ProductsResponse = ProductsResponse(
-        totalCount = 0,
-        page = 0,
-        pageSize = 0,
-        products = listOf(
-            ProductResponse(
-                id = 1L,
-                status = ProductStatus.ON_SALE,
-                name = "상품1",
-                description = "상품1 설명",
-                price = BigDecimal.ZERO,
-                stock = 10,
-                createdAt = Instant.now(),
-            ),
-            ProductResponse(
-                id = 2L,
-                status = ProductStatus.ON_SALE,
-                name = "상품2",
-                description = "상품2 설명",
-                price = BigDecimal.ZERO,
-                stock = 20,
-                createdAt = Instant.now(),
-            )
+    @GetMapping("/products/popular")
+    override fun getPopularProducts() =
+        handleRequest(
+            block = {
+                val products = productFacade.getPopularProducts()
+                ProductsResponse.from(products)
+            },
+            errorSpec = {
+                when (it) {
+                    else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
+                }
+            }
         )
-    )
 }

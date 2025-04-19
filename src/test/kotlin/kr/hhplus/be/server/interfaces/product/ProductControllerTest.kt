@@ -8,8 +8,8 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.application.product.ProductFacade
+import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.ProductQueryModel
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.mock.ProductMock
@@ -140,5 +140,31 @@ class ProductControllerTest {
             }
 
         verify { productFacade.getAllOnSalePaged(page, pageSize) }
+    }
+
+    @Test
+    fun `인기 상품 조회 - 200`() {
+        val products = List(5) {
+            ProductMock.queryModel(
+                name = "상품${it + 1}",
+            )
+        }
+        every { productFacade.getPopularProducts() } returns products
+
+        mockMvc.get("/products/popular")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.products") { isArray() }
+                jsonPath("$.products") { hasSize<Any>(products.size) }
+                products.forEachIndexed { index, product ->
+                    jsonPath("$.products[$index].id") { value(product.id.value) }
+                    jsonPath("$.products[$index].status") { value(product.status.name) }
+                    jsonPath("$.products[$index].name") { value(product.name) }
+                    jsonPath("$.products[$index].description") { value(product.description) }
+                    jsonPath("$.products[$index].price") { value(product.price.toString()) }
+                    jsonPath("$.products[$index].stock") { value(product.stock) }
+                    jsonPath("$.products[$index].createdAt") { value(product.createdAt.toString()) }
+                }
+            }
     }
 }
