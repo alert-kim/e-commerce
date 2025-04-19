@@ -1,13 +1,9 @@
 package kr.hhplus.be.server.mock
 
-import kr.hhplus.be.server.domain.balance.BalanceAmount
-
-import kr.hhplus.be.server.domain.balance.Balance
-import kr.hhplus.be.server.domain.balance.BalanceId
-import kr.hhplus.be.server.domain.balance.BalanceView
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.bigDecimal
 import io.kotest.property.arbitrary.next
+import kr.hhplus.be.server.domain.balance.*
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -26,12 +22,14 @@ object BalanceMock {
         id: BalanceId? = id(),
         userId: UserId = UserMock.id(),
         amount: BigDecimal = amount().value,
+        records: List<BalanceRecord> = emptyList(),
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ): Balance = Balance(
         id = id,
         userId = userId,
         amount = amount,
+        records = records,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )

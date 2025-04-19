@@ -13,6 +13,7 @@ import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
+import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.UserMock
@@ -42,18 +43,21 @@ class BalanceServiceTest {
         val userId = UserMock.id()
         val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
         val newBalanceId = BalanceMock.id()
+        val balance = BalanceMock.balance(id = newBalanceId, amount = BigDecimal.ZERO)
         every { repository.findByUserId(userId) } returns null
         every { repository.save(any()) } returns newBalanceId
+        every { repository.findById(newBalanceId.value) } returns balance
 
         val result = service.charge(command)
 
-        assertAll(
-            { assertThat(result).isEqualTo(newBalanceId) },
-        )
         assertThat(result).isEqualTo(newBalanceId)
         verify {
             repository.save(withArg<Balance> {
-                assertThat(it.userId).isEqualTo(userId)
+                assertThat(it.userId).isEqualTo(command.userId)
+                assertThat(it.amount).isEqualByComparingTo(BigDecimal.ZERO)
+            })
+            repository.update(withArg<Balance> {
+                assertThat(it.id).isEqualTo(balance.id)
                 assertThat(it.amount).isEqualByComparingTo(command.amount)
             })
         }
@@ -64,16 +68,17 @@ class BalanceServiceTest {
         val existingBalanceId = BalanceMock.id()
         val existingBalance = BalanceMock.balance(id = existingBalanceId, amount = BigDecimal.ONE)
         val originalAmount = existingBalance.amount
-        val chargeAmount = BigDecimal.valueOf(1_000)
+        val chargeAmount = 1000.toBigDecimal()
         val command = ChargeBalanceCommand(userId = existingBalance.userId, amount = chargeAmount)
         every { repository.findByUserId(command.userId) } returns existingBalance
         every { repository.save(any()) } returns existingBalanceId
+        every { repository.findById(existingBalanceId.value) } returns existingBalance
 
         val result = service.charge(command)
 
         assertThat(result).isEqualTo(existingBalance.id)
         verify {
-            repository.save(withArg<Balance> {
+            repository.update(withArg<Balance> {
                 assertThat(it.id).isEqualTo(existingBalance.id)
                 assertThat(it.amount).isEqualByComparingTo(originalAmount.add(chargeAmount))
             })

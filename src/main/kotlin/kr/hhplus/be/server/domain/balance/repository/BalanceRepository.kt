@@ -1,5 +1,7 @@
-package kr.hhplus.be.server.domain.balance
+package kr.hhplus.be.server.domain.balance.repository
 
+import kr.hhplus.be.server.domain.balance.Balance
+import kr.hhplus.be.server.domain.balance.BalanceId
 import kr.hhplus.be.server.domain.user.UserId
 
 interface BalanceRepository {
@@ -8,4 +10,6 @@ interface BalanceRepository {
     fun findByUserId(userId: UserId): Balance?
 
     fun save(balance: Balance): BalanceId
+
+    fun update(balance: Balance)
 }

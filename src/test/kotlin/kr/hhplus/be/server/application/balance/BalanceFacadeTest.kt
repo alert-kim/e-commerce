@@ -7,7 +7,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
-import kr.hhplus.be.server.domain.balance.BalanceRecordService
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
@@ -32,14 +31,11 @@ class BalanceFacadeTest {
     private lateinit var balanceService: BalanceService
 
     @MockK(relaxed = true)
-    private lateinit var balanceRecordService: BalanceRecordService
-
-    @MockK(relaxed = true)
     private lateinit var userService: UserService
 
     @BeforeEach
     fun setup() {
-        clearMocks(balanceService, balanceRecordService, userService)
+        clearMocks(balanceService, userService)
     }
 
     @Test
@@ -91,24 +87,6 @@ class BalanceFacadeTest {
 
         verify(exactly = 0) {
             balanceService.charge(any())
-            balanceRecordService.record(any())
         }
-    }
-
-    @Test
-    fun `충전 - 잔고 충전에 실패할 경우(잔고 초과) 발생한 예외를 던지며, 충전을 하지 않고, 기록도 남기지 않는다`() {
-        val userId = UserMock.id()
-        val command = ChargeBalanceFacadeCommand(amount = BigDecimal.valueOf(1_000), userId = userId.value)
-        every { userService.get(userId.value) } returns UserMock.view(id = userId)
-        every { balanceService.charge(ChargeBalanceCommand(userId, command.amount)) } throws ExceedMaxBalanceAmountException(command.amount)
-
-        assertThrows<ExceedMaxBalanceAmountException> {
-            facade.charge(command)
-        }
-
-        verify(exactly = 0) {
-            balanceRecordService.record(any())
-        }
-        verify(exactly = 0) { balanceRecordService.record(any()) }
     }
 }

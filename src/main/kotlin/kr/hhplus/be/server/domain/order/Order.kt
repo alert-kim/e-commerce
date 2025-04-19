@@ -40,10 +40,10 @@ class Order(
     var updatedAt: Instant = updatedAt
         private set
 
-    var _products: MutableList<OrderProduct> = orderProducts.toMutableList()
-
     val products: List<OrderProduct>
         get() = _products.toList()
+
+    private val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
 
     fun requireId(): OrderId =
         id ?: throw RequiredOrderIdException()

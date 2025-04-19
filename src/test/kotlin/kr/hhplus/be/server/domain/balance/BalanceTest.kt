@@ -41,7 +41,7 @@ class BalanceTest {
     }
 
     @Test
-    fun `charge - 잔고를 충전하고 updatedAt을 갱신한다`() {
+    fun `charge - 잔고를 충전하고, 레코드를 생성하며, updatedAt을 갱신한다`() {
         val initialAmount = BigDecimal.valueOf(1_000)
         val balance = BalanceMock.balance(amount = initialAmount)
         val chargeAmount = BigDecimal.valueOf(2_000)
@@ -50,10 +50,15 @@ class BalanceTest {
 
         assertThat(balance.amount).isEqualByComparingTo(initialAmount.add(chargeAmount))
         assertThat(balance.updatedAt).isAfter(balance.createdAt)
+        assertThat(balance.records).hasSize(1)
+        val record = balance.records.last()
+        assertThat(record.balanceId).isEqualTo(balance.id)
+        assertThat(record.amount.value).isEqualByComparingTo(chargeAmount)
+        assertThat(record.type).isEqualTo(BalanceTransactionType.CHARGE)
     }
 
     @Test
-    fun `user - 잔고를 사용하고 updatedAt을 갱신한다`() {
+    fun `user - 잔고를 사용하고, 레코드를 생성하며, updatedAt을 갱신한다`() {
         val initialAmount = BigDecimal.valueOf(1_000)
         val balance = BalanceMock.balance(amount = initialAmount)
         val useAmount = BigDecimal.valueOf(500)
@@ -64,5 +69,10 @@ class BalanceTest {
         assertThat(result.amount.value).isEqualByComparingTo(useAmount)
         assertThat(balance.amount).isEqualByComparingTo(initialAmount.minus(useAmount))
         assertThat(balance.updatedAt).isAfter(balance.createdAt)
+        assertThat(balance.records).hasSize(1)
+        val record = balance.records.last()
+        assertThat(record.balanceId).isEqualTo(balance.id)
+        assertThat(record.amount.value).isEqualByComparingTo(useAmount)
+        assertThat(record.type).isEqualTo(BalanceTransactionType.USE)
     }
 }

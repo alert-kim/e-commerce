@@ -10,28 +10,38 @@ class Balance (
     val id: BalanceId? = null,
     val userId: UserId,
     val createdAt: Instant,
+    records: List<BalanceRecord>,
     amount: BigDecimal,
     updatedAt: Instant,
 ) {
-    private var _amount: BalanceAmount = BalanceAmount(amount)
-
-    var amount: BigDecimal
+    val amount: BigDecimal
         get() = _amount.value
-        private set(value) {
-            this._amount = BalanceAmount(value)
-        }
+
+    val records: List<BalanceRecord>
+        get() = _records.toList()
 
     var updatedAt: Instant = updatedAt
         private set
 
+    private var _amount: BalanceAmount = BalanceAmount(amount)
+    private val _records: MutableList<BalanceRecord> = records.toMutableList()
+
     fun charge(amount: BalanceAmount) {
         this._amount = this._amount.plus(amount)
         this.updatedAt = Instant.now()
+        addRecord(
+            type = BalanceTransactionType.CHARGE,
+            amount = amount,
+        )
     }
 
     fun use(amount: BalanceAmount): UsedBalanceAmount  {
         this._amount = this._amount.minus(amount)
         this.updatedAt = Instant.now()
+        addRecord(
+            type = BalanceTransactionType.USE,
+            amount = amount,
+        )
         return UsedBalanceAmount(
             balanceId = requireId(),
             amount = amount,
@@ -41,12 +51,27 @@ class Balance (
     fun requireId(): BalanceId =
         id ?: throw RequiredBalanceIdException()
 
+    private fun addRecord(
+        type: BalanceTransactionType,
+        amount: BalanceAmount,
+    ) {
+        val record = BalanceRecord.new(
+            balanceId = requireId(),
+            type = type,
+            amount = amount,
+        )
+        _records.add(record)
+        this.updatedAt = Instant.now()
+
+    }
+
     companion object {
         fun new(userId: UserId): Balance =
             Balance(
                 userId = userId,
-                createdAt = Instant.now(),
                 amount = BigDecimal.ZERO,
+                records = emptyList(),
+                createdAt = Instant.now(),
                 updatedAt = Instant.now(),
             )
     }
