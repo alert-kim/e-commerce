@@ -3,6 +3,7 @@ package kr.hhplus.be.server.mock
 import kr.hhplus.be.server.domain.product.*
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
 object ProductMock {
 
@@ -66,5 +67,19 @@ object ProductMock {
         stock = stock,
         status = status,
         createdAt = createdAt,
+    )
+
+    fun dailySale(
+        date: LocalDate = LocalDate.now(),
+        productId: ProductId = id(),
+        quantity: Int = 10,
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now(),
+    ) = ProductDailySale(
+        date = date,
+        productId = productId,
+        createdAt = createdAt,
+        quantity = quantity,
+        updatedAt = updatedAt,
     )
 }

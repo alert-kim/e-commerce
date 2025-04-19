@@ -9,6 +9,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
+import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
 import kr.hhplus.be.server.mock.ProductMock
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class ProductServiceTest {
@@ -28,6 +30,9 @@ class ProductServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var repository: ProductRepository
+
+    @MockK(relaxed = true)
+    private lateinit var saleRepository: ProductDailySaleRepository
 
     @BeforeEach
     fun setUp() {
@@ -176,6 +181,72 @@ class ProductServiceTest {
 
         shouldThrow<NotFoundProductException> {
             service.allocateStocks(command)
+        }
+    }
+
+    @Test
+    fun `aggregateProductDailySales - 상품 일일 판매량 집계 - 해당 상품의 집계 데이터가 이미 있는 경우`() {
+        val newSaleQuantity = 10
+        val sale = ProductMock.dailySale()
+        val originalQuantity = sale.quantity
+
+        val command = RecordProductDailySalesCommand(
+            sales = listOf(
+                RecordProductDailySalesCommand.ProductSale(
+                    productId = sale.productId,
+                    date = sale.date,
+                    quantity = newSaleQuantity,
+                ),
+            ),
+        )
+        every {
+            saleRepository.findByProductIdAndDate(
+                productId = sale.productId,
+                date = sale.date,
+            )
+        } returns sale
+
+        service.aggregateProductDailySales(command)
+
+        verify {
+            saleRepository.update(withArg<ProductDailySale> {
+                assertThat(it.productId).isEqualTo(sale.productId)
+                assertThat(it.date).isEqualTo(sale.date)
+                assertThat(it.quantity).isEqualTo(originalQuantity + newSaleQuantity)
+            })
+        }
+    }
+
+    @Test
+    fun `aggregateProductDailySales - 상품 일일 판매량 집계 - 해당 상품의 집계 데이터가 없는 경우`() {
+        val date = LocalDate.now()
+        val productId = ProductMock.id()
+        val newSaleQuantity = 3
+
+        val command = RecordProductDailySalesCommand(
+            sales = listOf(
+                RecordProductDailySalesCommand.ProductSale(
+                    productId = productId,
+                    date = date,
+                    quantity = newSaleQuantity,
+                ),
+            ),
+        )
+        every {
+            saleRepository.findByProductIdAndDate(
+                productId = productId,
+                date = date,
+            )
+        } returns null
+
+        service.aggregateProductDailySales(command)
+
+        verify {
+            saleRepository.save(withArg<ProductDailySale> {
+                assertThat(it.productId).isEqualTo(productId)
+                assertThat(it.date).isEqualTo(date)
+                assertThat(it.quantity).isEqualTo(newSaleQuantity)
+            })
         }
     }
 }

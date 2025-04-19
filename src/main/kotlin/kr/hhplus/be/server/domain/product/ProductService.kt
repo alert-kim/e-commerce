@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class ProductService(
     private val repository: ProductRepository,
+    private val dailySaleRepository: ProductDailySaleRepository,
 ) {
     fun allocateStocks(
         command: AllocateStocksCommand
@@ -34,7 +35,26 @@ class ProductService(
     }
 
     fun aggregateProductDailySales(command: RecordProductDailySalesCommand) {
-        TODO()
+        command.sales.forEach { newSale ->
+            val sale = dailySaleRepository.findByProductIdAndDate(
+                productId = newSale.productId,
+                date = newSale.date,
+            )
+            when(sale == null) {
+                true -> {
+                    val sale = ProductDailySale.new(
+                        productId = newSale.productId,
+                        date = newSale.date,
+                        quantity = newSale.quantity,
+                    )
+                    dailySaleRepository.save(sale)
+                }
+                false -> {
+                    sale.addQuantity(newSale.quantity)
+                    dailySaleRepository.update(sale)
+                }
+            }
+        }
     }
 
     fun getAllByStatusOnPaged(status: ProductStatus, page: Int, pageSize: Int): Page<Product> {

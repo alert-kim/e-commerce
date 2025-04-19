@@ -11,6 +11,7 @@ import io.mockk.verify
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.Product
+import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductService
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
@@ -70,18 +71,18 @@ class ProductFacadeTest {
         )
         val expects = listOf(
             RecordProductDailySalesCommand.ProductSale(
-                productId = 1L,
-                localDate = yesterday,
+                productId = ProductId(1L),
+                date = yesterday,
                 quantity = 20,
             ),
             RecordProductDailySalesCommand.ProductSale(
-                productId = 1L,
-                localDate = today,
+                productId = ProductId(1L),
+                date = today,
                 quantity = 10,
             ),
             RecordProductDailySalesCommand.ProductSale(
-                productId = 2L,
-                localDate = today,
+                productId = ProductId(2L),
+                date = today,
                 quantity = 10,
             )
         )
@@ -96,9 +97,9 @@ class ProductFacadeTest {
                 withArg<RecordProductDailySalesCommand> {
                     it.sales.forEach { productSale ->
                         val expect =
-                            expects.find { it.productId == productSale.productId && it.localDate == productSale.localDate }
+                            expects.find { it.productId == productSale.productId && it.date == productSale.date }
                         assertThat(productSale.productId).isEqualTo(expect?.productId)
-                        assertThat(productSale.localDate).isEqualTo(expect?.localDate)
+                        assertThat(productSale.date).isEqualTo(expect?.date)
                         assertThat(productSale.quantity).isEqualTo(expect?.quantity)
                     }
                 }

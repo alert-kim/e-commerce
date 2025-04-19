@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.product
 
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
+import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductQueryModel
 import kr.hhplus.be.server.domain.product.ProductService
 import kr.hhplus.be.server.domain.product.ProductStatus
@@ -8,7 +9,6 @@ import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.util.TimeZone
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class ProductFacade(
@@ -20,10 +20,10 @@ class ProductFacade(
             .groupBy {
                 Pair(it.productId, it.createdAt.atZone(TimeZone.KSTId).toLocalDate())
             }.map { (key, sales) ->
-                val (productId, localDate) = key
+                val (productId, date) = key
                 RecordProductDailySalesCommand.ProductSale(
-                    productId = productId,
-                    localDate = localDate,
+                    productId = ProductId(productId),
+                    date = date,
                     quantity = sales.sumOf { it.quantity }
                 )
             }

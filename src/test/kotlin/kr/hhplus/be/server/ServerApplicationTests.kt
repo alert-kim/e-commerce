@@ -8,6 +8,7 @@ import kr.hhplus.be.server.domain.order.OrderRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventRepository
 import kr.hhplus.be.server.domain.payment.PaymentRepository
+import kr.hhplus.be.server.domain.product.ProductDailySaleRepository
 import kr.hhplus.be.server.domain.product.ProductRepository
 import kr.hhplus.be.server.domain.user.UserRepository
 import org.junit.jupiter.api.Test
@@ -43,6 +44,9 @@ class ServerApplicationTests {
 
 	@MockitoBean
 	lateinit var productRepository: ProductRepository
+
+	@MockitoBean
+	lateinit var productDailySaleRepository: ProductDailySaleRepository
 
 	@MockitoBean
 	lateinit var userRepository: UserRepository
