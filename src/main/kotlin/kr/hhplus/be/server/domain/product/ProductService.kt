@@ -62,4 +62,8 @@ class ProductService(
             createPageRequest(page = page, pageSize = pageSize, sort = Sort.by(Sort.Direction.DESC, "createdAt"))
         return repository.findAllByStatus(status, pageable)
     }
+
+    fun getPopularProducts(): List<Product> {
+        TODO()
+    }
 }

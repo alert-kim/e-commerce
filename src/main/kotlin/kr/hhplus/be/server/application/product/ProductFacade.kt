@@ -43,6 +43,9 @@ class ProductFacade(
     }
 
     fun getPopularProducts(): List<ProductQueryModel> {
-        TODO()
+        val products = service.getPopularProducts()
+        return products.map { product ->
+            ProductQueryModel.from(product)
+        }
     }
 }

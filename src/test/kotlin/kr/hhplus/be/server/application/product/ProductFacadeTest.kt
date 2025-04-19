@@ -183,4 +183,39 @@ class ProductFacadeTest {
             facade.getAllOnSalePaged(page, pageSize)
         }
     }
+
+    @Test
+    fun `getPopularProducts - 인기 상품 반환`() {
+        val products = List(5) {
+            ProductMock.product()
+        }
+        every {
+            service.getPopularProducts()
+        } returns products
+
+        val result = facade.getPopularProducts()
+
+        assertThat(result).hasSize(products.size)
+        result.forEachIndexed { index, productQueryModel ->
+            assertThat(productQueryModel.id).isEqualTo(products[index].id)
+            assertThat(productQueryModel.status).isEqualTo(products[index].status)
+            assertThat(productQueryModel.name).isEqualTo(products[index].name)
+            assertThat(productQueryModel.description).isEqualTo(products[index].description)
+            assertThat(productQueryModel.price).isEqualByComparingTo(products[index].price)
+            assertThat(productQueryModel.stock).isEqualByComparingTo(products[index].stock.quantity)
+            assertThat(productQueryModel.createdAt).isEqualTo(products[index].createdAt)
+        }
+        verify {
+            service.getPopularProducts()
+        }
+    }
+
+    @Test
+    fun `getPopularProducts - 인기 상품이 없는 경우 빈 페이지 반환`() {
+        every { service.getPopularProducts() } returns emptyList()
+
+        val result = facade.getPopularProducts()
+
+        assertThat(result).isEmpty()
+    }
 }
