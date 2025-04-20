@@ -15,7 +15,7 @@ class CouponsResponseTest {
         assertThat(response.coupons).hasSize(coupons.size)
         response.coupons.forEachIndexed { index, couponResponse ->
             assertThat(couponResponse.id).isEqualTo(coupons[index].id.value)
-            assertThat(couponResponse.userId).isEqualTo(coupons[index].userId.value)
+            assertThat(couponResponse.userId).isEqualTo(coupons[index].userId)
             assertThat(couponResponse.name).isEqualTo(coupons[index].name)
             assertThat(couponResponse.discountAmount).isEqualByComparingTo(coupons[index].discountAmount)
             assertThat(couponResponse.usedAt).isEqualTo(coupons[index].usedAt)

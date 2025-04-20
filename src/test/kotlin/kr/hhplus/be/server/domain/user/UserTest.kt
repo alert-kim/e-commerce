@@ -12,9 +12,9 @@ class UserTest {
     fun `requireId - id가 null이 아닌 경우 id 반환`() {
         val user = UserMock.user(id = UserMock.id())
 
-        val result = user.requireId()
+        val result = user.id()
 
-        assertThat(result).isEqualTo(user.id)
+        assertThat(result).isEqualTo(user.id())
     }
 
     @Test
@@ -22,7 +22,7 @@ class UserTest {
         val user = UserMock.user(id = null)
 
         assertThrows(RequiredUserIdException::class.java) {
-            user.requireId()
+            user.id()
         }
     }
 }

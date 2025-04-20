@@ -11,7 +11,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
-import java.math.BigDecimal
 
 class PaymentTest {
     @Test
@@ -38,7 +37,7 @@ class PaymentTest {
         val orderId = OrderMock.id()
         val amount = UsedBalanceAmount(
             balanceId = BalanceMock.id(),
-            amount = BalanceAmount(1000.toBigDecimal()),
+            amount = BalanceAmount.of(1000.toBigDecimal()),
         )
 
         val payment = Payment.new(

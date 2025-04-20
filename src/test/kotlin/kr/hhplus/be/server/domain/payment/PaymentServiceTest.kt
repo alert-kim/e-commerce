@@ -8,6 +8,7 @@ import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.mock.BalanceMock
+import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
@@ -28,7 +29,7 @@ class PaymentServiceTest {
         val orderId = OrderMock.id()
         val amount = UsedBalanceAmount(
             balanceId = BalanceMock.id(),
-            amount = BalanceAmount(2_500.toBigDecimal()),
+            amount = BalanceAmount.of(2_500.toBigDecimal()),
         )
 
         val result = service.pay(

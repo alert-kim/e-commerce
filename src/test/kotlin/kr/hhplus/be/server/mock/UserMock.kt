@@ -7,14 +7,16 @@ import java.time.Instant
 
 object UserMock {
 
-    fun id(): UserId = UserId(IdMock.value())
+    fun id(
+        value: Long = IdMock.value(),
+    ) = UserId(value)
 
     fun user(
         id: UserId? = id(),
         name: String = "홍길동",
         createdAt: Instant = Instant.now(),
     ) = User(
-        id = id,
+        id = id?.value,
         name = name,
         createdAt = createdAt,
     )

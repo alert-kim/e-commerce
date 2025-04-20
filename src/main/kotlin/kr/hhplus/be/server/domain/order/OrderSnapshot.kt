@@ -1,12 +1,13 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
+import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
 
 data class OrderSnapshot(
     val id: Long,
-    val userId: Long,
+    val userId: UserId,
     val status: OrderStatus,
     val originalAmount: BigDecimal,
     val discountAmount: BigDecimal,
@@ -41,7 +42,7 @@ data class OrderSnapshot(
         fun from(order: Order): OrderSnapshot {
             return OrderSnapshot(
                 id = order.requireId().value,
-                userId = order.userId.value,
+                userId = order.userId,
                 status = order.status,
                 originalAmount = order.originalAmount,
                 discountAmount = order.discountAmount,

@@ -8,21 +8,18 @@ import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderId
-import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
-import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
-import kr.hhplus.be.server.domain.order.command.PayOrderCommand
-import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
+import kr.hhplus.be.server.domain.order.OrderView
+import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventType
-import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductService
 import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
+import kr.hhplus.be.server.domain.user.UserView
 import org.springframework.stereotype.Service
 
 @Service
@@ -37,10 +34,10 @@ class OrderFacade(
     fun order(
         command: OrderFacadeCommand,
     ): OrderView {
-        val userId = verifyUser(command.userId)
+        val userId = getUser(command.userId).id
         val orderId = createOrder(userId)
-        placeProduct(orderId,command)
-        applyCoupon(orderId, command)
+        placeProduct(orderId, command)
+        applyCoupon(orderId, userId, command)
         pay(orderId)
         return orderService.get(orderId.value)
     }
@@ -48,7 +45,7 @@ class OrderFacade(
     fun sendOrderCompletionData(
         command: SendOrderFacadeCommand,
     ) {
-       orderService.sendOrderCompleted(SendOrderCompletedCommand(command.orderSnapshot))
+        orderService.sendOrderCompleted(SendOrderCompletedCommand(command.orderSnapshot))
     }
 
     fun consumeEvent(
@@ -66,10 +63,10 @@ class OrderFacade(
             eventType = eventType,
         )
 
-    private fun verifyUser(
+    private fun getUser(
         userId: Long,
-    ): UserId =
-        userService.get(userId).id
+    ): UserView =
+        userService.get(userId)
 
     private fun placeProduct(
         orderId: OrderId,
@@ -95,11 +92,12 @@ class OrderFacade(
 
     private fun applyCoupon(
         orderId: OrderId,
+        userId: UserId,
         command: OrderFacadeCommand,
     ) {
         if (command.couponId != null) {
             val usedCoupon = couponService.use(
-                UseCouponCommand(command.couponId, UserId(command.userId))
+                UseCouponCommand(command.couponId, userId)
             )
             orderService.applyCoupon(ApplyCouponCommand(orderId, usedCoupon))
         }

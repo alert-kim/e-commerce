@@ -40,5 +40,5 @@ object PaymentMock {
             orderId = orderId,
             amount = amount,
             createdAt = createdAt,
-    )
+        )
 }

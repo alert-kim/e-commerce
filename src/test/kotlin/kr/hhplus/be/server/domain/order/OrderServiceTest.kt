@@ -49,8 +49,8 @@ class OrderServiceTest {
     @Test
     fun `create - 주문 생성`() {
         val orderId = OrderMock.id()
-        val userId = UserMock.id()
         every { repository.save(any()) } returns orderId
+        val userId = UserMock.id()
 
         val result = service.createOrder(CreateOrderCommand(userId))
 

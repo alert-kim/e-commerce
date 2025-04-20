@@ -11,7 +11,7 @@ data class BalanceResponse(
     val amount: BigDecimal,
     val createdAt: Instant,
     val updatedAt: Instant,
-): ServerApiResponse {
+) : ServerApiResponse {
     companion object {
         fun of(
             userId: UserId,

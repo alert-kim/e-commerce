@@ -9,7 +9,7 @@ data class UserView(
 ) {
     companion object {
         fun from(user: User) = UserView(
-            id = user.requireId(),
+            id = user.id(),
             name = user.name,
             createdAt = user.createdAt,
         )

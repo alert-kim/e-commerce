@@ -21,9 +21,9 @@ class BalanceFacade(
                 amount = command.amount,
             )
         )
-        return balanceService.get(balanceId.value).let { BalanceView.from(it) }
+        return balanceService.get(balanceId.value)
     }
 
     fun getOrNullByUerId(userId: UserId): BalanceView? =
-        balanceService.getOrNullByUerId(userId)
+        balanceService.getOrNullByUserId(userId)
 }

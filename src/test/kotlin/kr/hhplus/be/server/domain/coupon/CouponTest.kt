@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.mock.CouponMock
+import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -33,7 +34,7 @@ class CouponTest {
 
     @Test
     fun `new - 쿠폰 생성`() {
-        val userId = UserId(1L)
+        val userId = UserMock.id()
         val couponSourceId = CouponSourceId(1L)
         val name = "쿠폰 이름"
         val discountAmount = BigDecimal.valueOf(1000)
@@ -72,10 +73,10 @@ class CouponTest {
 
     @Test
     fun `use - 다른 사람 쿠폰 사용 - NotOwnedCouponException 발생`() {
-        val coupon = CouponMock.coupon(userId = UserId(1L), usedAt = null)
+        val coupon = CouponMock.coupon(userId = UserMock.id(1), usedAt = null)
 
         assertThrows<NotOwnedCouponException> {
-            coupon.use(UserId(2L))
+            coupon.use(UserMock.id(2))
         }
     }
 

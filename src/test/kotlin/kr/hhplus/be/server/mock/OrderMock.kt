@@ -2,7 +2,6 @@ package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
-import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
 import kr.hhplus.be.server.domain.order.event.OrderEventId
@@ -113,7 +112,7 @@ object OrderMock {
 
     fun eventConsumerOffset(
         consumerId: String = "test",
-        eventId : OrderEventId = eventId(),
+        eventId: OrderEventId = eventId(),
         eventType: OrderEventType = OrderEventType.COMPLETED,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),

@@ -15,9 +15,9 @@ data class BalanceView(
         fun from(
             balance: Balance,
         ) = BalanceView(
-            id = balance.requireId(),
+            id = balance.id(),
             userId = balance.userId,
-            amount = balance.amount,
+            amount = balance.amount.value,
             createdAt = balance.createdAt,
             updatedAt = balance.updatedAt,
         )

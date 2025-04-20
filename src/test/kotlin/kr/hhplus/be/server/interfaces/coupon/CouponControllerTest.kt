@@ -14,6 +14,7 @@ import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
 import kr.hhplus.be.server.mock.CouponMock
+import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.UserMock
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.jupiter.api.BeforeEach
@@ -118,10 +119,10 @@ class CouponControllerTest {
 
     @Test
     fun `내 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
-        val userId = UserMock.id()
-        every { couponFacade.getCoupons(userId.value) } returns emptyList()
+        val userId = IdMock.value()
+        every { couponFacade.getCoupons(userId) } returns emptyList()
 
-        mockMvc.get("/users/${userId.value}/coupons")
+        mockMvc.get("/users/${userId}/coupons")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.coupons") { hasSize<Any>(0) }
@@ -130,10 +131,10 @@ class CouponControllerTest {
 
     @Test
     fun `내 쿠폰 목록 조회 - 404 - 유저 없음`() {
-        val userId = UserMock.id()
-        every { couponFacade.getCoupons(userId.value) } returns emptyList()
+        val userId = IdMock.value()
+        every { couponFacade.getCoupons(userId) } returns emptyList()
 
-        mockMvc.get("/users/${userId.value}/coupons")
+        mockMvc.get("/users/${userId}/coupons")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.coupons") { hasSize<Any>(0) }
@@ -142,10 +143,10 @@ class CouponControllerTest {
 
     @Test
     fun `내 쿠폰 목록 조회 - 404 - 찾을 수 없는 유저`() {
-        val userId = UserMock.id()
-        every { couponFacade.getCoupons(userId.value) } throws NotFoundUserException()
+        val userId = IdMock.value()
+        every { couponFacade.getCoupons(userId) } throws NotFoundUserException()
 
-        mockMvc.get("/users/${userId.value}/coupons")
+        mockMvc.get("/users/${userId}/coupons")
             .andExpect {
                 status { isNotFound() }
                 jsonPath("$.errorCode") { value(ErrorCode.NOT_FOUND_USER.name) }
@@ -155,17 +156,17 @@ class CouponControllerTest {
     @Test
     fun `쿠폰 발급 - 200`() {
         val couponSourceId = CouponMock.sourceId()
-        val userId = UserMock.id()
+        val userId = IdMock.value()
         val coupon = CouponMock.view()
         val request = IssueCouponRequest(
             couponSourceId = couponSourceId.value,
-            userId = userId.value,
+            userId = userId,
         )
         every {
             couponFacade.issueCoupon(
                 IssueCouponFacadeCommand(
                     couponSourceId = couponSourceId.value,
-                    userId = userId.value
+                    userId = userId
                 ),
             )
         } returns coupon
@@ -192,16 +193,16 @@ class CouponControllerTest {
     @Test
     fun `쿠폰 발급 - 400 - 쿠폰 재고 부족`() {
         val couponSourceId = CouponMock.sourceId()
-        val userId = UserMock.id()
+        val userId = IdMock.value()
         val request = IssueCouponRequest(
             couponSourceId = couponSourceId.value,
-            userId = userId.value,
+            userId = userId,
         )
         every {
             couponFacade.issueCoupon(
                 IssueCouponFacadeCommand(
                     couponSourceId = couponSourceId.value,
-                    userId = userId.value,
+                    userId = userId,
                 )
             )
         } throws OutOfStockCouponSourceException(couponSourceId, 1, 0)
@@ -218,16 +219,16 @@ class CouponControllerTest {
     @Test
     fun `쿠폰 발급 - 404 - 찾을 수 없는 유저`() {
         val couponSourceId = CouponMock.sourceId()
-        val userId = UserMock.id()
+        val userId = IdMock.value()
         val request = IssueCouponRequest(
             couponSourceId = couponSourceId.value,
-            userId = userId.value,
+            userId = userId,
         )
         every {
             couponFacade.issueCoupon(
                 IssueCouponFacadeCommand(
                     couponSourceId = couponSourceId.value,
-                    userId = userId.value,
+                    userId = userId,
                 )
             )
         } throws NotFoundUserException("")
@@ -244,16 +245,16 @@ class CouponControllerTest {
     @Test
     fun `쿠폰 발급 - 404 - 찾을 수 없는 쿠폰 소스`() {
         val couponSourceId = CouponMock.sourceId()
-        val userId = UserMock.id()
+        val userId = IdMock.value()
         val request = IssueCouponRequest(
             couponSourceId = couponSourceId.value,
-            userId = userId.value,
+            userId = userId,
         )
         every {
             couponFacade.issueCoupon(
                 IssueCouponFacadeCommand(
                     couponSourceId = couponSourceId.value,
-                    userId = userId.value,
+                    userId = userId,
                 )
             )
         } throws NotFoundCouponSourceException("")

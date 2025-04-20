@@ -1,11 +1,13 @@
 package kr.hhplus.be.server.domain.balance
 
+import jakarta.persistence.Embeddable
 import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import java.math.BigDecimal
+import java.math.RoundingMode
 
-@JvmInline
-value class BalanceAmount (val value: BigDecimal) {
+@Embeddable
+data class BalanceAmount private constructor(val value: BigDecimal) {
     init {
         if (value < MIN_AMOUNT) {
             throw BelowMinBalanceAmountException(value)
@@ -24,5 +26,8 @@ value class BalanceAmount (val value: BigDecimal) {
     companion object {
         val MIN_AMOUNT: BigDecimal = BigDecimal.valueOf(0)
         val MAX_AMOUNT: BigDecimal = BigDecimal.valueOf(1_000_000)
+
+        fun of(value: BigDecimal): BalanceAmount =
+            BalanceAmount(value.setScale(2, RoundingMode.HALF_UP))
     }
 }

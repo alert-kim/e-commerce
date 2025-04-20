@@ -12,6 +12,7 @@ import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
 import kr.hhplus.be.server.mock.BalanceMock
+import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.UserMock
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -81,17 +82,17 @@ class BalanceControllerTest {
 
     @Test
     fun `잔고 조회 - 유저를 찾을 수 없는 경우 404 Not Found`() {
-        val userId = UserMock.id()
-        every { userFacade.get(userId.value) } throws NotFoundUserException()
+        val userId = IdMock.value()
+        every { userFacade.get(userId) } throws NotFoundUserException()
 
         mockMvc.get("/balances") {
-            param("userId", "${userId.value}")
+            param("userId", "${userId}")
         }.andExpect {
             status { isNotFound() }
             jsonPath("$.errorCode") { value(ErrorCode.NOT_FOUND_USER.name) }
         }
 
-        verify { userFacade.get(userId.value) }
+        verify { userFacade.get(userId) }
     }
 
     @Test
@@ -117,7 +118,6 @@ class BalanceControllerTest {
     @Test
     fun `잔고 충전 - 200`() {
         val userId = UserMock.id()
-        val balanceId = BalanceMock.id()
         val request = ChargeApiRequest(userId = userId.value, amount = BigDecimal.valueOf(1_000))
         val chargedBalance = BalanceMock.view(userId = userId, amount = BigDecimal.valueOf(2_000))
         every { balanceFacade.charge(ChargeBalanceFacadeCommand(userId = userId.value, amount = request.amount)) } returns chargedBalance
@@ -145,8 +145,8 @@ class BalanceControllerTest {
 
     @Test
     fun `잔고 충전 - 400 - 최대 잔고를 초과`() {
-        val userId = UserMock.id()
-        val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
+        val userId = IdMock.value()
+        val request = ChargeApiRequest(userId, BigDecimal.valueOf(1_000))
         every { balanceFacade.charge(any()) } throws ExceedMaxBalanceAmountException(request.amount)
 
         mockMvc.post("/balances/charge") {
@@ -162,8 +162,8 @@ class BalanceControllerTest {
 
     @Test
     fun `잔고 충전 - 400 - 최소 잔고 미만`() {
-        val userId = UserMock.id()
-        val request = ChargeApiRequest(userId.value, BigDecimal.valueOf(1_000))
+        val userId = IdMock.value()
+        val request = ChargeApiRequest(userId, BigDecimal.valueOf(1_000))
         every { balanceFacade.charge(any()) } throws BelowMinBalanceAmountException(request.amount)
 
         mockMvc.post("/balances/charge") {

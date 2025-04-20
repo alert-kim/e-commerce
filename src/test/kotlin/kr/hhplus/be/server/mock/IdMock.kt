@@ -5,5 +5,5 @@ import io.kotest.property.arbitrary.long
 import io.kotest.property.arbitrary.next
 
 object IdMock {
-    fun value(): Long = Arb.long(0L..100L).next()
+    fun value(): Long = Arb.long(0L..10_000L).next()
 }

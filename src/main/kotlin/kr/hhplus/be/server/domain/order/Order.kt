@@ -79,7 +79,7 @@ class Order(
             )
         }
         val newCouponId = coupon.id
-        when(val originalCouponId = this.couponId) {
+        when (val originalCouponId = this.couponId) {
             null -> Unit
             newCouponId -> return
             else -> throw AlreadyCouponAppliedException(

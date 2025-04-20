@@ -16,6 +16,7 @@ import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.order.reqeust.OrderRequest
+import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
@@ -148,7 +149,7 @@ class OrderControllerTest {
     @Test
     fun `주문 - 400 - 잔고 부족`() {
         val request = request()
-        every { orderFacade.order(any()) } throws InsufficientBalanceException(1L, BigDecimal.ZERO, BigDecimal.ZERO)
+        every { orderFacade.order(any()) } throws InsufficientBalanceException(BalanceMock.id(), BigDecimal.ZERO, BigDecimal.ZERO)
 
         mockMvc.post("/orders") {
             contentType = MediaType.APPLICATION_JSON

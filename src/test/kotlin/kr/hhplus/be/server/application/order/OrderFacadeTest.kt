@@ -76,7 +76,7 @@ class OrderFacadeTest {
         }
         val usedAmount = UsedBalanceAmount(
             balanceId = BalanceMock.id(),
-            amount = BalanceAmount(command.totalAmount),
+            amount = BalanceAmount.of(command.totalAmount),
         )
         val payment = PaymentMock.view(
             orderId = orderId,
@@ -171,7 +171,7 @@ class OrderFacadeTest {
         }
         val usedAmount = UsedBalanceAmount(
             balanceId = BalanceMock.id(),
-            amount = BalanceAmount(command.totalAmount),
+            amount = BalanceAmount.of(command.totalAmount),
         )
         val payment = PaymentMock.view(
             orderId = orderId,
