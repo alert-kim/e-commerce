@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.balance.response
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import kr.hhplus.be.server.domain.balance.BalanceView
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
@@ -8,6 +9,7 @@ import java.time.Instant
 
 data class BalanceResponse(
     val userId: Long,
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     val amount: BigDecimal,
     val createdAt: Instant,
     val updatedAt: Instant,

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.balance
 
+import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
 import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
@@ -7,7 +8,10 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Embeddable
-data class BalanceAmount private constructor(val value: BigDecimal) {
+data class BalanceAmount private constructor(
+    @Column(precision = 20, scale = 2)
+    val value: BigDecimal
+) {
     init {
         if (value < MIN_AMOUNT) {
             throw BelowMinBalanceAmountException(value)
