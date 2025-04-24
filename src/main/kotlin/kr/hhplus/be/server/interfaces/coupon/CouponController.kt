@@ -41,13 +41,13 @@ class CouponController(
         @RequestBody request: IssueCouponRequest,
     ) = handleRequest(
         block = {
-            val coupon = couponFacade.issueCoupon(
+            val result = couponFacade.issueCoupon(
                 IssueCouponFacadeCommand(
-                couponSourceId = request.couponSourceId,
-                userId = request.userId,
+                    couponSourceId = request.couponSourceId,
+                    userId = request.userId,
                 )
             )
-            CouponResponse.from(coupon)
+            CouponResponse.from(result)
         },
         errorSpec = {
             when (it) {

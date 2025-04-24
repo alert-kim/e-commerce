@@ -1,38 +1,24 @@
 package kr.hhplus.be.server.interfaces.balance.response
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import kr.hhplus.be.server.domain.balance.BalanceView
-import kr.hhplus.be.server.domain.user.UserId
+import kr.hhplus.be.server.application.balance.result.BalanceResult
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
-import java.time.Instant
 
 data class BalanceResponse(
     val userId: Long,
-    @JsonFormat(shape=JsonFormat.Shape.STRING)
-    val amount: BigDecimal,
-    val createdAt: Instant,
-    val updatedAt: Instant,
+    val balance: BigDecimal,
 ) : ServerApiResponse {
     companion object {
-        fun of(
-            userId: UserId,
-            balance: BalanceView?,
-        ) = when (balance) {
-            null -> default(userId)
-            else -> BalanceResponse(
-                userId = balance.userId.value,
-                amount = balance.amount,
-                createdAt = balance.createdAt,
-                updatedAt = balance.updatedAt,
-            )
-        }
-
-        private fun default(userId: UserId) = BalanceResponse(
-            userId = userId.value,
-            amount = BigDecimal.ZERO,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now(),
-        )
+        fun of(result: BalanceResult): BalanceResponse =
+            when (result) {
+                is BalanceResult.Found -> BalanceResponse(
+                    userId = result.value.userId.value,
+                    balance = result.value.amount,
+                )
+                is BalanceResult.Empty -> BalanceResponse(
+                    userId = result.userId.value,
+                    balance = BigDecimal.ZERO,
+                )
+            }
     }
 }

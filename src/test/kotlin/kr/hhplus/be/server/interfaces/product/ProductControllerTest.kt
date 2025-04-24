@@ -9,8 +9,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.ProductFacade
+import kr.hhplus.be.server.application.product.result.ProductsResult
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.PopularProductsView
 import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.mock.ProductMock
@@ -57,13 +57,14 @@ class ProductControllerTest {
         val products = List(pageSize) {
             ProductMock.view(
                 name = "상품${it + 1}",
-
-                )
+            )
         }
-        every { productFacade.getAllOnSalePaged(page, pageSize) } returns PageImpl(
-            products,
-            Pageable.unpaged(),
-            totalCount
+        every { productFacade.getAllOnSalePaged(page, pageSize) } returns ProductsResult.Paged(
+            value = PageImpl(
+                products,
+                Pageable.unpaged(),
+                totalCount
+            )
         )
 
         mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
@@ -93,10 +94,12 @@ class ProductControllerTest {
         val pageSize = 20
         val totalCount = 0L
         val products = emptyList<ProductView>()
-        every { productFacade.getAllOnSalePaged(page, pageSize) } returns PageImpl(
-            products,
-            Pageable.unpaged(),
-            totalCount
+        every { productFacade.getAllOnSalePaged(page, pageSize) } returns ProductsResult.Paged(
+            value = PageImpl(
+                products,
+                Pageable.unpaged(),
+                totalCount
+            )
         )
 
         mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
@@ -114,7 +117,9 @@ class ProductControllerTest {
     fun `상품 목록 조회 - 200 - 요청된 page, pageSize로 상품을 조회`() {
         val page = Arb.int(0..10).next()
         val pageSize = Arb.int(1..100).next()
-        every { productFacade.getAllOnSalePaged(page, pageSize) } returns PageImpl(emptyList(), Pageable.unpaged(), 0)
+        every { productFacade.getAllOnSalePaged(page, pageSize) } returns ProductsResult.Paged(
+            value = PageImpl(emptyList(), Pageable.unpaged(), 0)
+        )
 
         mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
             .andExpect {
@@ -150,7 +155,7 @@ class ProductControllerTest {
                 name = "상품${it + 1}",
             )
         }
-        every { productFacade.getPopularProducts() } returns PopularProductsView(products)
+        every { productFacade.getPopularProducts() } returns ProductsResult.Listed(products)
 
         mockMvc.get("/products/popular")
             .andExpect {
@@ -162,7 +167,7 @@ class ProductControllerTest {
                     jsonPath("$.products[$index].status") { value(product.status.name) }
                     jsonPath("$.products[$index].name") { value(product.name) }
                     jsonPath("$.products[$index].description") { value(product.description) }
-                    jsonPath("$.products[$index].price") { value(product.price.toString()) }
+                    jsonPath("$.products[$index].price") { value(product.price.value.toString()) }
                     jsonPath("$.products[$index].stock") { value(product.stock) }
                     jsonPath("$.products[$index].createdAt") { value(product.createdAt.toString()) }
                 }

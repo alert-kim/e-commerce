@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.order
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
+import kr.hhplus.be.server.application.order.result.OrderResult
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
@@ -35,14 +36,14 @@ class OrderFacade(
 ) {
     fun order(
         command: OrderFacadeCommand,
-    ): OrderView {
+    ): OrderResult.Single {
         command.validate()
         val userId = getUser(command.userId).id
         val orderId = createOrder(userId)
         placeProduct(orderId, command)
         applyCoupon(orderId, userId, command)
         pay(orderId)
-        return orderService.get(orderId.value)
+        return OrderResult.Single(orderService.get(orderId.value))
     }
 
     fun sendOrderCompletionData(
@@ -60,10 +61,12 @@ class OrderFacade(
     fun getAllEventsNotConsumedInOrder(
         consumerId: String,
         eventType: OrderEventType,
-    ): List<OrderEvent> =
-        orderService.getAllEventsNotConsumedInOrder(
-            consumerId = consumerId,
-            eventType = eventType,
+    ): OrderResult.Events =
+        OrderResult.Events(
+            orderService.getAllEventsNotConsumedInOrder(
+                consumerId = consumerId,
+                eventType = eventType,
+            )
         )
 
     private fun getUser(

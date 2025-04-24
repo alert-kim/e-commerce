@@ -19,9 +19,7 @@ class GetBalanceApiTest : ApiTest() {
         }.andExpect {
             status { isOk() }
             jsonPath("$.userId") { value(balance.userId.value) }
-            jsonPath("$.amount") { value(BigDecimal(balance.amount.value.toPlainString())) }
-            jsonPath("$.createdAt") { value(balance.createdAt.toString()) }
-            jsonPath("$.updatedAt") { value(balance.updatedAt.toString()) }
+            jsonPath("$.balance") { value(BigDecimal(balance.amount.value.toPlainString())) }
         }
     }
 
@@ -34,7 +32,7 @@ class GetBalanceApiTest : ApiTest() {
         }.andExpect {
             status { isOk() }
             jsonPath("$.userId") { value(user.id().value) }
-            jsonPath("$.amount") { value(BigDecimal.ZERO) }
+            jsonPath("$.balance") { value(BigDecimal.ZERO) }
         }
     }
 

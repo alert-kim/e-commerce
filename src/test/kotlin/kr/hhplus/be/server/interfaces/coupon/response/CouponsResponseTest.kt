@@ -1,37 +1,34 @@
 package kr.hhplus.be.server.interfaces.coupon.response
 
-import kr.hhplus.be.server.domain.coupon.CouponView
+import kr.hhplus.be.server.application.coupon.result.CouponResult
 import kr.hhplus.be.server.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class CouponsResponseTest {
     @Test
-    fun `내 쿠폰 목록에 대한 응답 생성`() {
+    fun `쿠폰 목록 대한 응답 생성`() {
         val coupons = List(3) { CouponMock.view() }
+        val result = CouponResult.List(coupons)
 
-        val response = CouponsResponse.from(coupons)
+        val response = CouponsResponse.from(result)
 
-        assertThat(response.coupons).hasSize(coupons.size)
-        response.coupons.forEachIndexed { index, couponResponse ->
-            assertThat(couponResponse.id).isEqualTo(coupons[index].id.value)
-            assertThat(couponResponse.userId).isEqualTo(coupons[index].userId)
-            assertThat(couponResponse.name).isEqualTo(coupons[index].name)
-            assertThat(couponResponse.discountAmount).isEqualByComparingTo(coupons[index].discountAmount)
-            assertThat(couponResponse.usedAt).isEqualTo(coupons[index].usedAt)
-            assertThat(couponResponse.createdAt).isEqualTo(coupons[index].createdAt)
-            assertThat(couponResponse.updatedAt).isEqualTo(coupons[index].updatedAt)
+        assertThat(response.coupons.size).isEqualTo(coupons.size)
+        response.coupons.forEachIndexed { index, coupon ->
+            assertThat(coupon.id).isEqualTo(coupons[index].id.value)
+            assertThat(coupon.name).isEqualTo(coupons[index].name)
+            assertThat(coupon.discountAmount).isEqualByComparingTo(coupons[index].discountAmount)
+            assertThat(coupon.createdAt).isEqualTo(coupons[index].createdAt)
+            assertThat(coupon.updatedAt).isEqualTo(coupons[index].updatedAt)
         }
-
     }
 
     @Test
     fun `빈 리스트인 경우 빈 리스트 응답`() {
-        val coupons = emptyList<CouponView>()
+        val result = CouponResult.List(emptyList())
 
-        val response = CouponsResponse.from(coupons)
+        val response = CouponsResponse.from(result)
 
         assertThat(response.coupons).isEmpty()
     }
 }
-

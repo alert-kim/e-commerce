@@ -7,7 +7,10 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
+import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
+import kr.hhplus.be.server.application.order.result.OrderResult
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
@@ -15,7 +18,10 @@ import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderService
+import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.command.*
+import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
@@ -110,7 +116,8 @@ class OrderFacadeTest {
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isEqualTo(order)
+        assertThat(result).isInstanceOf(OrderResult.Single::class.java)
+        assertThat(result.value).isEqualTo(order)
         verifyOrder {
             command.validate()
             userService.get(command.userId)
@@ -212,7 +219,8 @@ class OrderFacadeTest {
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isEqualTo(order)
+        assertThat(result).isInstanceOf(OrderResult.Single::class.java)
+        assertThat(result.value).isEqualTo(order)
         verifyOrder {
             command.validate()
             userService.get(command.userId)
@@ -261,28 +269,46 @@ class OrderFacadeTest {
         }
     }
 
-    private fun orderFacadeCommand(
-        couponId: Long? = null
-    ): OrderFacadeCommand =
-        OrderFacadeCommand(
-            userId = 1L,
-            productsToOrder = listOf(
-                OrderFacadeCommand.ProductToOrder(
-                    productId = 1L,
-                    quantity = 2,
-                    unitPrice = BigDecimal.valueOf(10_000),
-                    totalPrice = BigDecimal.valueOf(20_000)
-                ),
-                OrderFacadeCommand.ProductToOrder(
-                    productId = 2L,
-                    quantity = 1,
-                    unitPrice = BigDecimal.valueOf(30_000),
-                    totalPrice = BigDecimal.valueOf(30_000)
-                ),
-            ),
-            couponId = couponId,
-            originalAmount = BigDecimal.valueOf(50_000),
-            discountAmount = BigDecimal.valueOf(10_000),
-            totalAmount = BigDecimal.valueOf(40_000)
-        )
+    @Test
+    fun `sendOrderCompletionData - 주문 완료 데이터를 전송한다`() {
+        val orderSnapshot = OrderSnapshot.from(OrderMock.order())
+        val command = SendOrderFacadeCommand(orderSnapshot)
+
+        orderFacade.sendOrderCompletionData(command)
+
+        verify {
+            orderService.sendOrderCompleted(SendOrderCompletedCommand(orderSnapshot))
+        }
+    }
+
+    @Test
+    fun `consumeEvent - 주문 이벤트를 소비한다`() {
+        val consumerId = "test-consumer"
+        val events = listOf(OrderMock.event())
+        val command = ConsumeOrderEventsFacadeCommand(consumerId, events)
+
+        orderFacade.consumeEvent(command)
+
+        verify {
+            orderService.consumeEvent(ConsumeOrderEventCommand.of(consumerId, events))
+        }
+    }
+
+    @Test
+    fun `getAllEventsNotConsumedInOrder - 소비되지 않은 주문 이벤트를 조회한다`() {
+        val consumerId = "test-consumer"
+        val eventType = OrderEventType.COMPLETED
+        val events = listOf(OrderMock.event())
+        every { orderService.getAllEventsNotConsumedInOrder(consumerId, eventType) } returns events
+
+        // when
+        val result = orderFacade.getAllEventsNotConsumedInOrder(consumerId, eventType)
+
+        // then
+        assertThat(result).isInstanceOf(OrderResult.Events::class.java)
+        assertThat(result.value).isEqualTo(events)
+        verify {
+            orderService.getAllEventsNotConsumedInOrder(consumerId, eventType)
+        }
+    }
 }

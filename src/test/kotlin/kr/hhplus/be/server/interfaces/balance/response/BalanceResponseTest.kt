@@ -1,5 +1,5 @@
-package kr.hhplus.be.server.interfaces.balance.response
-
+import kr.hhplus.be.server.application.balance.result.BalanceResult
+import kr.hhplus.be.server.interfaces.balance.response.BalanceResponse
 import kr.hhplus.be.server.mock.BalanceMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
@@ -10,28 +10,28 @@ import java.math.BigDecimal
 class BalanceResponseTest {
 
     @Test
-    fun `잔액에 대한 응답 생성`() {
+    fun `Found 결과로부터 응답 생성`() {
         val balance = BalanceMock.view()
+        val result = BalanceResult.Found(value = balance)
 
-        val response = BalanceResponse.of(balance.userId, balance)
+        val response = BalanceResponse.of(result)
 
         assertAll(
             { assertThat(response.userId).isEqualTo(balance.userId.value) },
-            { assertThat(response.amount).isEqualByComparingTo(balance.amount) },
-            { assertThat(response.createdAt).isEqualTo(balance.createdAt) },
-            { assertThat(response.updatedAt).isEqualTo(balance.updatedAt) }
+            { assertThat(response.balance).isEqualByComparingTo(balance.amount) }
         )
     }
 
     @Test
-    fun `잔액이 없는 경우 기본값으로 응답 생성`() {
+    fun `Empty 결과로부터 기본값으로 응답 생성`() {
         val userId = UserMock.id()
+        val result = BalanceResult.Empty(userId = userId)
 
-        val response = BalanceResponse.of(userId, null)
+        val response = BalanceResponse.of(result)
 
         assertAll(
             { assertThat(response.userId).isEqualTo(userId.value) },
-            { assertThat(response.amount).isEqualByComparingTo(BigDecimal.ZERO) }
+            { assertThat(response.balance).isEqualByComparingTo(BigDecimal.ZERO) }
         )
     }
 }

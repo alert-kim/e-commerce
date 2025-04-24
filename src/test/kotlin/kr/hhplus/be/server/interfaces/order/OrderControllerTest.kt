@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kr.hhplus.be.server.application.order.OrderFacade
+import kr.hhplus.be.server.application.order.result.OrderResult
 import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.ExpiredCouponException
@@ -61,7 +62,7 @@ class OrderControllerTest {
     fun `주문 - 200`() {
         val request = request()
         val order = OrderMock.view()
-        every { orderFacade.order(any()) } returns order
+        every { orderFacade.order(any()) } returns OrderResult.Single(order)
 
         mockMvc.post("/orders") {
             contentType = MediaType.APPLICATION_JSON

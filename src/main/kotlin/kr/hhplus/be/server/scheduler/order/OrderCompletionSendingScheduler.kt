@@ -13,7 +13,7 @@ class OrderCompletionSendingScheduler(
 ) {
     @Scheduled(fixedRate = 10_000)
     fun send() {
-        val events = orderFacade.getAllEventsNotConsumedInOrder(SCHEDULER_ID, eventType)
+        val events = orderFacade.getAllEventsNotConsumedInOrder(SCHEDULER_ID, eventType).value
         events.forEach {
             orderFacade.sendOrderCompletionData(
                 command = SendOrderFacadeCommand(it.snapshot)

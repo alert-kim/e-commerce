@@ -23,7 +23,7 @@ class ProductController(
     ) = handleRequest(
         block = {
             val productsPaged = productFacade.getAllOnSalePaged(page = page, pageSize = pageSize)
-            ProductsPageResponse.from(productsPaged)
+            ProductsPageResponse.from(productsPaged.value)
         },
         errorSpec = {
             when (it) {
@@ -37,8 +37,8 @@ class ProductController(
     override fun getPopularProducts() =
         handleRequest(
             block = {
-                val products = productFacade.getPopularProducts()
-                ProductsResponse.from(products)
+                val result = productFacade.getPopularProducts()
+                ProductsResponse.from(result)
             },
             errorSpec = {
                 when (it) {

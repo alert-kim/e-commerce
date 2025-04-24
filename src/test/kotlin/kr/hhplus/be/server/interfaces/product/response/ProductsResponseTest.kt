@@ -1,33 +1,33 @@
 package kr.hhplus.be.server.interfaces.product.response
 
-import kr.hhplus.be.server.domain.product.PopularProductsView
+import kr.hhplus.be.server.application.product.result.ProductsResult
 import kr.hhplus.be.server.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.PageImpl
 
 class ProductsResponseTest {
     @Test
-    fun `상품 목록에 대한 응답 생성`() {
-        val products = List(3) { ProductMock.view() }
+    fun `ProductResult Paged에서 ProductsResponse로 변환한다`() {
+        val productView = ProductMock.view()
+        val result = ProductsResult.Paged(PageImpl(listOf(productView)))
 
-        val response = ProductsResponse.from(PopularProductsView(products))
+        val response = ProductsResponse.from(result)
 
-        assertThat(response.products).hasSize(products.size)
-        response.products.forEachIndexed { index, productResponse ->
-            assertThat(productResponse.id).isEqualTo(products[index].id.value)
-            assertThat(productResponse.name).isEqualTo(products[index].name)
-            assertThat(productResponse.description).isEqualTo(products[index].description)
-            assertThat(productResponse.price).isEqualByComparingTo(products[index].price.value)
-            assertThat(productResponse.stock).isEqualTo(products[index].stock)
-            assertThat(productResponse.createdAt).isEqualTo(products[index].createdAt)
-        }
+        assertThat(response.products).hasSize(1)
+        assertThat(response.products[0].id).isEqualTo(productView.id.value)
+        assertThat(response.products[0].name).isEqualTo(productView.name)
     }
 
     @Test
-    fun `빈 리스트인 경우 빈 리스트 응답`() {
-        val response = ProductsResponse.from(PopularProductsView(emptyList()))
+    fun `ProductResult Listed에서 ProductsResponse로 변환한다`() {
+        val productView = ProductMock.view()
+        val result = ProductsResult.Listed(listOf(productView))
 
-        assertThat(response.products).isEmpty()
+        val response = ProductsResponse.from(result)
+
+        assertThat(response.products).hasSize(1)
+        assertThat(response.products[0].id).isEqualTo(productView.id.value)
+        assertThat(response.products[0].name).isEqualTo(productView.name)
     }
 }
-

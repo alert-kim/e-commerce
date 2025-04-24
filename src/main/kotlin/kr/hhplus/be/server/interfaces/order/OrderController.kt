@@ -33,7 +33,7 @@ class OrderController(
     ) =
         handleRequest(
             block = {
-                val order = orderFacade.order(OrderFacadeCommand(
+                val result = orderFacade.order(OrderFacadeCommand(
                     userId = request.userId,
                     productsToOrder = request.orderProducts.map {
                         OrderFacadeCommand.ProductToOrder(
@@ -49,7 +49,7 @@ class OrderController(
                     totalAmount = request.totalAmount,
                 ))
 
-                OrderResponse.from(order)
+                OrderResponse.from(result.value)
             },
             errorSpec = {
                 when (it) {

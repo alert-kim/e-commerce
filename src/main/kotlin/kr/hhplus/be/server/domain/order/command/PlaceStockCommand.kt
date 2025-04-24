@@ -1,11 +1,8 @@
 package kr.hhplus.be.server.domain.order.command
 
 import kr.hhplus.be.server.domain.order.OrderId
-import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
-import java.math.BigDecimal
 
 data class PlaceStockCommand(
     val orderId: OrderId,

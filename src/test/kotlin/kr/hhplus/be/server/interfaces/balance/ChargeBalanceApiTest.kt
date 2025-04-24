@@ -26,9 +26,7 @@ class ChargeBalanceApiTest : ApiTest() {
         }.andExpect {
             status { isOk() }
             jsonPath("$.userId") { value(balance.userId.value) }
-            jsonPath("$.amount") { value(expectBalanceAmount) }
-            jsonPath("$.createdAt") { isNotEmpty() }
-            jsonPath("$.updatedAt") { isNotEmpty() }
+            jsonPath("$.balance") { value(expectBalanceAmount) }
         }
     }
 

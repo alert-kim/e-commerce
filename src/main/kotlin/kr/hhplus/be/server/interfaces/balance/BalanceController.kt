@@ -2,7 +2,6 @@ package kr.hhplus.be.server.interfaces.balance
 
 import kr.hhplus.be.server.application.balance.BalanceFacade
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
-import kr.hhplus.be.server.application.user.UserFacade
 import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/balances")
 class BalanceController(
-    private val userFacade: UserFacade,
     private val balanceFacade: BalanceFacade,
 ) : BalanceControllerInterface {
 
@@ -28,9 +26,8 @@ class BalanceController(
         @RequestParam userId: Long,
     ): ResponseEntity<ServerApiResponse> = handleRequest(
         block = {
-            val user = userFacade.get(userId)
-            val balance = balanceFacade.getOrNullByUerId(user.id)
-            BalanceResponse.of(user.id, balance)
+            val balance = balanceFacade.getOrNullByUerId(userId)
+            BalanceResponse.of(balance)
         },
         errorSpec = {
             when (it) {
@@ -51,7 +48,7 @@ class BalanceController(
                     amount = request.amount,
                 )
             )
-            BalanceResponse.of(chargedBalance.userId, chargedBalance)
+            BalanceResponse.of(chargedBalance)
         },
         errorSpec = {
             when (it) {

@@ -15,7 +15,7 @@ class OrderProductStatsScheduler(
 ) {
     @Scheduled(fixedRate = 10_000)
     fun aggregate() {
-        val events = orderFacade.getAllEventsNotConsumedInOrder(SCHEDULER_ID, eventType)
+        val events = orderFacade.getAllEventsNotConsumedInOrder(SCHEDULER_ID, eventType).value
         val orderProducts = events.flatMap { it.snapshot.orderProducts }
 
         productFacade.aggregate(

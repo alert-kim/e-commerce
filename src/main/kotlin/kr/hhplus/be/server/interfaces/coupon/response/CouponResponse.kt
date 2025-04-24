@@ -1,30 +1,41 @@
 package kr.hhplus.be.server.interfaces.coupon.response
 
+import kr.hhplus.be.server.application.coupon.result.CouponResult
 import kr.hhplus.be.server.domain.coupon.CouponView
-import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
 import java.time.Instant
 
-data class CouponResponse(
+class CouponResponse(
     val id: Long,
-    val userId: UserId,
+    val userId: Long,
     val name: String,
-    val discountAmount: BigDecimal?,
-    val usedAt: Instant?,
+    val discountAmount: BigDecimal,
     val createdAt: Instant,
     val updatedAt: Instant,
-): ServerApiResponse {
+) : ServerApiResponse {
     companion object {
-        fun from(coupon: CouponView) =
-            CouponResponse(
+        fun from(result: CouponResult.Single): CouponResponse {
+            val coupon = result.value
+            return CouponResponse(
                 id = coupon.id.value,
-                userId = coupon.userId,
+                userId = coupon.userId.value,
                 name = coupon.name,
                 discountAmount = coupon.discountAmount,
-                usedAt = coupon.usedAt,
                 createdAt = coupon.createdAt,
                 updatedAt = coupon.updatedAt,
             )
+        }
+
+        fun from(coupon: CouponView): CouponResponse {
+            return CouponResponse(
+                id = coupon.id.value,
+                userId = coupon.userId.value,
+                name = coupon.name,
+                discountAmount = coupon.discountAmount,
+                createdAt = coupon.createdAt,
+                updatedAt = coupon.updatedAt,
+            )
+        }
     }
 }

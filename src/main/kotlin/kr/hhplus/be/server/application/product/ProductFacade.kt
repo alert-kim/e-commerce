@@ -1,10 +1,10 @@
 package kr.hhplus.be.server.application.product
 
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
+import kr.hhplus.be.server.application.product.result.ProductsResult
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.util.TimeZone
-import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,8 +32,13 @@ class ProductFacade(
         )
     }
 
-    fun getAllOnSalePaged(page: Int, pageSize: Int): Page<ProductView> =
-         service.getAllByStatusOnPaged(status = ProductStatus.ON_SALE, page = page, pageSize = pageSize)
+    fun getAllOnSalePaged(page: Int, pageSize: Int): ProductsResult.Paged {
+        val products = service.getAllByStatusOnPaged(status = ProductStatus.ON_SALE, page = page, pageSize = pageSize)
+        return ProductsResult.Paged(value = products)
+    }
 
-    fun getPopularProducts(): PopularProductsView = service.getPopularProducts()
+    fun getPopularProducts(): ProductsResult.Listed {
+        val popularProducts = service.getPopularProducts()
+        return ProductsResult.Listed(value = popularProducts.products)
+    }
 }

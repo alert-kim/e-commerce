@@ -49,7 +49,7 @@ class CouponFacadeTest {
             )
         )
 
-        assertThat(result.id).isEqualTo(coupon.id)
+        assertThat(result.value.id).isEqualTo(coupon.id)
         verify {
             userService.get(userId.value)
             couponSourceService.issue(IssueCouponCommand(couponSourceId.value))
@@ -67,9 +67,9 @@ class CouponFacadeTest {
 
         val result = couponFacade.getCoupons(userId.value)
 
-        assertThat(result).hasSize(coupons.size)
+        assertThat(result.value).hasSize(coupons.size)
         coupons.forEachIndexed { index, coupon ->
-            assertThat(result[index].id).isEqualTo(coupon.id)
+            assertThat(result.value[index].id).isEqualTo(coupon.id)
         }
         verify {
             userService.get(userId.value)

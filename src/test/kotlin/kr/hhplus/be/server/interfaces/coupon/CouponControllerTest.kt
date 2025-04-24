@@ -7,12 +7,15 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kr.hhplus.be.server.application.coupon.CouponFacade
 import kr.hhplus.be.server.application.coupon.command.IssueCouponFacadeCommand
+import kr.hhplus.be.server.application.coupon.result.CouponResult
+import kr.hhplus.be.server.application.coupon.result.CouponSourcesResult
 import kr.hhplus.be.server.domain.coupon.CouponSourceView
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
+import kr.hhplus.be.server.interfaces.coupon.response.CouponSourcesResponse
 import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.UserMock
@@ -60,7 +63,7 @@ class CouponControllerTest {
                 name = "상품${it + 1}",
             )
         }
-        every { couponFacade.getAllSourcesIssuable() } returns coupons
+        every { couponFacade.getAllSourcesIssuable() } returns CouponSourcesResult(coupons)
 
         mockMvc.get("/couponSources")
             .andExpect {
@@ -80,7 +83,7 @@ class CouponControllerTest {
     @Test
     fun `발급 가능 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
         val coupons = emptyList<CouponSourceView>()
-        every { couponFacade.getAllSourcesIssuable() } returns coupons
+        every { couponFacade.getAllSourcesIssuable() } returns CouponSourcesResult(coupons)
 
         mockMvc.get("/couponSources")
             .andExpect {
@@ -95,7 +98,7 @@ class CouponControllerTest {
         val coupons = List(3) {
             CouponMock.view(userId = userId)
         }
-        every { couponFacade.getCoupons(userId.value) } returns coupons
+        every { couponFacade.getCoupons(userId.value) } returns CouponResult.List(coupons)
 
         mockMvc.get("/users/${userId.value}/coupons")
             .andExpect {
@@ -120,7 +123,7 @@ class CouponControllerTest {
     @Test
     fun `내 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
         val userId = IdMock.value()
-        every { couponFacade.getCoupons(userId) } returns emptyList()
+        every { couponFacade.getCoupons(userId) } returns CouponResult.List(emptyList())
 
         mockMvc.get("/users/${userId}/coupons")
             .andExpect {
@@ -132,7 +135,7 @@ class CouponControllerTest {
     @Test
     fun `내 쿠폰 목록 조회 - 404 - 유저 없음`() {
         val userId = IdMock.value()
-        every { couponFacade.getCoupons(userId) } returns emptyList()
+        every { couponFacade.getCoupons(userId) } returns CouponResult.List(emptyList())
 
         mockMvc.get("/users/${userId}/coupons")
             .andExpect {
@@ -169,7 +172,7 @@ class CouponControllerTest {
                     userId = userId
                 ),
             )
-        } returns coupon
+        } returns CouponResult.Single(coupon)
 
         mockMvc.post("/coupons") {
             contentType = MediaType.APPLICATION_JSON
@@ -268,3 +271,4 @@ class CouponControllerTest {
         }
     }
 }
+

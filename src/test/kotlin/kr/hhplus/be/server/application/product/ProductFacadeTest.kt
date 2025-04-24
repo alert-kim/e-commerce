@@ -9,10 +9,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
+import kr.hhplus.be.server.application.product.result.ProductsResult
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
-import kr.hhplus.be.server.domain.product.PopularProducts
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
 import kr.hhplus.be.server.util.TimeZone
@@ -138,18 +138,9 @@ class ProductFacadeTest {
 
         val result = facade.getAllOnSalePaged(page, pageSize)
 
-        assertThat(result.pageable).isEqualTo(pageable)
-        assertThat(result.totalElements).isEqualTo(totalCount)
-        assertThat(result.content).hasSize(products.size)
-        result.content.forEachIndexed { index, productQueryModel ->
-            assertThat(productQueryModel.id).isEqualTo(products[index].id)
-            assertThat(productQueryModel.status).isEqualTo(products[index].status)
-            assertThat(productQueryModel.name).isEqualTo(products[index].name)
-            assertThat(productQueryModel.description).isEqualTo(products[index].description)
-            assertThat(productQueryModel.price.value).isEqualByComparingTo(products[index].price.value)
-            assertThat(productQueryModel.stock).isEqualByComparingTo(products[index].stock)
-            assertThat(productQueryModel.createdAt).isEqualTo(products[index].createdAt)
-        }
+        assertThat(result).isInstanceOf(ProductsResult.Paged::class.java)
+        assertThat(result.value).isEqualTo(productPage)
+
         verify {
             service.getAllByStatusOnPaged(status = ProductStatus.ON_SALE, page = page, pageSize = pageSize)
         }
@@ -164,7 +155,7 @@ class ProductFacadeTest {
 
         val result = facade.getAllOnSalePaged(page, pageSize)
 
-        assertThat(result.content).isEmpty()
+        assertThat(result.value).isEmpty()
     }
 
     @Test
