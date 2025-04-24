@@ -35,8 +35,8 @@ class OrderController(
             block = {
                 val order = orderFacade.order(OrderFacadeCommand(
                     userId = request.userId,
-                    orderProducts = request.orderProducts.map {
-                        OrderFacadeCommand.OrderProduct(
+                    productsToOrder = request.orderProducts.map {
+                        OrderFacadeCommand.ProductToOrder(
                             productId = it.productId,
                             quantity = it.quantity,
                             unitPrice = it.unitPrice,

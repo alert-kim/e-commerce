@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.domain.product
 
+import kr.hhplus.be.server.domain.product.excpetion.NotOnSaleProductException
+import kr.hhplus.be.server.domain.product.excpetion.ProductPriceMismatchException
+import kr.hhplus.be.server.domain.product.result.PurchasableProduct
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -8,10 +11,41 @@ data class ProductView(
     val status: ProductStatus,
     val name: String,
     val description: String,
-    val price: BigDecimal,
+    val price: ProductPrice,
     val stock: Long,
     val createdAt: Instant,
 ) {
+    fun validatePurchasable(
+        price: BigDecimal,
+    ): PurchasableProduct {
+        validateOnSale()
+        validatePrice(price)
+        return PurchasableProduct(
+            id = this.id,
+            price = this.price,
+        )
+    }
+
+    private fun validateOnSale(
+    ) {
+        if (this.status != ProductStatus.ON_SALE) {
+            throw NotOnSaleProductException(this.id.value)
+        }
+    }
+
+    private fun validatePrice(
+        price: BigDecimal,
+    ) {
+        if (this.price.isEqualTo(price).not()) {
+            throw ProductPriceMismatchException(
+                id = this.id.value,
+                actual = this.price.value,
+                expect = price,
+            )
+        }
+    }
+
+
     companion object {
         fun from(product: Product): ProductView {
             return ProductView(
@@ -19,7 +53,7 @@ data class ProductView(
                 status = product.status,
                 name = product.name,
                 description = product.description,
-                price = product.price,
+                price = ProductPrice(product.price),
                 stock = product.stock.quantity,
                 createdAt = product.createdAt,
             )

@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.product.command
 
-data class AllocateStocksCommand (
+data class AllocateProductStocksCommand (
     val needStocks: List<NeedStock>,
 ) {
     data class NeedStock(

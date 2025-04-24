@@ -16,7 +16,8 @@ import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductService
-import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
+import kr.hhplus.be.server.domain.stock.StockService
+import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.domain.user.UserView
@@ -30,10 +31,12 @@ class OrderFacade(
     private val paymentService: PaymentService,
     private val productService: ProductService,
     private val userService: UserService,
+    private val stockService: StockService,
 ) {
     fun order(
         command: OrderFacadeCommand,
     ): OrderView {
+        command.validate()
         val userId = getUser(command.userId).id
         val orderId = createOrder(userId)
         placeProduct(orderId, command)
@@ -72,22 +75,22 @@ class OrderFacade(
         orderId: OrderId,
         command: OrderFacadeCommand,
     ) {
-        val allocated = productService.allocateStocks(
-            AllocateStocksCommand(
-                needStocks = command.orderProducts.map {
-                    AllocateStocksCommand.NeedStock(
-                        productId = it.productId,
-                        quantity = it.quantity,
-                    )
-                },
+        val products = productService.getAllByIds(command.orderProductIds())
+
+        val purchasableProducts = command.productsToOrder.map { orderProduct ->
+            products.validatePurchasable(
+                orderProduct.productId,
+                orderProduct.unitPrice,
             )
-        )
-        orderService.placeStock(
-            PlaceStockCommand(
-                orderId = orderId,
-                stocks = allocated.stocks,
-            )
-        )
+        }
+
+        val stocksAllocated = stockService.allocate(AllocateStocksCommand(
+            purchasableProducts.associate {
+                it.id to command.quantityOfProduct(it.id)
+            }
+        ))
+
+        orderService.placeStock(PlaceStockCommand.of(orderId, purchasableProducts, stocksAllocated.stocks))
     }
 
     private fun applyCoupon(

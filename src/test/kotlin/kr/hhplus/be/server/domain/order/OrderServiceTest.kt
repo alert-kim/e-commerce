@@ -15,6 +15,10 @@ import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
+import kr.hhplus.be.server.domain.product.Product
+import kr.hhplus.be.server.domain.product.ProductPrice
+import kr.hhplus.be.server.domain.product.result.PurchasableProduct
+import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertAll
@@ -80,13 +84,23 @@ class OrderServiceTest {
             totalAmount = BigDecimal.ZERO,
             couponId = null,
         )
-        val stocks = List(3) {
-            ProductMock.stockAllocated()
+        var totalPrice = BigDecimal.ZERO
+        val purchasableProducts = List(3) {
+            PurchasableProduct(
+                id = ProductMock.id(),
+                price = ProductPrice(1000.toBigDecimal()),
+            )
         }
-        val totalAmount = stocks.fold(BigDecimal.ZERO) { acc, stock ->
-            acc.add(stock.unitPrice.multiply(BigDecimal(stock.quantity)))
+        val stocks = purchasableProducts.map {
+            val quantity = 3
+            totalPrice = totalPrice.plus(it.price.value.multiply(quantity.toBigDecimal()))
+            AllocatedStock(
+                productId = it.id,
+                quantity = quantity,
+            )
         }
-        val command = PlaceStockCommand(orderId, stocks)
+
+        val command = PlaceStockCommand.of(orderId, purchasableProducts, stocks)
         every { repository.findById(orderId.value) } returns order
         every { repository.save(any()) } returns orderId
 
@@ -94,33 +108,20 @@ class OrderServiceTest {
 
         verify {
             repository.save(withArg {
-                assertAll(
-                    { assertThat(it.id).isEqualTo(orderId) },
-                    { assertThat(it.status).isEqualTo(OrderStatus.STOCK_ALLOCATED) },
-                    { assertThat(it.originalAmount).isEqualByComparingTo(totalAmount) },
-                    { assertThat(it.totalAmount).isEqualByComparingTo(totalAmount) },
-                    { assertThat(it.discountAmount).isEqualByComparingTo(BigDecimal.ZERO) },
-                    { assertThat(it.couponId).isNull() },
-                    { assertThat(it.products).hasSize(stocks.size) }
-                )
-                it.products.forEach { product ->
-                    val stock = stocks.find { it.productId == product.productId }
-                    assertAll(
-                        { assertThat(stock).isNotNull() },
-                        { assertThat(product.orderId).isEqualTo(orderId) },
-                        { assertThat(product.productId).isEqualTo(stock?.productId) },
-                        { assertThat(product.quantity).isEqualTo(stock?.quantity) },
-                        { assertThat(product.unitPrice).isEqualByComparingTo(stock?.unitPrice) },
-                        {
-                            assertThat(product.totalPrice).isEqualByComparingTo(
-                                stock?.unitPrice?.multiply(
-                                    BigDecimal(
-                                        stock.quantity
-                                    )
-                                )
-                            )
-                        }
-                    )
+                assertThat(it.id).isEqualTo(orderId)
+                assertThat(it.status).isEqualTo(OrderStatus.STOCK_ALLOCATED)
+                assertThat(it.originalAmount).isEqualByComparingTo(totalPrice)
+                assertThat(it.totalAmount).isEqualByComparingTo(totalPrice)
+                assertThat(it.discountAmount).isEqualByComparingTo(BigDecimal.ZERO)
+                assertThat(it.couponId).isNull()
+                assertThat(it.products).hasSize(stocks.size)
+                assertThat(it.products).allSatisfy { product ->
+                    val targetProduct = purchasableProducts.first { it.id == product.productId }
+                    val targetStock = stocks.first { it.productId == product.productId }
+                    assertThat(product.orderId).isEqualTo(orderId)
+                    assertThat(product.productId).isEqualTo(targetProduct.id)
+                    assertThat(product.quantity).isEqualTo(targetStock.quantity)
+                    assertThat(product.unitPrice).isEqualByComparingTo(targetProduct.price.value)
                 }
                 assertThat(it.updatedAt).isAfter(it.createdAt)
             })
@@ -130,10 +131,18 @@ class OrderServiceTest {
     @Test
     fun `placeStock - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
         val orderId = OrderMock.id()
-        val stocks = List(3) {
-            ProductMock.stockAllocated()
+        val purchasableProducts = List(3) {
+            ProductMock.purchasableProduct()
         }
-        val command = PlaceStockCommand(orderId, stocks)
+        val stocks = purchasableProducts.map {
+            val quantity = 3
+            AllocatedStock(
+                productId = it.id,
+                quantity = quantity,
+            )
+        }
+        val command = PlaceStockCommand.of(orderId, purchasableProducts, stocks)
+
         every { repository.findById(orderId.value) } returns null
 
         shouldThrow<NotFoundOrderException> {

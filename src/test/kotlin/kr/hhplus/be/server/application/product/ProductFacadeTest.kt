@@ -146,7 +146,7 @@ class ProductFacadeTest {
             assertThat(productQueryModel.status).isEqualTo(products[index].status)
             assertThat(productQueryModel.name).isEqualTo(products[index].name)
             assertThat(productQueryModel.description).isEqualTo(products[index].description)
-            assertThat(productQueryModel.price).isEqualByComparingTo(products[index].price)
+            assertThat(productQueryModel.price.value).isEqualByComparingTo(products[index].price.value)
             assertThat(productQueryModel.stock).isEqualByComparingTo(products[index].stock)
             assertThat(productQueryModel.createdAt).isEqualTo(products[index].createdAt)
         }

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import kotlin.math.min
 
-class OrderProductTest {
+class ProductToOrderTest {
     @Test
     fun `new - 단위가격 * 총 수량 = 총 가격으로 생성`() {
         val orderId = OrderMock.id()

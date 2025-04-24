@@ -11,7 +11,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.command.AllocateStocksCommand
+import kr.hhplus.be.server.domain.product.command.AllocateProductStocksCommand
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
@@ -66,7 +66,7 @@ class ProductServiceTest {
             assertThat(product.status).isEqualTo(products[index].status)
             assertThat(product.name).isEqualTo(products[index].name)
             assertThat(product.description).isEqualTo(products[index].description)
-            assertThat(product.price).isEqualByComparingTo(products[index].price)
+            assertThat(product.price.value).isEqualByComparingTo(products[index].price)
             assertThat(product.stock).isEqualTo(products[index].stock.quantity)
             assertThat(product.createdAt).isEqualTo(products[index].createdAt)
         }
@@ -109,13 +109,13 @@ class ProductServiceTest {
         val product1 = ProductMock.product(id = product1Id, stock = ProductMock.stock(quantity = 20))
         val product2Id = ProductMock.id()
         val product2 = ProductMock.product(id = product2Id, stock = ProductMock.stock(quantity = 15))
-        val command = AllocateStocksCommand(
+        val command = AllocateProductStocksCommand(
             needStocks = listOf(
-                AllocateStocksCommand.NeedStock(
+                AllocateProductStocksCommand.NeedStock(
                     productId = product1Id.value,
                     quantity = 10,
                 ),
-                AllocateStocksCommand.NeedStock(
+                AllocateProductStocksCommand.NeedStock(
                     productId = product2Id.value,
                     quantity = 15,
                 ),
@@ -145,13 +145,13 @@ class ProductServiceTest {
         val product1 = ProductMock.product(id = product1Id, stock = ProductMock.stock(quantity = 5))
         val product2Id = ProductMock.id()
         val product2 = ProductMock.product(id = product2Id, stock = ProductMock.stock(quantity = 5))
-        val command = AllocateStocksCommand(
+        val command = AllocateProductStocksCommand(
             needStocks = listOf(
-                AllocateStocksCommand.NeedStock(
+                AllocateProductStocksCommand.NeedStock(
                     productId = product1Id.value,
                     quantity = 5,
                 ),
-                AllocateStocksCommand.NeedStock(
+                AllocateProductStocksCommand.NeedStock(
                     productId = product2Id.value,
                     quantity = 15,
                 ),
@@ -169,13 +169,13 @@ class ProductServiceTest {
         val product1Id = ProductMock.id()
         val product1 = ProductMock.product(id = product1Id, stock = ProductMock.stock(quantity = 5))
         val product2Id = ProductMock.id()
-        val command = AllocateStocksCommand(
+        val command = AllocateProductStocksCommand(
             needStocks = listOf(
-                AllocateStocksCommand.NeedStock(
+                AllocateProductStocksCommand.NeedStock(
                     productId = product1Id.value,
                     quantity = 5,
                 ),
-                AllocateStocksCommand.NeedStock(
+                AllocateProductStocksCommand.NeedStock(
                     productId = product2Id.value,
                     quantity = 15,
                 ),

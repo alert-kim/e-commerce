@@ -34,9 +34,14 @@ class OrderService(
     ) {
         val order = doGet(command.orderId.value)
 
-        order.placeStock(
-            stocks = command.stocks,
-        )
+        command.preparedProductForOrder.forEach {
+            order.placeStock(
+                productId = it.product.id,
+                quantity = it.stock.quantity,
+                unitPrice = it.product.price,
+            )
+        }
+
         repository.save(order)
     }
 

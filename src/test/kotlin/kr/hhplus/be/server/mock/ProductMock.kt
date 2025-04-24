@@ -2,6 +2,7 @@ package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
+import kr.hhplus.be.server.domain.product.result.PurchasableProduct
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -52,6 +53,14 @@ object ProductMock {
         updatedAt = updatedAt,
     )
 
+    fun purchasableProduct(
+        id: ProductId = id(),
+        price: BigDecimal = BigDecimal.valueOf(10_000),
+    ) = PurchasableProduct(
+        id = id,
+        price = ProductPrice(price),
+    )
+
     fun view(
         id: ProductId = id(),
         name: String = "상품명",
@@ -64,7 +73,7 @@ object ProductMock {
         id = id,
         name = name,
         description = description,
-        price = price,
+        price = ProductPrice(price),
         stock = stock,
         status = status,
         createdAt = createdAt,

@@ -18,7 +18,7 @@ class ProductViewTest {
             { assertThat(result.id).isEqualTo(product.id) },
             { assertThat(result.name).isEqualTo(product.name) },
             { assertThat(result.description).isEqualTo(product.description) },
-            { assertThat(result.price).isEqualByComparingTo(product.price) },
+            { assertThat(result.price.value).isEqualByComparingTo(product.price) },
             { assertThat(result.createdAt).isEqualTo(product.createdAt) },
             { assertThat(result.stock).isEqualTo(product.stock.quantity) },
         )

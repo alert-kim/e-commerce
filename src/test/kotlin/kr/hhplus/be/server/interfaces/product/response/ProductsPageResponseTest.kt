@@ -27,7 +27,7 @@ class ProductsPageResponseTest {
             assertThat(productResponse.id).isEqualTo(products[index].id.value)
             assertThat(productResponse.name).isEqualTo(products[index].name)
             assertThat(productResponse.description).isEqualTo(products[index].description)
-            assertThat(productResponse.price).isEqualByComparingTo(products[index].price)
+            assertThat(productResponse.price).isEqualByComparingTo(products[index].price.value)
             assertThat(productResponse.stock).isEqualTo(products[index].stock)
             assertThat(productResponse.createdAt).isEqualTo(products[index].createdAt)
         }

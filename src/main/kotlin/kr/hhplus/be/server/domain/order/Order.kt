@@ -5,6 +5,8 @@ import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
+import kr.hhplus.be.server.domain.product.ProductId
+import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
@@ -47,6 +49,30 @@ class Order(
 
     fun requireId(): OrderId =
         id ?: throw RequiredOrderIdException()
+
+    fun placeStock(
+        productId: ProductId,
+        quantity: Int,
+        unitPrice: ProductPrice,
+    ) {
+        if (status != OrderStatus.READY && status != OrderStatus.STOCK_ALLOCATED) {
+            throw InvalidOrderStatusException(
+                id = requireId(),
+                status = status,
+                expect = OrderStatus.READY,
+            )
+        }
+        OrderProduct.new(
+            orderId = requireId(),
+            productId = productId,
+            quantity = quantity,
+            unitPrice = unitPrice.value,
+        ).also { orderProduct ->
+            addOrderProduct(orderProduct)
+        }
+        status = OrderStatus.STOCK_ALLOCATED
+        updatedAt = Instant.now()
+    }
 
     fun placeStock(stocks: List<ProductStockAllocated>) {
         if (status != OrderStatus.READY) {

@@ -21,7 +21,7 @@ class ProductResponse(
                 status = product.status,
                 name = product.name,
                 description = product.description,
-                price = product.price,
+                price = product.price.value,
                 stock = product.stock,
                 createdAt = product.createdAt
             )
