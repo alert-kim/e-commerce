@@ -139,5 +139,5 @@ class OrderFacade(
             command = CreateOrderCommand(
                 userId = userId,
             ),
-        ).orderId
+        )
 }

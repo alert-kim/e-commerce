@@ -5,7 +5,6 @@ import kr.hhplus.be.server.domain.order.event.*
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
-import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -18,16 +17,12 @@ class OrderService(
 ) {
     fun createOrder(
         command: CreateOrderCommand,
-    ): CreateOrderResult {
-        val orderId = repository.save(
+    ): OrderId =
+        repository.save(
             Order.new(
                 userId = command.userId,
             )
         )
-        return CreateOrderResult(
-            orderId = orderId,
-        )
-    }
 
     fun placeStock(
         command: PlaceStockCommand,
