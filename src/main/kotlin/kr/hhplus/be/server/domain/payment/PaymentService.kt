@@ -14,6 +14,6 @@ class PaymentService(
             amount = command.amount,
         )
         val id = repository.save(payment)
-        return PaymentView.from(id, payment)
+        return PaymentView.from(payment)
     }
 }

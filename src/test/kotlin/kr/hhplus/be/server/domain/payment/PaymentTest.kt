@@ -14,20 +14,20 @@ import org.junit.jupiter.api.assertThrows
 
 class PaymentTest {
     @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
-        val payment = PaymentMock.payment(id = PaymentMock.id())
+    fun `id() - id가 null이 아닌 경우 id 반환`() {
+        val payment = PaymentMock.payment(id = 1L)
 
-        val result = payment.requireId()
+        val result = payment.id()
 
-        assertThat(result).isEqualTo(payment.id)
+        assertThat(result.value).isEqualTo(1L)
     }
 
     @Test
-    fun `requireId - id가 null이면 RequiredPaymentIdException 발생`() {
+    fun `id() - id가 null이면 RequiredPaymentIdException 발생`() {
         val payment = PaymentMock.payment(id = null)
 
         assertThrows<RequiredPaymentIdException> {
-            payment.requireId()
+            payment.id()
         }
     }
 
@@ -47,11 +47,9 @@ class PaymentTest {
         )
 
         assertAll(
-            { assertThat(payment.userId).isEqualTo(userId) },
-            { assertThat(payment.orderId).isEqualTo(orderId) },
+            { assertThat(payment.userId).isEqualTo(userId.value) },
+            { assertThat(payment.orderId).isEqualTo(orderId.value) },
             { assertThat(payment.amount).isEqualByComparingTo(amount.value) },
         )
     }
-
-
 }

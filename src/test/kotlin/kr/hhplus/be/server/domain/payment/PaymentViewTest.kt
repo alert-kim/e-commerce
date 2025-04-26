@@ -10,7 +10,7 @@ class PaymentViewTest {
         val id = PaymentMock.id()
         val payment = PaymentMock.payment()
 
-        val result = PaymentView.from(id, payment)
+        val result = PaymentView.from(payment)
 
         assertThat(result.id).isEqualTo(id)
         assertThat(result.userId).isEqualTo(payment.userId)
