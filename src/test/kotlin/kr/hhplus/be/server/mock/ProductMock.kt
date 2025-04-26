@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.product.*
-import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
 import java.math.BigDecimal
 import java.time.Instant
@@ -21,16 +20,6 @@ object ProductMock {
         createdAt = createdAt,
         quantity = quantity,
         updatedAt = updatedAt,
-    )
-
-    fun stockAllocated(
-        productId: ProductId = id(),
-        quantity: Int = 10,
-        unitPrice: BigDecimal = BigDecimal.valueOf(10_000),
-    ): ProductStockAllocated = ProductStockAllocated(
-        productId = productId,
-        quantity = quantity,
-        unitPrice = unitPrice,
     )
 
     fun product(

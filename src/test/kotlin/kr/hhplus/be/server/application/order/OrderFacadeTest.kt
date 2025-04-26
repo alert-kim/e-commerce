@@ -8,7 +8,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
-import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
 import kr.hhplus.be.server.application.order.result.OrderResult
 import kr.hhplus.be.server.domain.balance.BalanceAmount
@@ -20,7 +19,6 @@ import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import kr.hhplus.be.server.domain.payment.PaymentService
@@ -31,14 +29,12 @@ import kr.hhplus.be.server.domain.product.ProductsView
 import kr.hhplus.be.server.domain.stock.StockService
 import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
-import kr.hhplus.be.server.domain.stock.result.AllocatedStockResult
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.math.BigDecimal
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
@@ -108,7 +104,7 @@ class OrderFacadeTest {
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns CreateOrderResult(orderId)
         every { productService.getAllByIds(any()) } returns ProductsView(products)
-        every { stockService.allocate(any<AllocateStocksCommand>()) } returns AllocatedStockResult(stocks)
+        every { stockService.allocate(any<AllocateStocksCommand>()) } returns stocks
         every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns usedCoupon
         every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
         every { paymentService.pay(any<PayCommand>()) } returns payment
@@ -212,7 +208,7 @@ class OrderFacadeTest {
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns CreateOrderResult(orderId)
         every { productService.getAllByIds(any()) } returns ProductsView(products)
-        every { stockService.allocate(any<AllocateStocksCommand>()) } returns AllocatedStockResult(stocks)
+        every { stockService.allocate(any<AllocateStocksCommand>()) } returns stocks
         every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
         every { paymentService.pay(any<PayCommand>()) } returns payment
         every { orderService.get(orderId.value) } returns order

@@ -93,7 +93,7 @@ class OrderFacade(
             }
         ))
 
-        orderService.placeStock(PlaceStockCommand.of(orderId, purchasableProducts, stocksAllocated.stocks))
+        orderService.placeStock(PlaceStockCommand.of(orderId, purchasableProducts, stocksAllocated))
     }
 
     private fun applyCoupon(

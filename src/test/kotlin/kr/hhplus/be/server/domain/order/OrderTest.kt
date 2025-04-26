@@ -1,11 +1,18 @@
 package kr.hhplus.be.server.domain.order
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.next
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
-import kr.hhplus.be.server.mock.*
+import kr.hhplus.be.server.domain.product.ProductPrice
+import kr.hhplus.be.server.mock.CouponMock
+import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -58,32 +65,22 @@ class OrderTest {
             discountAmount = BigDecimal.ZERO,
             totalAmount = BigDecimal.ZERO,
         )
-        val productStocks = List(2) {
-            ProductMock.stockAllocated()
-        }
-        val totalAmount = productStocks.sumOf { it.unitPrice.multiply(BigDecimal(it.quantity.toLong())) }
+        val productId = ProductMock.id()
+        val quantity = Arb.int(1..5).next()
+        val unitPrice = ProductPrice(1000.toBigDecimal())
+        val totalAmount = unitPrice.value.multiply(BigDecimal.valueOf(quantity.toLong()))
 
-        order.placeStock(productStocks)
+
+        order.placeStock(productId, quantity, unitPrice)
 
         assertAll(
-            { assertThat(order.products).hasSize(productStocks.size) },
+            { assertThat(order.products).hasSize(1) },
             { assertThat(order.originalAmount).isEqualByComparingTo(totalAmount) },
             { assertThat(order.totalAmount).isEqualByComparingTo(totalAmount) },
+            { assertThat(order.products[0].productId).isEqualTo(productId) },
+            { assertThat(order.products[0].quantity).isEqualTo(quantity) },
+            { assertThat(order.products[0].unitPrice).isEqualByComparingTo(unitPrice.value) },
         )
-        order.products.forEachIndexed { index, orderProduct ->
-            val productStock = productStocks[index]
-            assertAll(
-                { assertThat(orderProduct.orderId).isEqualTo(order.id) },
-                { assertThat(orderProduct.productId).isEqualTo(productStock.productId) },
-                { assertThat(orderProduct.quantity).isEqualTo(productStock.quantity) },
-                { assertThat(orderProduct.unitPrice).isEqualByComparingTo(productStock.unitPrice) },
-                {
-                    assertThat(orderProduct.totalPrice).isEqualByComparingTo(
-                        productStock.unitPrice.multiply(BigDecimal.valueOf(productStock.quantity.toLong()))
-                    )
-                },
-            )
-        }
     }
 
     @Test
@@ -91,12 +88,9 @@ class OrderTest {
         val order = OrderMock.order(
             status = OrderStatus.COMPLETED,
         )
-        val productStocks = List(2) {
-            ProductMock.stockAllocated()
-        }
 
         assertThrows<InvalidOrderStatusException> {
-            order.placeStock(productStocks)
+            order.placeStock(ProductMock.id(), 1, ProductPrice(1000.toBigDecimal()))
         }
     }
 

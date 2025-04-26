@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.domain.product
 
 import kr.hhplus.be.server.domain.product.excpetion.RequiredProductIdException
-import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -23,13 +22,4 @@ class Product(
 
     fun requireId(): ProductId =
         id ?: throw RequiredProductIdException()
-
-    fun allocateStock(quantity: Int): ProductStockAllocated {
-        stock.allocate(quantity)
-        return ProductStockAllocated(
-            productId = requireId(),
-            quantity = quantity,
-            unitPrice = price,
-        )
-    }
 }

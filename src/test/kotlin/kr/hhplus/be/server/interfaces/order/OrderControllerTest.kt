@@ -12,8 +12,10 @@ import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.ExpiredCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderPriceException
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderProductQuantityException
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
-import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
+import kr.hhplus.be.server.domain.stock.exception.InvalidStockQuantityToAllocateException
+import kr.hhplus.be.server.domain.stock.exception.OutOfStockException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.order.reqeust.OrderRequest
@@ -94,7 +96,7 @@ class OrderControllerTest {
     @Test
     fun `주문 - 400 - 재고 부족`() {
         val request = request()
-        every { orderFacade.order(any()) } throws OutOfStockProductException(1L, 1, 0L)
+        every { orderFacade.order(any()) } throws OutOfStockException(ProductMock.id(), 1, 0)
 
         mockMvc.post("/orders") {
             contentType = MediaType.APPLICATION_JSON
@@ -116,6 +118,34 @@ class OrderControllerTest {
         }.andExpect {
             status { isBadRequest() }
             jsonPath("$.errorCode") { value(ErrorCode.INVALID_ORDER_PRICE.name) }
+        }
+    }
+
+    @Test
+    fun `주문 - 400 - 유효하지 않은 주문 수량`() {
+        val request = request()
+        every { orderFacade.order(any()) } throws InvalidOrderProductQuantityException( "deatil")
+
+        mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.errorCode") { value(ErrorCode.INVALID_ORDER_QUANTITY.name) }
+        }
+    }
+
+    @Test
+    fun `주문 - 400 - 유효하지 않은 주문 수량 (재고)`() {
+        val request = request()
+        every { orderFacade.order(any()) } throws InvalidStockQuantityToAllocateException( "deatil")
+
+        mockMvc.post("/orders") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(request)
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.errorCode") { value(ErrorCode.INVALID_ORDER_QUANTITY.name) }
         }
     }
 
@@ -150,7 +180,11 @@ class OrderControllerTest {
     @Test
     fun `주문 - 400 - 잔고 부족`() {
         val request = request()
-        every { orderFacade.order(any()) } throws InsufficientBalanceException(BalanceMock.id(), BigDecimal.ZERO, BigDecimal.ZERO)
+        every { orderFacade.order(any()) } throws InsufficientBalanceException(
+            BalanceMock.id(),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO
+        )
 
         mockMvc.post("/orders") {
             contentType = MediaType.APPLICATION_JSON

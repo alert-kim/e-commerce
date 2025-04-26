@@ -56,6 +56,7 @@ enum class ErrorCode(val message: String) {
 
     // order
     INVALID_ORDER_PRICE("잘못된 주문 금액입니다."),
+    INVALID_ORDER_QUANTITY("잘못된 주문 수량입니다."),
 
     // product
     NOT_FOUND_PRODUCT("상품을 찾을 수 없습니다."),

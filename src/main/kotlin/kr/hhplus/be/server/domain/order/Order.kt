@@ -7,7 +7,6 @@ import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductPrice
-import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -69,28 +68,6 @@ class Order(
             unitPrice = unitPrice.value,
         ).also { orderProduct ->
             addOrderProduct(orderProduct)
-        }
-        status = OrderStatus.STOCK_ALLOCATED
-        updatedAt = Instant.now()
-    }
-
-    fun placeStock(stocks: List<ProductStockAllocated>) {
-        if (status != OrderStatus.READY) {
-            throw InvalidOrderStatusException(
-                id = requireId(),
-                status = status,
-                expect = OrderStatus.READY,
-            )
-        }
-        stocks.forEach { stock ->
-            OrderProduct.new(
-                orderId = requireId(),
-                productId = stock.productId,
-                quantity = stock.quantity,
-                unitPrice = stock.unitPrice,
-            ).also { orderProduct ->
-                addOrderProduct(orderProduct)
-            }
         }
         status = OrderStatus.STOCK_ALLOCATED
         updatedAt = Instant.now()
