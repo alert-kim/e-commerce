@@ -8,9 +8,9 @@ class PaymentViewTest {
     @Test
     fun `결제 정보를 올바르게 반환한다`() {
         val id = PaymentMock.id()
-        val payment = PaymentMock.payment()
+        val payment = PaymentMock.payment(id = id.value)
 
-        val result = PaymentView.from(id, payment)
+        val result = PaymentView.from(payment)
 
         assertThat(result.id).isEqualTo(id)
         assertThat(result.userId).isEqualTo(payment.userId)

@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.payment
 
 import kr.hhplus.be.server.domain.payment.command.PayCommand
+import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,8 +13,8 @@ class PaymentService(
             orderId = command.orderId,
             userId = command.userId,
             amount = command.amount,
-        )
-        val id = repository.save(payment)
-        return PaymentView.from(id, payment)
+        ).let { repository.save(it) }
+
+        return PaymentView.from(payment)
     }
 }

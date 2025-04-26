@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.payment
 
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -7,9 +8,10 @@ import io.mockk.verify
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.payment.command.PayCommand
+import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
 import kr.hhplus.be.server.mock.BalanceMock
-import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.mock.PaymentMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -31,6 +33,8 @@ class PaymentServiceTest {
             balanceId = BalanceMock.id(),
             amount = BalanceAmount.of(2_500.toBigDecimal()),
         )
+        val payment = PaymentMock.payment()
+        every { repository.save(any()) } returns payment
 
         val result = service.pay(
             PayCommand(
@@ -40,9 +44,7 @@ class PaymentServiceTest {
             ),
         )
 
-        assertThat(result.orderId).isEqualTo(orderId)
-        assertThat(result.userId).isEqualTo(userId)
-        assertThat(result.amount).isEqualByComparingTo(amount.value)
+        assertThat(result).isEqualTo(PaymentView.from(payment))
         verify {
             repository.save(
                 withArg {
