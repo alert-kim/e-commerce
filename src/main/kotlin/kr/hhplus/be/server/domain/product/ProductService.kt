@@ -66,9 +66,8 @@ class ProductService(
             .map { ProductView.from(it) }
     }
 
-    fun getAllByIds(id: List<Long>): ProductsView {
-        TODO()
-    }
+    fun getAllByIds(ids: List<Long>): ProductsView =
+        repository.findAllByIds(ids).map { ProductView.from(it) }.let { ProductsView(it) }
 
     fun getPopularProducts(): PopularProductsView {
         val popularProductIds = dailySaleRepository.findTopNProductsByQuantity(
@@ -80,3 +79,4 @@ class ProductService(
         return PopularProductsView(products.map { ProductView.from(it) })
     }
 }
+

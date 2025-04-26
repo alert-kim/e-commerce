@@ -14,4 +14,11 @@ data class ProductsView(
         val product = value.find { it.id.value == productId } ?: throw NotFoundProductException("by id: $productId")
         return product.validatePurchasable(price)
     }
+
+    companion object {
+        fun from(products: List<Product>): ProductsView {
+            return ProductsView(products.map { ProductView.from(it) })
+        }
+    }
+
 }

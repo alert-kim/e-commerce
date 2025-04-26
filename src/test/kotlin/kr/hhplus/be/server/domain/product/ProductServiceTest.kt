@@ -254,6 +254,29 @@ class ProductServiceTest {
         }
     }
 
+
+    @Test
+    fun `getAllByIds - 주어진 ID 목록에 해당하는 상품들을 반환`() {
+        val ids = listOf(1L, 2L, 3L)
+        val products = ids.map { ProductMock.product(id = ProductId(it)) }
+        every { repository.findAllByIds(ids) } returns products
+
+        val result = service.getAllByIds(ids)
+
+        assertThat(result.value).hasSize(ids.size)
+        assertThat(result.value.map { it.id }).containsExactlyInAnyOrderElementsOf(products.map { it.id })
+    }
+
+    @Test
+    fun `getAllByIds - 주어진 ID 목록에 해당하는 상품이 없으면 빈 리스트 반환`() {
+        val ids = listOf(1L, 2L, 3L)
+        every { repository.findAllByIds(ids) } returns emptyList()
+
+        val result = service.getAllByIds(ids)
+
+        assertThat(result.value).isEmpty()
+    }
+
     @Test
     fun `getPopularProducts - 인기 상품 조회`() {
         val products = List(Arb.int(1..PopularProducts.MAX_SIZE).next()) {
