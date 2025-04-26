@@ -17,12 +17,12 @@ import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
+import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventType
-import kr.hhplus.be.server.domain.order.result.CreateOrderResult
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductId
@@ -106,7 +106,7 @@ class OrderFacadeTest {
         )
         val order = OrderMock.view(id = orderId, userId = userId, couponId = couponId)
         every { userService.get(command.userId) } returns user
-        every { orderService.createOrder(any<CreateOrderCommand>()) } returns CreateOrderResult(orderId)
+        every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
         every { productService.getAllByIds(any()) } returns ProductsView(products)
         every { stockService.allocate(any<AllocateStocksCommand>()) } returns AllocatedStockResult(stocks)
         every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns usedCoupon
@@ -210,7 +210,7 @@ class OrderFacadeTest {
         )
         val order = OrderMock.view(id = orderId, userId = userId, couponId = null)
         every { userService.get(command.userId) } returns user
-        every { orderService.createOrder(any<CreateOrderCommand>()) } returns CreateOrderResult(orderId)
+        every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
         every { productService.getAllByIds(any()) } returns ProductsView(products)
         every { stockService.allocate(any<AllocateStocksCommand>()) } returns AllocatedStockResult(stocks)
         every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount

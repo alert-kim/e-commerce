@@ -58,7 +58,7 @@ class OrderServiceTest {
 
         val result = service.createOrder(CreateOrderCommand(userId))
 
-        assertThat(result.orderId).isEqualTo(orderId)
+        assertThat(result).isEqualTo(orderId)
         verify {
             repository.save(withArg {
                 assertThat(it.userId).isEqualTo(userId)
