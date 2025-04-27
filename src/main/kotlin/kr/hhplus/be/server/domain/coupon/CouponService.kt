@@ -7,11 +7,15 @@ import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.domain.user.UserId
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class CouponService(
     private val repository: CouponRepository,
 ) {
+
+    @Transactional
     fun create(command: CreateCouponCommand): CouponView {
         val coupon = Coupon.new(
             userId = command.userId,
@@ -19,18 +23,17 @@ class CouponService(
             name = command.issuedCoupon.name,
             discountAmount = command.issuedCoupon.discountAmount,
             createdAt = command.issuedCoupon.createdAt,
-        )
+        ).let { repository.save(it) }
 
-        val id = repository.save(coupon)
-        return CouponView.from(coupon, id)
+        return CouponView.from(coupon)
     }
 
+    @Transactional
     fun use(command: UseCouponCommand): UsedCoupon {
         val coupon = repository.findById(command.couponId)
             ?: throw NotFoundCouponException("by id: ${command.couponId}")
 
         val usedCoupon = coupon.use(command.userId)
-        repository.save(coupon)
 
         return usedCoupon
     }

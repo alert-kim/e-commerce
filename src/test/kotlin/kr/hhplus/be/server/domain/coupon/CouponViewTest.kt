@@ -13,7 +13,7 @@ class CouponViewTest {
         val result = CouponView.from(coupon)
 
         assertAll(
-            { assertThat(result.id).isEqualTo(coupon.id) },
+            { assertThat(result.id).isEqualTo(coupon.id()) },
             { assertThat(result.userId).isEqualTo(coupon.userId) },
             { assertThat(result.name).isEqualTo(coupon.name) },
             { assertThat(result.couponSourceId).isEqualTo(coupon.couponSourceId) },
@@ -22,15 +22,5 @@ class CouponViewTest {
             { assertThat(result.createdAt).isEqualTo(coupon.createdAt) },
             { assertThat(result.updatedAt).isEqualTo(coupon.updatedAt) },
         )
-    }
-
-    @Test
-    fun `쿠폰 아이디가 따로 전달될 경우, id는 전달된 쿠폰 아이디다`() {
-        val id = CouponMock.id()
-        val coupon = CouponMock.coupon()
-
-        val result = CouponView.from(coupon, id)
-
-        assertThat(result.id).isEqualTo(id)
     }
 }

@@ -14,20 +14,21 @@ import java.time.Instant
 
 class CouponTest {
     @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
-        val coupon = CouponMock.coupon(id = CouponMock.id())
+    fun `id() - id가 null이 아닌 경우 id 반환`() {
+        val id = CouponMock.id()
+        val coupon = CouponMock.coupon(id = id)
 
-        val result = coupon.requireId()
+        val result = coupon.id()
 
-        assertThat(result).isEqualTo(coupon.id)
+        assertThat(result).isEqualTo(id)
     }
 
     @Test
-    fun `requireId - id가 null이면 RequiredCouponIdException 발생`() {
+    fun `id() - id가 null이면 RequiredCouponIdException 발생`() {
         val coupon = CouponMock.coupon(id = null)
 
         assertThrows<RequiredCouponIdException> {
-            coupon.requireId()
+            coupon.id()
         }
     }
 
@@ -48,7 +49,6 @@ class CouponTest {
         )
 
         assertAll(
-            { assertThat(coupon.id).isNull() },
             { assertThat(coupon.userId).isEqualTo(userId) },
             { assertThat(coupon.couponSourceId).isEqualTo(couponSourceId) },
             { assertThat(coupon.name).isEqualTo(name) },
@@ -64,7 +64,7 @@ class CouponTest {
         val usedCoupon = coupon.use(coupon.userId)
 
         assertThat(coupon.usedAt).isNotNull
-        assertThat(usedCoupon.id).isEqualTo(coupon.id)
+        assertThat(usedCoupon.id).isEqualTo(coupon.id())
         assertThat(usedCoupon.userId).isEqualTo(coupon.userId)
         assertThat(usedCoupon.discountAmount).isEqualByComparingTo(coupon.discountAmount)
         assertThat(usedCoupon.usedAt).isEqualTo(coupon.usedAt)

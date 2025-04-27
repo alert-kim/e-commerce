@@ -5,12 +5,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
+import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.mock.CouponMock
 import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.UserMock
@@ -38,20 +40,19 @@ class CouponServiceTest {
     fun `create - 쿠폰 생성`() {
         val userId = UserMock.id()
         val issuedCoupon = CouponMock.issuedCoupon()
-        val couponId = CouponMock.id()
-        every { repository.save(any()) } returns couponId
+        val coupon = CouponMock.coupon(id = CouponMock.id(), userId = userId)
+        every { repository.save(any()) } returns coupon
 
         val result = service.create(CreateCouponCommand(userId, issuedCoupon))
 
-        assertThat(result.id).isEqualTo(couponId)
-        assertThat(result.userId).isEqualTo(userId)
-        assertThat(result.couponSourceId).isEqualTo(issuedCoupon.couponSourceId)
-        assertThat(result.name).isEqualTo(issuedCoupon.name)
-        assertThat(result.discountAmount).isEqualByComparingTo(issuedCoupon.discountAmount)
-        assertThat(result.createdAt).isEqualTo(issuedCoupon.createdAt)
+        assertThat(result).isEqualTo(CouponView.from(coupon))
         verify {
             repository.save(withArg {
                 assertThat(it.userId).isEqualTo(userId)
+                assertThat(it.couponSourceId).isEqualTo(issuedCoupon.couponSourceId)
+                assertThat(it.name).isEqualTo(issuedCoupon.name)
+                assertThat(it.discountAmount).isEqualByComparingTo(issuedCoupon.discountAmount)
+                assertThat(it.createdAt).isEqualTo(issuedCoupon.createdAt)
             })
         }
     }
@@ -59,29 +60,22 @@ class CouponServiceTest {
     @Test
     fun `use - 쿠폰 사용`() {
         val couponId = CouponMock.id()
-        val coupon = CouponMock.coupon(id = couponId, usedAt = null)
+        val coupon = mockk<Coupon>()
+        val userId = UserMock.id()
+        val usedCoupon = UsedCoupon(
+            id = CouponMock.id(),
+            userId = UserMock.id(),
+            discountAmount = 1000.toBigDecimal(),
+            usedAt = Instant.now(),
+        )
         every { repository.findById(couponId.value) } returns coupon
+        every { coupon.use(any()) } returns usedCoupon
+        val result = service.use(UseCouponCommand(couponId.value, userId))
 
-        val result = service.use(UseCouponCommand(couponId.value, coupon.userId))
-
-        assertThat(result.id).isEqualTo(coupon.id)
-        assertThat(result.usedAt).isNotNull()
+        assertThat(result).isEqualTo(usedCoupon)
         verify {
             repository.findById(couponId.value)
-            repository.save(withArg {
-                assertThat(it.usedAt).isNotNull()
-            })
-        }
-    }
-
-    @Test
-    fun `use - 이미 사용한 쿠폰`() {
-        val couponId = CouponMock.id()
-        val coupon = CouponMock.coupon(id = couponId, usedAt = Instant.now())
-        every { repository.findById(couponId.value) } returns coupon
-
-        assertThrows<AlreadyUsedCouponException> {
-            service.use(UseCouponCommand(couponId.value, coupon.userId))
+            coupon.use(userId)
         }
     }
 

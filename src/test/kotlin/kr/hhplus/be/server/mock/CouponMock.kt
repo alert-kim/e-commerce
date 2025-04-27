@@ -42,7 +42,7 @@ object CouponMock {
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = Coupon(
-        id = id,
+        id = id?.value,
         userId = userId,
         name = name,
         couponSourceId = couponSourceId,

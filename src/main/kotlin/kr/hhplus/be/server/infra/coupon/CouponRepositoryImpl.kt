@@ -7,16 +7,18 @@ import kr.hhplus.be.server.domain.user.UserId
 import org.springframework.stereotype.Repository
 
 @Repository
-class CouponRepositoryImpl: CouponRepository {
-    override fun save(coupon: Coupon): CouponId {
-        TODO("Not yet implemented")
+class CouponRepositoryImpl(
+    private val jpaRepository: CouponJpaRepository
+): CouponRepository {
+    override fun save(coupon: Coupon): Coupon {
+        return jpaRepository.save(coupon)
     }
 
     override fun findById(id: Long): Coupon? {
-        TODO("Not yet implemented")
+        return jpaRepository.findById(id).orElse(null)
     }
 
     override fun findAllByUserIdAndUsedAtIsNull(userId: UserId): List<Coupon> {
-        TODO("Not yet implemented")
+        return jpaRepository.findAllByUserIdAndUsedAtIsNull(userId.value)
     }
 }
