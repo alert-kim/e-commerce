@@ -26,8 +26,8 @@ class ChargeBalanceApiTest : ApiTest() {
         }.andExpect {
             status { isOk() }
             jsonPath("$.userId") { value(balance.userId.value) }
-            jsonPath("$.balance") { value(expectBalanceAmount) }
-        }
+            jsonPath("$.balance") { value(expectBalanceAmount.toDouble()) }
+        }.andDo { print() }
     }
 
     @Test

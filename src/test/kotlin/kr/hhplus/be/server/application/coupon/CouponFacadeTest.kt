@@ -58,14 +58,14 @@ class CouponFacadeTest {
     }
 
     @Test
-    fun `getCoupons - 사용자 쿠폰 조회`() {
+    fun `getUsableCoupons - 사용 가능한 사용자 쿠폰 조회`() {
         val userId = UserMock.id()
         val user = UserMock.view(id = userId)
         val coupons = List(3) { CouponMock.view(id = CouponMock.id()) }
         every { userService.get(userId.value) } returns user
         every { couponService.getAllUnused(userId) } returns coupons
 
-        val result = couponFacade.getCoupons(userId.value)
+        val result = couponFacade.getUsableCoupons(userId.value)
 
         assertThat(result.value).hasSize(coupons.size)
         coupons.forEachIndexed { index, coupon ->
@@ -75,5 +75,19 @@ class CouponFacadeTest {
             userService.get(userId.value)
             couponService.getAllUnused(userId)
         }
+    }
+
+    @Test
+    fun `getAllSourcesIssuable - 발급 가능한 쿠폰 소스 조회`() {
+        val couponSources = List(3) { CouponMock.sourceView() }
+        every { couponSourceService.getAllIssuable() } returns couponSources
+
+        val result = couponFacade.getAllSourcesIssuable()
+
+        assertThat(result.value).hasSize(couponSources.size)
+        couponSources.forEachIndexed { index, source ->
+            assertThat(result.value[index].id).isEqualTo(source.id)
+        }
+        verify { couponSourceService.getAllIssuable() }
     }
 }

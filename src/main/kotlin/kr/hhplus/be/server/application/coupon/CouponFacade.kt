@@ -29,7 +29,7 @@ class CouponFacade(
     fun getAllSourcesIssuable(): CouponSourcesResult =
         CouponSourcesResult(couponSourceService.getAllIssuable())
 
-    fun getCoupons(userId: Long): CouponResult.List {
+    fun getUsableCoupons(userId: Long): CouponResult.List {
         val userId = userService.get(userId).id
         val coupons = couponService.getAllUnused(userId)
         return CouponResult.List(coupons)

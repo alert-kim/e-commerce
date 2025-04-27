@@ -12,6 +12,7 @@ import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceExcepti
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponSourceIdException
 import kr.hhplus.be.server.domain.coupon.result.IssuedCoupon
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Instant
 
 @Entity
@@ -57,7 +58,6 @@ class CouponSource(
         if (quantity == 0) {
             status = CouponSourceStatus.OUT_OF_STOCK
         }
-
         return IssuedCoupon(
             couponSourceId = id(),
             name = name,
