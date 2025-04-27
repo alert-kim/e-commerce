@@ -5,7 +5,7 @@ import kr.hhplus.be.server.domain.coupon.CouponSourceId
 import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 
 interface CouponSourceRepository {
-    fun save(couponSource: CouponSource): CouponSourceId
+    fun save(couponSource: CouponSource): CouponSource
 
     fun findById(id: Long): CouponSource?
 

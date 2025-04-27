@@ -43,7 +43,6 @@ class CouponSourceServiceTest {
         assertThat(result).isEqualTo(issuedCoupon)
         verify {
             repository.findById(couponSourceId.value)
-            repository.save(any())
         }
     }
 
@@ -64,12 +63,12 @@ class CouponSourceServiceTest {
     @Test
     fun `getAllIssuable - ACTIVE 상태의 쿠폰 소스를 조회`() {
         val couponSources = List(3) { CouponMock.source() }
-        every { repository.findAllByStatus(CouponSourceStatus.ACTIVE)  } returns couponSources
+        every { repository.findAllByStatus(CouponSourceStatus.ACTIVE) } returns couponSources
 
         val result = service.getAllIssuable()
 
         result.forEachIndexed { index, source ->
-            assertThat(source.id).isEqualTo(couponSources[index].id)
+            assertThat(source.id).isEqualTo(couponSources[index].id())
         }
         verify {
             repository.findAllByStatus(withArg {
@@ -80,7 +79,7 @@ class CouponSourceServiceTest {
 
     @Test
     fun `getAllIssuable - 발급 가능한 쿠폰 소스가 없는 경우 빈 리스트 반환`() {
-        every { repository.findAllByStatus(CouponSourceStatus.ACTIVE)  } returns emptyList<CouponSource>()
+        every { repository.findAllByStatus(CouponSourceStatus.ACTIVE) } returns emptyList<CouponSource>()
 
         val result = service.getAllIssuable()
 

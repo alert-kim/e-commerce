@@ -13,7 +13,6 @@ class CouponSourceService(
     fun issue(command: IssueCouponCommand): IssuedCoupon {
         val couponSource = repository.findById(command.couponSourceId) ?: throw NotFoundCouponSourceException("by id: ${command.couponSourceId}")
         val issued = couponSource.issue()
-        repository.save(couponSource)
         return issued
     }
 

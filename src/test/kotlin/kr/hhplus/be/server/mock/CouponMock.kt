@@ -95,7 +95,7 @@ object CouponMock {
         updatedAt: Instant = Instant.now(),
     ): CouponSource =
         CouponSource(
-            id = id,
+            id = id?.value,
             name = name,
             status = status,
             quantity = quantity,

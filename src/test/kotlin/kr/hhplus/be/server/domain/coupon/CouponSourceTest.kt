@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -32,20 +31,21 @@ class CouponSourceTest {
     }
 
     @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
-        val source = CouponMock.source(id = CouponMock.sourceId())
+    fun `id() - id가 null이 아닌 경우 id 반환`() {
+        val id = CouponMock.sourceId()
+        val source = CouponMock.source(id = id)
 
-        val result = source.requireId()
+        val result = source.id()
 
-        assertThat(result).isEqualTo(source.id)
+        assertThat(result).isEqualTo(id)
     }
 
     @Test
-    fun `requireId - id가 null이면 RequiredCouponSourceIdException 발생`() {
+    fun `id() - id가 null이면 RequiredCouponSourceIdException 발생`() {
         val source = CouponMock.source(id = null)
 
         assertThrows<RequiredCouponSourceIdException> {
-            source.requireId()
+            source.id()
         }
     }
 
@@ -57,7 +57,7 @@ class CouponSourceTest {
         val result = source.issue()
 
         assertAll(
-            { assertThat(result.couponSourceId).isEqualTo(source.id) },
+            { assertThat(result.couponSourceId).isEqualTo(source.id()) },
             { assertThat(result.name).isEqualTo(source.name) },
             { assertThat(result.discountAmount).isEqualTo(source.discountAmount) },
             { assertThat(source.quantity).isEqualTo(originalQuantity - 1) },

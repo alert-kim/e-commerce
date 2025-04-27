@@ -17,7 +17,7 @@ data class CouponSourceView(
             couponSource: CouponSource,
         ): CouponSourceView =
             CouponSourceView(
-                id = couponSource.requireId(),
+                id = couponSource.id(),
                 name = couponSource.name,
                 status = couponSource.status,
                 quantity = couponSource.quantity,
