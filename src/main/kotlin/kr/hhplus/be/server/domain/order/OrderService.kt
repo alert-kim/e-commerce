@@ -3,6 +3,7 @@ package kr.hhplus.be.server.domain.order
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
@@ -77,26 +78,18 @@ class OrderService(
     fun consumeEvent(
         command: ConsumeOrderEventCommand,
     ) {
-        val offset = eventConsumerOffsetRepository.find(command.consumerId, command.event.type)
+        val offset = eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(command.consumerId, command.event.type))
         when (offset) {
             null -> eventConsumerOffsetRepository.save(
-                OrderEventConsumerOffset(
+                OrderEventConsumerOffset.new(
                     consumerId = command.consumerId,
-                    value = command.event.id(),
+                    eventId = command.event.id(),
                     eventType = command.event.type,
-                    createdAt = Instant.now(),
-                    updatedAt = Instant.now(),
                 )
             )
 
-            else -> eventConsumerOffsetRepository.update(
-                OrderEventConsumerOffset(
-                    consumerId = command.consumerId,
-                    value = command.event.id(),
-                    eventType = command.event.type,
-                    createdAt = offset.createdAt,
-                    updatedAt = command.event.createdAt,
-                )
+            else -> offset.update(
+                eventId = command.event.id(),
             )
         }
     }
@@ -110,13 +103,15 @@ class OrderService(
         eventType: OrderEventType,
     ): List<OrderEvent> {
         val offset = eventConsumerOffsetRepository.find(
-            consumerId = consumerId,
-            eventType = eventType,
+            OrderEventConsumerOffsetId(
+                consumerId = consumerId,
+                eventType = eventType,
+            )
         )
         return when (offset) {
             null -> eventRepository.findAllByIdAsc()
             else -> eventRepository.findAllByIdGreaterThanOrderByIdAsc(
-                id = offset.value,
+                id = offset.eventId,
             )
         }
     }

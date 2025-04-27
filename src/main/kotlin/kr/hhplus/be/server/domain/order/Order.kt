@@ -125,7 +125,7 @@ class Order(
         this.discountAmount = coupon.calculateDiscountAmount(totalAmount)
         this.totalAmount = totalAmount.minus(discountAmount)
         this.couponId = newCouponId
-        updatedAt = Instant.now()
+        this.updatedAt = Instant.now()
     }
 
     private fun addOrderProduct(

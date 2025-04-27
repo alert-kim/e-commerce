@@ -4,10 +4,10 @@ import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
 import kr.hhplus.be.server.domain.order.event.OrderEventId
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -122,9 +122,11 @@ object OrderMock {
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ): OrderEventConsumerOffset = OrderEventConsumerOffset(
-        consumerId = consumerId,
-        value = eventId,
-        eventType = eventType,
+        id = OrderEventConsumerOffsetId(
+            consumerId = consumerId,
+            eventType = eventType,
+        ),
+        eventId = eventId,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
