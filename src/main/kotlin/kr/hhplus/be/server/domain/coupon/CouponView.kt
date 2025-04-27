@@ -29,5 +29,19 @@ data class CouponView(
                 createdAt = coupon.createdAt,
                 updatedAt = coupon.updatedAt,
             )
+
+            fun from(
+                coupon: Coupon,
+            ): CouponView =
+                CouponView(
+                    id = coupon.requireId(),
+                    userId = coupon.userId,
+                    name = coupon.name,
+                    couponSourceId = coupon.couponSourceId,
+                    discountAmount = coupon.discountAmount,
+                    usedAt = coupon.usedAt,
+                    createdAt = coupon.createdAt,
+                    updatedAt = coupon.updatedAt,
+                )     
     }
 }
