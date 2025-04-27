@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
@@ -36,7 +37,7 @@ class ProductServiceTest {
 
     @BeforeEach
     fun setUp() {
-        clearMocks(repository)
+        clearMocks(repository, saleRepository)
     }
 
     @Test
@@ -101,69 +102,73 @@ class ProductServiceTest {
     @Test
     fun `aggregateProductDailySales - 상품 일일 판매량 집계 - 해당 상품의 집계 데이터가 이미 있는 경우`() {
         val newSaleQuantity = 10
-        val sale = ProductMock.dailySale()
-        val originalQuantity = sale.quantity
-
+        val sales = listOf(
+            ProductMock.dailySale() to mockk<ProductDailySale>(relaxed = true),
+            ProductMock.dailySale() to mockk<ProductDailySale>(relaxed = true)
+        )
         val command = RecordProductDailySalesCommand(
-            sales = listOf(
+            sales = sales.map { (sale, _) ->
                 RecordProductDailySalesCommand.ProductSale(
                     productId = sale.productId,
                     date = sale.date,
                     quantity = newSaleQuantity,
-                ),
-            ),
+                )
+            }
         )
-        every {
-            saleRepository.findByProductIdAndDate(
-                productId = sale.productId,
-                date = sale.date,
-            )
-        } returns sale
+        sales.forEach { (sale, mockSale) ->
+            every {
+                saleRepository.findById(
+                    ProductDailySaleId(
+                        productId = sale.productId,
+                        date = sale.date
+                    )
+                )
+            } returns mockSale
+        }
 
         service.aggregateProductDailySales(command)
 
-        verify {
-            saleRepository.update(withArg<ProductDailySale> {
-                assertThat(it.productId).isEqualTo(sale.productId)
-                assertThat(it.date).isEqualTo(sale.date)
-                assertThat(it.quantity).isEqualTo(originalQuantity + newSaleQuantity)
-            })
+        sales.forEach { (_, mockSale) ->
+            verify {
+                mockSale.addQuantity(newSaleQuantity)
+            }
         }
     }
 
     @Test
     fun `aggregateProductDailySales - 상품 일일 판매량 집계 - 해당 상품의 집계 데이터가 없는 경우`() {
         val date = LocalDate.now()
-        val productId = ProductMock.id()
-        val newSaleQuantity = 3
-
-        val command = RecordProductDailySalesCommand(
-            sales = listOf(
-                RecordProductDailySalesCommand.ProductSale(
-                    productId = productId,
-                    date = date,
-                    quantity = newSaleQuantity,
-                ),
-            ),
-        )
-        every {
-            saleRepository.findByProductIdAndDate(
-                productId = productId,
+        val sales = listOf(
+            RecordProductDailySalesCommand.ProductSale(
+                productId = ProductMock.id(),
                 date = date,
+                quantity = 3,
+            ),
+            RecordProductDailySalesCommand.ProductSale(
+                productId = ProductMock.id(),
+                date = date,
+                quantity = 5,
+            )
+        )
+        val command = RecordProductDailySalesCommand(sales = sales)
+        every {
+            saleRepository.findById(
+                any()
             )
         } returns null
 
         service.aggregateProductDailySales(command)
 
-        verify {
-            saleRepository.save(withArg<ProductDailySale> {
-                assertThat(it.productId).isEqualTo(productId)
-                assertThat(it.date).isEqualTo(date)
-                assertThat(it.quantity).isEqualTo(newSaleQuantity)
-            })
+        sales.forEach { sale ->
+            verify {
+                saleRepository.save(withArg<ProductDailySale> {
+                    assertThat(it.productId).isEqualTo(sale.productId)
+                    assertThat(it.date).isEqualTo(sale.date)
+                    assertThat(it.quantity).isEqualTo(sale.quantity)
+                })
+            }
         }
     }
-
 
     @Test
     fun `getAllByIds - 주어진 ID 목록에 해당하는 상품들을 반환`() {

@@ -1,17 +1,10 @@
 package kr.hhplus.be.server.interfaces.coupon
 
-import io.kotest.assertions.print.print
-import io.mockk.core.ValueClassSupport.boxedValue
 import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 import kr.hhplus.be.server.interfaces.ApiTest
-import kr.hhplus.be.server.mock.CouponMock
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.equalToObject
 import org.hamcrest.Matchers.hasSize
-import org.hamcrest.number.BigDecimalCloseTo.closeTo
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.get
-import java.math.BigDecimal
 
 class GetCouponSourcesApiTest : ApiTest() {
 
@@ -27,7 +20,6 @@ class GetCouponSourcesApiTest : ApiTest() {
         )
 
         mockMvc.get("/couponSources")
-            .andDo { print() }
             .andExpect {
                 status { isOk() }
                 jsonPath("$.coupons", hasSize<Any>(issuableSources.size))
@@ -35,13 +27,11 @@ class GetCouponSourcesApiTest : ApiTest() {
                     jsonPath("$.coupons[$index].id") { value(couponSource.id().value) }
                     jsonPath("$.coupons[$index].name") { value(couponSource.name) }
                     jsonPath("$.coupons[$index].quantity") { value(couponSource.quantity) }
-                    jsonPath("$.coupons[$index].discountAmount" ) { value(couponSource.discountAmount.toDouble()) }
+                    jsonPath("$.coupons[$index].discountAmount") { value(couponSource.discountAmount.toDouble()) }
                     jsonPath("$.coupons[$index].createdAt") { value(couponSource.createdAt.toString()) }
                     jsonPath("$.coupons[$index].updatedAt") { value(couponSource.updatedAt.toString()) }
                 }
             }
-
-
     }
 
     @Test

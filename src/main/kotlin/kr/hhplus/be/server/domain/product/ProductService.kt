@@ -15,10 +15,10 @@ class ProductService(
 
     fun aggregateProductDailySales(command: RecordProductDailySalesCommand) {
         command.sales.forEach { newSale ->
-            val sale = dailySaleRepository.findByProductIdAndDate(
+            val sale = dailySaleRepository.findById(ProductDailySaleId(
                 productId = newSale.productId,
                 date = newSale.date,
-            )
+            ))
             when (sale == null) {
                 true -> {
                     val sale = ProductDailySale.new(
@@ -31,7 +31,6 @@ class ProductService(
 
                 false -> {
                     sale.addQuantity(newSale.quantity)
-                    dailySaleRepository.update(sale)
                 }
             }
         }

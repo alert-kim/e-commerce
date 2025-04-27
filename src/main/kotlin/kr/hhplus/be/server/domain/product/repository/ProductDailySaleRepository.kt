@@ -1,14 +1,12 @@
 package kr.hhplus.be.server.domain.product.repository
 
 import kr.hhplus.be.server.domain.product.ProductDailySale
+import kr.hhplus.be.server.domain.product.ProductDailySaleId
 import kr.hhplus.be.server.domain.product.ProductId
 import java.time.LocalDate
 
 interface ProductDailySaleRepository {
-    fun findByProductIdAndDate(
-        productId: ProductId,
-        date: LocalDate,
-    ): ProductDailySale?
+    fun findById(id: ProductDailySaleId): ProductDailySale?
 
     fun findTopNProductsByQuantity(
         startDate: LocalDate,
@@ -16,7 +14,5 @@ interface ProductDailySaleRepository {
         limit: Int,
     ): List<ProductDailySale>
 
-    fun save(sale: ProductDailySale)
-
-    fun update(sale: ProductDailySale)
+    fun save(sale: ProductDailySale): ProductDailySale
 }

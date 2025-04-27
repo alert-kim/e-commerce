@@ -16,7 +16,7 @@ class OrderEventConsumerOffsetRepositoryTest : RepositoryTest() {
     private lateinit var repository: OrderEventConsumerOffsetRepository
 
     @Test
-    fun `save - 저장 및 조회 테스트`() {
+    fun `save - 주문 이벤트 소비 offset 저장 테스트`() {
         val consumerId = "test-consumer"
         val eventType = OrderEventType.COMPLETED
         val eventId = OrderMock.eventId()

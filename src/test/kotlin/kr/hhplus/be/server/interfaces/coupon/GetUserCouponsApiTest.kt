@@ -17,10 +17,8 @@ class GetUserCouponsApiTest : ApiTest() {
             savedCoupon(userId = user.id(), usedAt = null)
         }
         savedCoupon(userId = user.id(), usedAt = Instant.now())
-        println("hello --- ${coupons.first().discountAmount}")
 
         mockMvc.get("/users/${user.id().value}/coupons")
-            .andDo { print() }
             .andExpect {
                 status { isOk() }
                 jsonPath("$.coupons", hasSize<Any>(coupons.size))

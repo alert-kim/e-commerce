@@ -1,11 +1,16 @@
 package kr.hhplus.be.server.domain.product
 
+import jakarta.persistence.EmbeddedId
+import jakarta.persistence.Entity
+import jakarta.persistence.Table
 import java.time.Instant
 import java.time.LocalDate
 
+@Entity
+@Table(name = "product_daily_sales")
 class ProductDailySale(
-    val date: LocalDate,
-    val productId: ProductId,
+    @EmbeddedId
+    val id: ProductDailySaleId,
     val createdAt: Instant,
     quantity: Int,
     updatedAt: Instant,
@@ -15,6 +20,12 @@ class ProductDailySale(
 
     var updatedAt: Instant = updatedAt
         private set
+
+    val productId: ProductId
+        get() = id.productId
+
+    val date: LocalDate
+        get() = id.date
 
     fun addQuantity(quantity: Int) {
         this.quantity += quantity
@@ -28,8 +39,7 @@ class ProductDailySale(
             quantity: Int,
         ): ProductDailySale {
             return ProductDailySale(
-                date = date,
-                productId = productId,
+                id = ProductDailySaleId(date, productId),
                 quantity = quantity,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),

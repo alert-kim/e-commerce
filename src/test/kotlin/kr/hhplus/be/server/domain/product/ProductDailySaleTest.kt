@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 class ProductDailySaleTest {
     @Test
-    fun `상품 일일 판매 데이터 생성`() {
+    fun `new - 상품 일일 판매 데이터 생성`() {
         val date = LocalDate.now()
         val productId = ProductId(3L)
         val quantity = Arb.int(2..4).next()
@@ -24,13 +24,14 @@ class ProductDailySaleTest {
         )
 
         assertAll(
-            { assert(result.date == date) },
-            { assert(result.productId == productId) },
+            { assert(result.id.date == date) },
+            { assert(result.id.productId == productId) },
             { assert(result.quantity == quantity) },
         )
     }
 
-    fun `상품 일일 판매 데이터 수량 추가`() {
+    @Test
+    fun `addQuantity - 상품 일일 판매 데이터 수량 추가`() {
         val originalQuantity = 3
         val originalUpdatedAt = Instant.now()
         val quantity = Arb.int(2..4).next()
@@ -43,7 +44,6 @@ class ProductDailySaleTest {
         assertAll(
             { assertThat(sale.quantity).isEqualTo(originalQuantity + quantity) },
             { assertThat(sale.updatedAt).isAfter(originalUpdatedAt) },
-            )
+        )
     }
-
 }
