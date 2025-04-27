@@ -18,7 +18,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 class StockServiceTest {
@@ -32,34 +31,6 @@ class StockServiceTest {
     @BeforeEach
     fun setUp() {
         clearMocks(repository)
-    }
-
-    @Test
-    fun `get - 상품 id재고 조회`() {
-        val productId = ProductId(100L)
-        val stock = Stock(
-            id = 1L,
-            productId = productId,
-            quantity = 10,
-            createdAt = Instant.now(),
-            updatedAt = Instant.now()
-        )
-        every { repository.findByProductId(productId) } returns stock
-
-        val result = service.getStock(productId)
-
-        assertThat(result.id).isEqualTo(stock.id())
-        verify { repository.findByProductId(productId) }
-    }
-
-    @Test
-    fun `get - 상품에 대한 재고가 없을 경우 - NotFoundStockException`() {
-        val productId = ProductId(100L)
-        every { repository.findByProductId(productId) } returns null
-
-        shouldThrow<NotFoundStockException> {
-            service.getStock(productId)
-        }
     }
 
     @Test

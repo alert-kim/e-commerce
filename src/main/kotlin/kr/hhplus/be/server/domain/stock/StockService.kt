@@ -12,12 +12,6 @@ import org.springframework.transaction.annotation.Transactional
 class StockService(
     private val stockRepository: StockRepository
 ) {
-    fun getStock(productId: ProductId): StockView {
-        val stock = stockRepository.findByProductId(productId)
-            ?: throw NotFoundStockException(productId)
-        return StockView.from(stock)
-    }
-
     fun getStocks(productIds: List<ProductId>): List<StockView> {
         val stocks = stockRepository.findAllByProductIds(productIds)
         return stocks.map { StockView.from(it) }
