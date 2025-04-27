@@ -1,5 +1,10 @@
 package kr.hhplus.be.server.domain.stock
 
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.stock.exception.InvalidStockQuantityToAllocateException
 import kr.hhplus.be.server.domain.stock.exception.OutOfStockException
@@ -7,11 +12,16 @@ import kr.hhplus.be.server.domain.stock.exception.RequiredStockIdException
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import java.time.Instant
 
+@Entity
+@Table(name = "stocks")
 class Stock(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected val id: Long? = null,
+
     val productId: ProductId,
-    quantity: Int,
     val createdAt: Instant = Instant.now(),
+    quantity: Int,
     updatedAt: Instant = Instant.now(),
 ) {
     var quantity: Int = quantity

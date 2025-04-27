@@ -6,13 +6,15 @@ import kr.hhplus.be.server.domain.stock.StockRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-class StockRepositoryImpl : StockRepository {
+class StockRepositoryImpl(
+    private val stockJpaRepository: StockJpaRepository
+) : StockRepository {
+
     override fun findAllByProductIds(productIds: Collection<ProductId>): List<Stock> {
-        TODO("Not yet implemented")
+        val productIdValues = productIds.map { it.value }
+        return stockJpaRepository.findAllByProductIdIn(productIdValues)
     }
 
-    override fun save(stock: Stock): Stock {
-        // TODO: Implement database query to save stock
-        return stock
-    }
+    override fun save(stock: Stock): Stock =
+        stockJpaRepository.save(stock)
 }

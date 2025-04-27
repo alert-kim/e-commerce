@@ -13,13 +13,13 @@ object StockMock {
     ): StockId = StockId(id)
 
     fun stock(
-        id: StockId = StockId(IdMock.value()),
+        id: StockId? = StockId(IdMock.value()),
         productId: ProductId = ProductMock.id(),
         quantity: Int = 100,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ): Stock = Stock(
-        id = id.value,
+        id = id?.value,
         productId = productId,
         quantity = quantity,
         createdAt = createdAt,
