@@ -7,6 +7,7 @@ import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
 import kr.hhplus.be.server.domain.order.event.OrderEventId
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.product.ProductId
+import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -14,15 +15,19 @@ import java.time.Instant
 object OrderMock {
     fun id(): OrderId = OrderId(IdMock.value())
 
+    fun productId(): OrderProductId = OrderProductId(IdMock.value())
+
     fun product(
-        orderId: OrderId = id(),
+        id: OrderProductId? = productId(),
+        order: Order? = null,
         productId: Long = IdMock.value(),
         quantity: Int = 1,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
     ): OrderProduct = OrderProduct(
-        orderId = orderId,
+        id = id?.value,
+        order = order,
         productId = ProductId(productId),
         quantity = quantity,
         unitPrice = unitPrice,
@@ -42,7 +47,7 @@ object OrderMock {
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = Order(
-        id = id,
+        id = id?.value,
         userId = userId,
         status = status,
         couponId = couponId,
@@ -62,7 +67,7 @@ object OrderMock {
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
     ): OrderProductView = OrderProductView(
-        orderId = orderId,
+//        orderId = orderId,
         productId = ProductId(productId),
         quantity = quantity,
         unitPrice = unitPrice,
@@ -125,14 +130,12 @@ object OrderMock {
     )
 
     fun orderProductSnapshot(
-        orderId: Long = IdMock.value(),
         productId: Long = IdMock.value(),
         quantity: Int = 2,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
     ): OrderSnapshot.OrderProductSnapshot = OrderSnapshot.OrderProductSnapshot(
-        orderId = orderId,
         productId = productId,
         quantity = quantity,
         unitPrice = unitPrice,

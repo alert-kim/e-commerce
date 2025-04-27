@@ -19,7 +19,7 @@ class GetBalanceApiTest : ApiTest() {
         }.andExpect {
             status { isOk() }
             jsonPath("$.userId") { value(balance.userId.value) }
-            jsonPath("$.balance") { value(BigDecimal(balance.amount.value.toPlainString())) }
+            jsonPath("$.balance") { value(balance.amount.value.toDouble()) }
         }
     }
 

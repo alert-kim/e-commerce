@@ -1,14 +1,19 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.*
+import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
+import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
+@Transactional(readOnly = true)
 class OrderService(
     private val repository: OrderRepository,
     private val eventRepository: OrderEventRepository,
@@ -22,7 +27,7 @@ class OrderService(
             Order.new(
                 userId = command.userId,
             )
-        )
+        ).id()
 
     fun placeStock(
         command: PlaceStockCommand,
@@ -36,8 +41,6 @@ class OrderService(
                 unitPrice = it.product.price,
             )
         }
-
-        repository.save(order)
     }
 
     fun applyCoupon(
@@ -46,8 +49,6 @@ class OrderService(
         val order = doGet(command.orderId.value)
 
         order.applyCoupon(command.usedCoupon)
-
-        repository.save(order)
     }
 
     fun pay(
@@ -57,9 +58,8 @@ class OrderService(
         val order = doGet(payment.orderId.value)
 
         order.pay()
-        val orderId = repository.save(order)
         val event = OrderEvent(
-            orderId = orderId,
+            orderId = order.id(),
             type = OrderEventType.COMPLETED,
             snapshot = OrderSnapshot.from(order),
             createdAt = Instant.now(),

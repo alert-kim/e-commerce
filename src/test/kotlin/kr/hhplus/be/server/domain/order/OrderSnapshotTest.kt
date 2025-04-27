@@ -27,7 +27,6 @@ class OrderSnapshotTest {
         assertThat(orderSnapshot.orderProducts).hasSize(order.products.size)
         orderSnapshot.orderProducts.forEachIndexed { index, product ->
             val expect = order.products[index]
-            assertThat(product.orderId).isEqualTo(expect.orderId.value)
             assertThat(product.productId).isEqualTo(expect.productId.value)
             assertThat(product.quantity).isEqualTo(expect.quantity)
             assertThat(product.unitPrice).isEqualByComparingTo(expect.unitPrice)

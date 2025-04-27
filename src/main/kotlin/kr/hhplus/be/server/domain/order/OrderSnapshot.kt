@@ -30,7 +30,6 @@ data class OrderSnapshot(
     }
 
     data class OrderProductSnapshot(
-        val orderId: Long,
         val productId: Long,
         val quantity: Int,
         val unitPrice: BigDecimal,
@@ -39,9 +38,9 @@ data class OrderSnapshot(
     )
 
     companion object {
-        fun from(order: Order): OrderSnapshot {
-            return OrderSnapshot(
-                id = order.requireId().value,
+        fun from(order: Order): OrderSnapshot =
+            OrderSnapshot(
+                id = order.id().value,
                 userId = order.userId,
                 status = order.status,
                 originalAmount = order.originalAmount,
@@ -50,7 +49,6 @@ data class OrderSnapshot(
                 couponId = order.couponId?.value,
                 orderProducts = order.products.map { product ->
                     OrderProductSnapshot(
-                        orderId = product.orderId.value,
                         productId = product.productId.value,
                         quantity = product.quantity,
                         unitPrice = product.unitPrice,
@@ -61,6 +59,5 @@ data class OrderSnapshot(
                 createdAt = order.createdAt,
                 updatedAt = order.updatedAt,
             )
-        }
     }
 }

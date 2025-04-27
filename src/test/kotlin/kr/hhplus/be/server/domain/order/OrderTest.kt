@@ -22,20 +22,21 @@ import java.time.Instant
 
 class OrderTest {
     @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
-        val order = OrderMock.order(id = OrderMock.id())
+    fun `id() - id가 null이 아닌 경우 id 반환`() {
+        val id = OrderMock.id()
+        val order = OrderMock.order(id = id)
 
-        val result = order.requireId()
+        val result = order.id()
 
-        assertThat(result).isEqualTo(order.id)
+        assertThat(result).isEqualTo(id)
     }
 
     @Test
-    fun `requireId - id가 null이면 RequiredOrderIdException 발생`() {
+    fun `id() - id가 null이면 RequiredOrderIdException 발생`() {
         val order = OrderMock.order(id = null)
 
         assertThrows<RequiredOrderIdException> {
-            order.requireId()
+            order.id()
         }
     }
 
