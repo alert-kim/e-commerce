@@ -51,7 +51,7 @@ class ProductServiceTest {
         }
         val totalCount = products.size * 2L
         val productPage = PageImpl(products, pageable, totalCount)
-        every { repository.findAllByStatus(status, pageable) } returns productPage
+        every { repository.findAllByStatusOrderByCreatedAtDesc(status, pageable) } returns productPage
 
         val result = service.getAllByStatusOnPaged(status, page, pageSize)
 
@@ -59,7 +59,7 @@ class ProductServiceTest {
         assertThat(result.totalElements).isEqualTo(totalCount)
         assertThat(result.content).hasSize(products.size)
         result.content.forEachIndexed { index, product ->
-            assertThat(product.id).isEqualTo(products[index].id)
+            assertThat(product.id).isEqualTo(products[index].id())
             assertThat(product.status).isEqualTo(products[index].status)
             assertThat(product.name).isEqualTo(products[index].name)
             assertThat(product.description).isEqualTo(products[index].description)
@@ -67,7 +67,7 @@ class ProductServiceTest {
             assertThat(product.createdAt).isEqualTo(products[index].createdAt)
         }
         verify {
-            repository.findAllByStatus(status, pageable)
+            repository.findAllByStatusOrderByCreatedAtDesc(status, pageable)
         }
     }
 
@@ -77,7 +77,7 @@ class ProductServiceTest {
         val page = 0
         val pageSize = 10
         val productPage = PageImpl(emptyList<Product>())
-        every { repository.findAllByStatus(status, any()) } returns productPage
+        every { repository.findAllByStatusOrderByCreatedAtDesc(status, any()) } returns productPage
 
         val result = service.getAllByStatusOnPaged(status, page, pageSize)
 
@@ -95,7 +95,7 @@ class ProductServiceTest {
         }
 
         verify(exactly = 0) {
-            repository.findAllByStatus(any(), any())
+            repository.findAllByStatusOrderByCreatedAtDesc(any(), any())
         }
     }
 
@@ -179,7 +179,7 @@ class ProductServiceTest {
         val result = service.getAllByIds(ids)
 
         assertThat(result.value).hasSize(ids.size)
-        assertThat(result.value.map { it.id }).containsExactlyInAnyOrderElementsOf(products.map { it.id })
+        assertThat(result.value.map { it.id }).containsExactlyInAnyOrderElementsOf(products.map { it.id() })
     }
 
     @Test
@@ -197,8 +197,8 @@ class ProductServiceTest {
         val products = List(Arb.int(1..PopularProducts.MAX_SIZE).next()) {
             ProductMock.product()
         }
-        val sales = products.map { ProductMock.dailySale(productId = it.requireId()) }
-        val productsIds = products.map { it.requireId().value }
+        val sales = products.map { ProductMock.dailySale(productId = it.id()) }
+        val productsIds = products.map { it.id().value }
         every {
             saleRepository.findTopNProductsByQuantity(
                 startDate = PopularProducts.getStartDay(),
@@ -212,7 +212,7 @@ class ProductServiceTest {
 
         assertThat(result.products).hasSize(products.size)
         result.products.forEachIndexed { index, product ->
-            assertThat(product.id).isEqualTo(products[index].id)
+            assertThat(product.id).isEqualTo(products[index].id())
         }
     }
 }

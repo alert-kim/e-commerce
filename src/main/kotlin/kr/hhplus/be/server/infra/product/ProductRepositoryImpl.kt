@@ -8,16 +8,13 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 
 @Repository
-class ProductRepositoryImpl : ProductRepository {
-    override fun save(product: Product) {
-        TODO("Not yet implemented")
-    }
+class ProductRepositoryImpl(
+    private val jpaRepository: ProductJpaRepository
+) : ProductRepository {
 
-    override fun findAllByIds(ids: List<Long>): List<Product> {
-        TODO("Not yet implemented")
-    }
+    override fun findAllByIds(ids: List<Long>): List<Product> =
+        jpaRepository.findAllByIdIn(ids)
 
-    override fun findAllByStatus(status: ProductStatus, pageable: Pageable): Page<Product> {
-        TODO("Not yet implemented")
-    }
+    override fun findAllByStatusOrderByCreatedAtDesc(status: ProductStatus, pageable: Pageable): Page<Product> =
+        jpaRepository.findAllByStatusOrderByCreatedAtDesc(status, pageable)
 }

@@ -39,7 +39,7 @@ class ProductService(
     fun getAllByStatusOnPaged(status: ProductStatus, page: Int, pageSize: Int): Page<ProductView> {
         val pageable =
             createPageRequest(page = page, pageSize = pageSize, sort = Sort.by(Sort.Direction.DESC, "createdAt"))
-        return repository.findAllByStatus(status, pageable)
+        return repository.findAllByStatusOrderByCreatedAtDesc(status, pageable)
             .map { ProductView.from(it) }
     }
 

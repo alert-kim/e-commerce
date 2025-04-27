@@ -13,7 +13,7 @@ class ProductsViewTest {
 
         assertThat(result.value).hasSize(products.size)
         result.value.forEachIndexed { index, productView ->
-            assertThat(productView.id).isEqualTo(products[index].id)
+            assertThat(productView.id).isEqualTo(products[index].id())
         }
     }
 

@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 @Repository
 class ProductDailySaleRepositoryImpl(
-    private val jpaRepository: ProductJpaRepository
+    private val jpaRepository: ProductDailySaleJpaRepository
 ) : ProductDailySaleRepository {
     override fun findById(id: ProductDailySaleId): ProductDailySale? {
         return jpaRepository.findById(id).orElse(null)

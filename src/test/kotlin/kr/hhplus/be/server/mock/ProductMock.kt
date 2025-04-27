@@ -31,7 +31,7 @@ object ProductMock {
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ): Product = Product(
-        id = id,
+        id = id?.value,
         status = status,
         name = name,
         description = description,

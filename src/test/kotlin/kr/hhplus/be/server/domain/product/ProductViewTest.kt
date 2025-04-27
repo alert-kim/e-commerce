@@ -15,7 +15,7 @@ class ProductViewTest {
         val result = ProductView.from(product)
 
         assertAll(
-            { assertThat(result.id).isEqualTo(product.id) },
+            { assertThat(result.id).isEqualTo(product.id()) },
             { assertThat(result.name).isEqualTo(product.name) },
             { assertThat(result.description).isEqualTo(product.description) },
             { assertThat(result.price.value).isEqualByComparingTo(product.price) },

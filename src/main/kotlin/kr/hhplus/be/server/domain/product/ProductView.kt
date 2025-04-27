@@ -47,7 +47,7 @@ data class ProductView(
     companion object {
         fun from(product: Product): ProductView {
             return ProductView(
-                id = product.requireId(),
+                id = product.id(),
                 status = product.status,
                 name = product.name,
                 description = product.description,
