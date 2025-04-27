@@ -2,6 +2,7 @@ package kr.hhplus.be.server.interfaces.order
 
 import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.ExpiredCouponException
@@ -61,9 +62,10 @@ class OrderController(
                     is InvalidOrderPriceException -> ErrorSpec.badRequest(ErrorCode.INVALID_ORDER_PRICE)
                     is InvalidOrderProductQuantityException,
                     is InvalidStockQuantityToAllocateException -> ErrorSpec.badRequest(ErrorCode.INVALID_ORDER_QUANTITY)
+
                     is AlreadyUsedCouponException -> ErrorSpec.badRequest(ErrorCode.ALREADY_USED_COUPON)
                     is ExpiredCouponException -> ErrorSpec.badRequest(ErrorCode.EXPIRED_COUPON)
-                    is InsufficientBalanceException -> ErrorSpec.badRequest(ErrorCode.INSUFFICIENT_BALANCE)
+                    is BelowMinBalanceAmountException -> ErrorSpec.badRequest(ErrorCode.INSUFFICIENT_BALANCE)
                     is NotOwnedCouponException -> ErrorSpec.forbidden(ErrorCode.NOT_OWNED_COUPON)
                     is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
                     is NotFoundProductException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_PRODUCT)

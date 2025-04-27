@@ -40,10 +40,12 @@ abstract class ApiTest {
 
     fun savedCoupon(
         userId: UserId = savedUser().id(),
-        usedAt: Instant? = null
+        usedAt: Instant? = null,
+        discountAmount: BigDecimal = 1000.toBigDecimal(),
     ) = databaseTestHelper.savedCoupon(
         userId = userId,
         usedAt = usedAt,
+        discountAmount = discountAmount,
     )
 
     fun savedCouponSource(
@@ -57,10 +59,12 @@ abstract class ApiTest {
     fun savedProduct(
         status: ProductStatus = ProductStatus.ON_SALE,
         stock: Int = 100,
+        price: BigDecimal = BigDecimal.valueOf(10_000),
     ): Product =
         databaseTestHelper.savedProduct(
             status = status,
             stock = stock,
+            price = price,
         )
 
     fun savedProductDailySale(

@@ -10,8 +10,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
-import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
 import kr.hhplus.be.server.domain.balance.repository.BalanceRecordRepository
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
@@ -209,13 +209,11 @@ class BalanceServiceTest {
         val balance = mockk<Balance>()
         val command = UseBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
         every { repository.findByUserId(command.userId) } returns balance
-        every { balance.use(BalanceAmount.of(command.amount)) } throws InsufficientBalanceException(
-            BalanceMock.id(),
+        every { balance.use(BalanceAmount.of(command.amount)) } throws BelowMinBalanceAmountException(
             BigDecimal.valueOf(1_000),
-            command.amount
         )
 
-        assertThrows<InsufficientBalanceException> {
+        assertThrows<BelowMinBalanceAmountException> {
             service.use(command)
         }
 
