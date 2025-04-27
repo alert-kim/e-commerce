@@ -28,7 +28,6 @@ object ProductMock {
         name: String = "상품명",
         description: String = "상품 설명",
         price: BigDecimal = BigDecimal.valueOf(10_000),
-        stock: ProductStock = stock(),
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ): Product = Product(
@@ -37,7 +36,6 @@ object ProductMock {
         name = name,
         description = description,
         price = price,
-        stock = stock,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
@@ -55,7 +53,6 @@ object ProductMock {
         name: String = "상품명",
         description: String = "상품 설명",
         price: BigDecimal = BigDecimal.valueOf(10000),
-        stock: Long = 10,
         status: ProductStatus = ProductStatus.ON_SALE,
         createdAt: Instant = Instant.now(),
     ) = ProductView(
@@ -63,7 +60,6 @@ object ProductMock {
         name = name,
         description = description,
         price = ProductPrice(price),
-        stock = stock,
         status = status,
         createdAt = createdAt,
     )

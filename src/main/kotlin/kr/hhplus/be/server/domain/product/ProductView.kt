@@ -12,7 +12,6 @@ data class ProductView(
     val name: String,
     val description: String,
     val price: ProductPrice,
-    val stock: Long,
     val createdAt: Instant,
 ) {
     fun validatePurchasable(
@@ -45,7 +44,6 @@ data class ProductView(
         }
     }
 
-
     companion object {
         fun from(product: Product): ProductView {
             return ProductView(
@@ -54,7 +52,6 @@ data class ProductView(
                 name = product.name,
                 description = product.description,
                 price = ProductPrice(product.price),
-                stock = product.stock.quantity,
                 createdAt = product.createdAt,
             )
         }

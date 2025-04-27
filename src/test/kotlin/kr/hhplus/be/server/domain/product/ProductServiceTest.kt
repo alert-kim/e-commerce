@@ -63,7 +63,6 @@ class ProductServiceTest {
             assertThat(product.name).isEqualTo(products[index].name)
             assertThat(product.description).isEqualTo(products[index].description)
             assertThat(product.price.value).isEqualByComparingTo(products[index].price)
-            assertThat(product.stock).isEqualTo(products[index].stock.quantity)
             assertThat(product.createdAt).isEqualTo(products[index].createdAt)
         }
         verify {

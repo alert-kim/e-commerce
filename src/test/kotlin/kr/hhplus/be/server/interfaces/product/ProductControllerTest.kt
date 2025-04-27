@@ -14,6 +14,7 @@ import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.mock.StockMock
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.test.web.servlet.MockMvc
@@ -53,30 +55,31 @@ class ProductControllerTest {
     fun `상품 목록 조회 - 200`() {
         val page = 0
         val pageSize = 20
-        val totalCount = 50L
-        val products = List(pageSize) {
-            ProductMock.view(
+        val productWithStocks = List(pageSize) {
+            val product = ProductMock.view(
                 name = "상품${it + 1}",
             )
-        }
-        every { productFacade.getAllOnSalePaged(page, pageSize) } returns ProductsResult.Paged(
-            value = PageImpl(
-                products,
-                Pageable.unpaged(),
-                totalCount
+            ProductsResult.ProductWithStock(
+                product, Arb.int(2..5).next()
             )
-        )
+        }
 
-        mockMvc.get("/products?page=${page}&pageSize=${pageSize}")
+        val pagedResult = ProductsResult.Paged(
+            value = PageImpl(productWithStocks, PageRequest.of(page, pageSize), productWithStocks.size.toLong())
+        )
+        every { productFacade.getAllOnSalePaged(page, pageSize) } returns pagedResult
+
+        mockMvc.get("/products?page=$page&pageSize=$pageSize")
             .andExpect {
                 status { isOk() }
-                jsonPath("$.totalCount") { value(totalCount) }
+                jsonPath("$.totalCount") { value(pagedResult.value.totalElements) }
                 jsonPath("$.page") { value(page) }
                 jsonPath("$.pageSize") { value(pageSize) }
                 jsonPath("$.products") { isArray() }
                 jsonPath("$.products") { hasSize<Any>(pageSize) }
-                products.forEachIndexed { index, productQueryModel ->
-                    jsonPath("$.products[$index].name") { value(productQueryModel.name) }
+                productWithStocks.forEachIndexed { index, product ->
+                    jsonPath("$.products[$index].id") { value(product.product.id.value) }
+                    jsonPath("$.products[$index].stock") { value(product.stockQuantity) }
                 }
                 jsonPath("$.products[0].id") { isNumber() }
                 jsonPath("$.products[0].status") { isString() }
@@ -93,7 +96,7 @@ class ProductControllerTest {
         val page = 0
         val pageSize = 20
         val totalCount = 0L
-        val products = emptyList<ProductView>()
+        val products = emptyList<ProductsResult.ProductWithStock>()
         every { productFacade.getAllOnSalePaged(page, pageSize) } returns ProductsResult.Paged(
             value = PageImpl(
                 products,
@@ -150,26 +153,29 @@ class ProductControllerTest {
 
     @Test
     fun `인기 상품 조회 - 200`() {
-        val products = List(5) {
-            ProductMock.view(
-                name = "상품${it + 1}",
+        val productWithStocks = List(5) {
+            ProductsResult.ProductWithStock(
+                product =  ProductMock.view(
+                    name = "상품${it + 1}",
+                ),
+                stockQuantity = Arb.int(2..5).next()
             )
         }
-        every { productFacade.getPopularProducts() } returns ProductsResult.Listed(products)
+        every { productFacade.getPopularProducts() } returns ProductsResult.Listed(productWithStocks)
 
         mockMvc.get("/products/popular")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.products") { isArray() }
-                jsonPath("$.products") { hasSize<Any>(products.size) }
-                products.forEachIndexed { index, product ->
-                    jsonPath("$.products[$index].id") { value(product.id.value) }
-                    jsonPath("$.products[$index].status") { value(product.status.name) }
-                    jsonPath("$.products[$index].name") { value(product.name) }
-                    jsonPath("$.products[$index].description") { value(product.description) }
-                    jsonPath("$.products[$index].price") { value(product.price.value.toString()) }
-                    jsonPath("$.products[$index].stock") { value(product.stock) }
-                    jsonPath("$.products[$index].createdAt") { value(product.createdAt.toString()) }
+                jsonPath("$.products") { hasSize<Any>(productWithStocks.size) }
+                productWithStocks.forEachIndexed { index, productWithStock ->
+                    jsonPath("$.products[$index].id") { value(productWithStock.product.id.value) }
+                    jsonPath("$.products[$index].status") { value(productWithStock.product.status.name) }
+                    jsonPath("$.products[$index].name") { value(productWithStock.product.name) }
+                    jsonPath("$.products[$index].description") { value(productWithStock.product.description) }
+                    jsonPath("$.products[$index].price") { value(productWithStock.product.price.value.toString()) }
+                    jsonPath("$.products[$index].stock") { value(productWithStock.stockQuantity) }
+                    jsonPath("$.products[$index].createdAt") { value(productWithStock.product.createdAt.toString()) }
                 }
             }
     }

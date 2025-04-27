@@ -8,6 +8,9 @@ import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import java.time.Instant
 
 object StockMock {
+    fun id(
+        id: Long = IdMock.value(),
+    ): StockId = StockId(id)
 
     fun stock(
         id: StockId = StockId(IdMock.value()),
@@ -17,6 +20,20 @@ object StockMock {
         updatedAt: Instant = Instant.now(),
     ): Stock = Stock(
         id = id.value,
+        productId = productId,
+        quantity = quantity,
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
+
+    fun view(
+        id: StockId = StockId(IdMock.value()),
+        productId: ProductId = ProductMock.id(),
+        quantity: Int = 100,
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now(),
+    ): StockView = StockView(
+        id = id,
         productId = productId,
         quantity = quantity,
         createdAt = createdAt,

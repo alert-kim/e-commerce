@@ -13,8 +13,11 @@ import kr.hhplus.be.server.application.product.result.ProductsResult
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
+import kr.hhplus.be.server.domain.stock.StockService
+import kr.hhplus.be.server.domain.stock.StockView
 import kr.hhplus.be.server.mock.OrderMock
 import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.mock.StockMock
 import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -27,15 +30,20 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class ProductFacadeTest {
+
     @InjectMockKs
     private lateinit var facade: ProductFacade
 
     @MockK(relaxed = true)
-    private lateinit var service: ProductService
+    private lateinit var productsService: ProductService
+
+    @MockK(relaxed = true)
+    private lateinit var stockService: StockService
+
 
     @BeforeEach
     fun setUp() {
-        clearMocks(service)
+        clearMocks(productsService, stockService)
     }
 
     @Test
@@ -91,7 +99,7 @@ class ProductFacadeTest {
         facade.aggregate(command)
 
         verify {
-            service.aggregateProductDailySales(
+            productsService.aggregateProductDailySales(
                 withArg<RecordProductDailySalesCommand> {
                     it.sales.forEach { productSale ->
                         val expect =
@@ -114,35 +122,42 @@ class ProductFacadeTest {
         facade.aggregate(command)
 
         verify(exactly = 0) {
-            service.aggregateProductDailySales(ofType(RecordProductDailySalesCommand::class))
+            productsService.aggregateProductDailySales(ofType(RecordProductDailySalesCommand::class))
         }
     }
 
     @Test
-    fun `getAllOnSalePaged - 판매 중인 상품 목록을 페이징해서 조회 모델로 반환`() {
+    fun `getAllOnSalePaged - 판매 중인 상품 목록을 페이징하여 조회`() {
         val page = 0
         val pageSize = 10
-        val pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
-        val products = List(pageSize) {
+        val products = List(2) {
             ProductMock.view()
         }
-        val totalCount = products.size * 2L
-        val productPage = PageImpl(products, pageable, totalCount)
+        val stocks = products.map { StockMock.view(productId = it.id) }
+        val productPage = PageImpl(
+            products,
+            PageRequest.of(page, pageSize),
+            products.size.toLong()
+        )
         every {
-            service.getAllByStatusOnPaged(
-                status = ProductStatus.ON_SALE,
-                page = page,
-                pageSize = pageSize
-            )
+            productsService.getAllByStatusOnPaged(ProductStatus.ON_SALE, page, pageSize)
         } returns productPage
+        every {
+            stockService.getStocks(any())
+        } returns stocks
 
         val result = facade.getAllOnSalePaged(page, pageSize)
 
-        assertThat(result).isInstanceOf(ProductsResult.Paged::class.java)
-        assertThat(result.value).isEqualTo(productPage)
 
-        verify {
-            service.getAllByStatusOnPaged(status = ProductStatus.ON_SALE, page = page, pageSize = pageSize)
+        assertThat(result.value.totalElements).isEqualTo(products.size.toLong())
+        assertThat(result.value.number).isEqualTo(productPage.number)
+        assertThat(result.value.size).isEqualTo(productPage.size)
+        result.value.content.forEachIndexed { index, productWithStock ->
+            val product = products[index]
+            val stock = stocks[index]
+
+            assertThat(productWithStock.product.id.value).isEqualTo(product.id.value)
+            assertThat(productWithStock.stockQuantity).isEqualTo(stock.quantity)
         }
     }
 
@@ -151,7 +166,7 @@ class ProductFacadeTest {
         val page = 0
         val pageSize = 10
         val productPage = PageImpl(emptyList<ProductView>())
-        every { service.getAllByStatusOnPaged(ProductStatus.ON_SALE, any(), any()) } returns productPage
+        every { productsService.getAllByStatusOnPaged(ProductStatus.ON_SALE, any(), any()) } returns productPage
 
         val result = facade.getAllOnSalePaged(page, pageSize)
 
@@ -162,7 +177,13 @@ class ProductFacadeTest {
     fun `getAllOnSalePaged - 유효하지 않은 페이징 요청 값인 경우 InvalidPageRequestArgumentException 발생`() {
         val page = 0
         val pageSize = 0
-        coEvery { service.getAllByStatusOnPaged(any(), any(), any()) } throws InvalidPageRequestArgumentException(
+        coEvery {
+            productsService.getAllByStatusOnPaged(
+                any(),
+                any(),
+                any()
+            )
+        } throws InvalidPageRequestArgumentException(
             0,
             0,
             Sort.by(Sort.Direction.DESC, "createdAt")
@@ -171,5 +192,41 @@ class ProductFacadeTest {
         shouldThrow<InvalidPageRequestArgumentException> {
             facade.getAllOnSalePaged(page, pageSize)
         }
+    }
+
+    @Test
+    fun `getPopularProducts - 인기 상품 목록을 조회`() {
+        val products = List(2) {
+            ProductMock.view()
+        }
+        val popularProducts = PopularProductsView(
+            products = products,
+        )
+        val stocks = products.map { StockMock.view(productId = it.id) }
+
+        every { productsService.getPopularProducts() } returns popularProducts
+        every {
+            stockService.getStocks(any())
+        } returns stocks
+
+        val result = facade.getPopularProducts()
+
+        assertThat(result.value).hasSize(products.size)
+        result.value.forEachIndexed { index, productWithStock ->
+            val product = products[index]
+            val stock = stocks[index]
+
+            assertThat(productWithStock.product.id.value).isEqualTo(product.id.value)
+            assertThat(productWithStock.stockQuantity).isEqualTo(stock.quantity)
+        }
+    }
+
+    @Test
+    fun `getPopularProducts - 인기 상품이 없는 경우 빈 페이지 반환`() {
+        every { productsService.getPopularProducts() } returns PopularProductsView(emptyList<ProductView>())
+
+        val result = facade.getPopularProducts()
+
+        assertThat(result.value).isEmpty()
     }
 }

@@ -10,7 +10,6 @@ class Product(
     val description: String,
     val price: BigDecimal,
     val createdAt: Instant,
-    val stock: ProductStock,
     status: ProductStatus,
     updatedAt: Instant,
 ) {

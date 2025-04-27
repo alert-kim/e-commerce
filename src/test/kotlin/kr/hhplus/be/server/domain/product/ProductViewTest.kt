@@ -20,7 +20,6 @@ class ProductViewTest {
             { assertThat(result.description).isEqualTo(product.description) },
             { assertThat(result.price.value).isEqualByComparingTo(product.price) },
             { assertThat(result.createdAt).isEqualTo(product.createdAt) },
-            { assertThat(result.stock).isEqualTo(product.stock.quantity) },
         )
     }
 
