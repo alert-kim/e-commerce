@@ -7,24 +7,29 @@ import kr.hhplus.be.server.domain.coupon.CouponSourceId
 import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
+import kr.hhplus.be.server.domain.product.*
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
+import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserRepositoryTestConfig
-import kr.hhplus.be.server.mock.BalanceMock
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.mock.*
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
 @Component
-@Import(UserRepositoryTestConfig::class)
+@Import(UserRepositoryTestConfig::class, ProductRepositoryTestConfig::class)
 class DatabaseTestHelper(
     private val testUserRepository: TestUserRepository,
+    private val testProductRepository: TestProductRepository,
     private val balanceRepository: BalanceRepository,
     private val couponRepository: CouponRepository,
-    private val couponSourceRepository: CouponSourceRepository
+    private val couponSourceRepository: CouponSourceRepository,
+    private val productDailySaleRepository: ProductDailySaleRepository,
+    private val stockRepository: StockRepository,
 ) {
     fun savedUser() = testUserRepository.save(UserMock.user(id = null))
 
@@ -71,4 +76,42 @@ class DatabaseTestHelper(
         )
         return couponRepository.save(coupon)
     }
+
+    fun savedProduct(
+        status: ProductStatus = ProductStatus.ON_SALE,
+        name: String = "테스트 상품",
+        description: String = "테스트 상품 설명",
+        price: BigDecimal = 10000.toBigDecimal(),
+        stock: Int = 10
+    ): Product {
+        val product = ProductMock.product(
+            id = null,
+            name = name,
+            description = description,
+            price = price,
+            status = status,
+        )
+        val saved = testProductRepository.save(product)
+        stockRepository.save(
+            StockMock.stock(
+                id = null,
+                productId = saved.id(),
+                quantity = stock,
+            )
+        )
+        return saved
+    }
+
+    fun savedProductDailySale(
+        productId: ProductId,
+        date: LocalDate,
+        quantity: Int,
+    ): ProductDailySale =
+        productDailySaleRepository.save(
+            ProductMock.dailySale(
+                productId = productId,
+                date = date,
+                quantity = quantity,
+            )
+        )
 }

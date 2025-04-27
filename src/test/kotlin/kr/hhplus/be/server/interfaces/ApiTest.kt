@@ -1,14 +1,13 @@
 package kr.hhplus.be.server.interfaces
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
-import kr.hhplus.be.server.domain.coupon.CouponSourceId
 import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
-import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
-import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
+import kr.hhplus.be.server.domain.product.Product
+import kr.hhplus.be.server.domain.product.ProductId
+import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.user.UserId
-import kr.hhplus.be.server.domain.user.repository.UserRepository
 import kr.hhplus.be.server.mock.BalanceMock
+import kr.hhplus.be.server.mock.ProductMock
 import kr.hhplus.be.server.util.DatabaseTestHelper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -17,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,19 +30,6 @@ abstract class ApiTest {
 
     @Autowired
     lateinit var databaseTestHelper: DatabaseTestHelper
-
-    @Autowired
-    lateinit var balanceRepository: BalanceRepository
-
-    @Autowired
-    lateinit var couponRepository: CouponRepository
-
-    @Autowired
-    lateinit var couponSourceRepository: CouponSourceRepository
-
-    @Autowired
-    lateinit var userRepository: UserRepository
-
 
     fun savedUser() = databaseTestHelper.savedUser()
 
@@ -66,4 +53,25 @@ abstract class ApiTest {
         quantity = quantity,
         status = status
     )
+
+    fun savedProduct(
+        status: ProductStatus = ProductStatus.ON_SALE,
+        stock: Int = 100,
+    ): Product =
+        databaseTestHelper.savedProduct(
+            status = status,
+            stock = stock,
+        )
+
+    fun savedProductDailySale(
+        productId: ProductId = ProductMock.id(),
+        date: LocalDate = LocalDate.now(),
+        quantity: Int = 100,
+    ) =
+        databaseTestHelper.savedProductDailySale(
+            productId = productId,
+            date = date,
+            quantity = quantity
+        )
+
 }
