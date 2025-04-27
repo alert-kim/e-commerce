@@ -15,13 +15,11 @@ import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
-import kr.hhplus.be.server.domain.product.Product
 import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -350,7 +348,7 @@ class OrderServiceTest {
         assertThat(result).hasSize(events.size)
         result.forEachIndexed { index, orderEvent ->
             val expect = events[index]
-            assertThat(orderEvent.id).isEqualTo(expect.id)
+            assertThat(orderEvent.id()).isEqualTo(expect.id())
         }
     }
 
@@ -360,14 +358,14 @@ class OrderServiceTest {
         val eventType = OrderEventType.COMPLETED
         val events = List(2) { OrderMock.event() }
         every { eveentConsumerOffsetRepository.find(consumerId, eventType) } returns null
-        every { eventRepository.findAllOrderByIdAsc() } returns events
+        every { eventRepository.findAllByIdAsc() } returns events
 
         val result = service.getAllEventsNotConsumedInOrder(consumerId, eventType)
 
         assertThat(result).hasSize(events.size)
         result.forEachIndexed { index, orderEvent ->
             val expect = events[index]
-            assertThat(orderEvent.id).isEqualTo(expect.id)
+            assertThat(orderEvent.id()).isEqualTo(expect.id())
         }
     }
 }

@@ -103,7 +103,7 @@ object OrderMock {
         snapshot: OrderSnapshot = OrderSnapshot.from(order()),
         createdAt: Instant = Instant.now(),
     ): OrderEvent = OrderEvent(
-        id = id,
+        id = id?.value,
         orderId = orderId,
         type = type,
         snapshot = snapshot,

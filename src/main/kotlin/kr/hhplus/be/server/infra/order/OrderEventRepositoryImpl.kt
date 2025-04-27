@@ -6,16 +6,15 @@ import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-class OrderEventRepositoryImpl : OrderEventRepository {
-    override fun save(event: OrderEvent): OrderEventId {
-        TODO("Not yet implemented")
-    }
+class OrderEventRepositoryImpl(
+    private val jpaRepository: OrderEventJpaRepository
+) : OrderEventRepository {
+    override fun save(event: OrderEvent): OrderEvent =
+        jpaRepository.save(event)
 
-    override fun findAllOrderByIdAsc(): List<OrderEvent> {
-        TODO("Not yet implemented")
-    }
+    override fun findAllByIdAsc(): List<OrderEvent> =
+        jpaRepository.findAllByIdAsc()
 
-    override fun findAllByIdGreaterThanOrderByIdAsc(id: OrderEventId): List<OrderEvent> {
-        TODO("Not yet implemented")
-    }
+    override fun findAllByIdGreaterThanOrderByIdAsc(id: OrderEventId): List<OrderEvent> =
+        jpaRepository.findAllByIdGreaterThanOrderByIdAsc(id.value)
 }

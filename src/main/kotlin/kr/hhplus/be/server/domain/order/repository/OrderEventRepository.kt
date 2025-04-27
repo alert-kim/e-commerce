@@ -4,9 +4,9 @@ import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventId
 
 interface OrderEventRepository {
-    fun save(event: OrderEvent): OrderEventId
+    fun save(event: OrderEvent): OrderEvent
 
-    fun findAllOrderByIdAsc(
+    fun findAllByIdAsc(
     ): List<OrderEvent>
 
     fun findAllByIdGreaterThanOrderByIdAsc(

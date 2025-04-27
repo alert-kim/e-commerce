@@ -8,21 +8,21 @@ import org.junit.jupiter.api.assertThrows
 
 class OrderEventTest {
     @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
+    fun `id - id가 null이 아닌 경우 id 반환`() {
         val id = OrderMock.eventId()
         val event = OrderMock.event(id = id)
 
-        val result = event.requireId()
+        val result = event.id()
 
         assertThat(result).isEqualTo(id)
     }
 
     @Test
-    fun `requireId - id가 null이면 RequiredOrderEventIdException 발생`() {
+    fun `id - id가 null이면 RequiredOrderEventIdException 발생`() {
         val event = OrderMock.event(id = null)
 
         assertThrows<RequiredOrderEventIdException> {
-            event.requireId()
+            event.id()
         }
     }
 }

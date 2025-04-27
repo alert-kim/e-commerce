@@ -20,7 +20,7 @@ data class ConsumeOrderEventCommand(
 
             return ConsumeOrderEventCommand(
                 consumerId = consumerId,
-                event = events.maxBy { it.requireId().value },
+                event = events.maxBy { it.id().value },
             )
         }
     }

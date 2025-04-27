@@ -82,7 +82,7 @@ class OrderService(
             null -> eventConsumerOffsetRepository.save(
                 OrderEventConsumerOffset(
                     consumerId = command.consumerId,
-                    value = command.event.requireId(),
+                    value = command.event.id(),
                     eventType = command.event.type,
                     createdAt = Instant.now(),
                     updatedAt = Instant.now(),
@@ -92,7 +92,7 @@ class OrderService(
             else -> eventConsumerOffsetRepository.update(
                 OrderEventConsumerOffset(
                     consumerId = command.consumerId,
-                    value = command.event.requireId(),
+                    value = command.event.id(),
                     eventType = command.event.type,
                     createdAt = offset.createdAt,
                     updatedAt = command.event.createdAt,
@@ -114,7 +114,7 @@ class OrderService(
             eventType = eventType,
         )
         return when (offset) {
-            null -> eventRepository.findAllOrderByIdAsc()
+            null -> eventRepository.findAllByIdAsc()
             else -> eventRepository.findAllByIdGreaterThanOrderByIdAsc(
                 id = offset.value,
             )
