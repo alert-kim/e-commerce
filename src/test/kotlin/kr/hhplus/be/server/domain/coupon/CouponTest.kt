@@ -3,8 +3,8 @@ package kr.hhplus.be.server.domain.coupon
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
-import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.mock.CouponMock
+import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -14,26 +14,27 @@ import java.time.Instant
 
 class CouponTest {
     @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
-        val coupon = CouponMock.coupon(id = CouponMock.id())
+    fun `id() - id가 null이 아닌 경우 id 반환`() {
+        val id = CouponMock.id()
+        val coupon = CouponMock.coupon(id = id)
 
-        val result = coupon.requireId()
+        val result = coupon.id()
 
-        assertThat(result).isEqualTo(coupon.id)
+        assertThat(result).isEqualTo(id)
     }
 
     @Test
-    fun `requireId - id가 null이면 RequiredCouponIdException 발생`() {
+    fun `id() - id가 null이면 RequiredCouponIdException 발생`() {
         val coupon = CouponMock.coupon(id = null)
 
         assertThrows<RequiredCouponIdException> {
-            coupon.requireId()
+            coupon.id()
         }
     }
 
     @Test
     fun `new - 쿠폰 생성`() {
-        val userId = UserId(1L)
+        val userId = UserMock.id()
         val couponSourceId = CouponSourceId(1L)
         val name = "쿠폰 이름"
         val discountAmount = BigDecimal.valueOf(1000)
@@ -48,7 +49,6 @@ class CouponTest {
         )
 
         assertAll(
-            { assertThat(coupon.id).isNull() },
             { assertThat(coupon.userId).isEqualTo(userId) },
             { assertThat(coupon.couponSourceId).isEqualTo(couponSourceId) },
             { assertThat(coupon.name).isEqualTo(name) },
@@ -64,7 +64,7 @@ class CouponTest {
         val usedCoupon = coupon.use(coupon.userId)
 
         assertThat(coupon.usedAt).isNotNull
-        assertThat(usedCoupon.id).isEqualTo(coupon.id)
+        assertThat(usedCoupon.id).isEqualTo(coupon.id())
         assertThat(usedCoupon.userId).isEqualTo(coupon.userId)
         assertThat(usedCoupon.discountAmount).isEqualByComparingTo(coupon.discountAmount)
         assertThat(usedCoupon.usedAt).isEqualTo(coupon.usedAt)
@@ -72,10 +72,10 @@ class CouponTest {
 
     @Test
     fun `use - 다른 사람 쿠폰 사용 - NotOwnedCouponException 발생`() {
-        val coupon = CouponMock.coupon(userId = UserId(1L), usedAt = null)
+        val coupon = CouponMock.coupon(userId = UserMock.id(1), usedAt = null)
 
         assertThrows<NotOwnedCouponException> {
-            coupon.use(UserId(2L))
+            coupon.use(UserMock.id(2))
         }
     }
 

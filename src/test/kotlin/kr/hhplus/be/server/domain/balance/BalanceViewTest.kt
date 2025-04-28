@@ -17,9 +17,9 @@ class BalanceViewTest {
 
         assertAll(
             { assertThat(result).isNotNull() },
-            { assertThat(result.id).isEqualTo(balance.id) },
+            { assertThat(result.id).isEqualTo(balance.id()) },
             { assertThat(result.userId).isEqualTo(balance.userId) },
-            { assertThat(result.amount).isEqualByComparingTo(balance.amount) },
+            { assertThat(result.amount).isEqualByComparingTo(balance.amount.value) },
             { assertThat(result.createdAt).isEqualTo(balance.createdAt) },
             { assertThat(result.updatedAt).isEqualTo(balance.updatedAt) }
         )

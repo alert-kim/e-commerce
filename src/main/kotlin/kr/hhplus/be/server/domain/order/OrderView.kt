@@ -20,7 +20,7 @@ data class OrderView(
     companion object {
         fun from(order: Order): OrderView =
             OrderView(
-                id = order.requireId(),
+                id = order.id(),
                 userId = order.userId,
                 status = order.status,
                 couponId = order.couponId,

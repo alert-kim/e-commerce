@@ -10,12 +10,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.ExceedMaxBalanceAmountException
-import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
+import kr.hhplus.be.server.domain.balance.repository.BalanceRecordRepository
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.mock.BalanceMock
+import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -33,90 +35,159 @@ class BalanceServiceTest {
     @MockK(relaxed = true)
     private lateinit var repository: BalanceRepository
 
+    @MockK(relaxed = true)
+    private lateinit var recordRepository: BalanceRecordRepository
+
     @BeforeEach
     fun setUp() {
-        clearMocks(repository)
+        clearMocks(repository, recordRepository)
     }
 
     @Test
     fun `charge - 유저 Id에 해당하는 Balance가 없으면 충전 금액을 가진 잔고를 생성한다`() {
         val userId = UserMock.id()
+        val balanceId = BalanceMock.id()
+        val balance = mockk<Balance>(relaxed = true)
         val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
-        val newBalanceId = BalanceMock.id()
-        val balance = BalanceMock.balance(id = newBalanceId, amount = BigDecimal.ZERO)
         every { repository.findByUserId(userId) } returns null
-        every { repository.save(any()) } returns newBalanceId
-        every { repository.findById(newBalanceId.value) } returns balance
+        every { repository.save(any()) } returns balance
+        every { balance.id() } returns balanceId
 
-        val result = service.charge(command)
+        service.charge(command)
 
-        assertThat(result).isEqualTo(newBalanceId)
         verify {
             repository.save(withArg<Balance> {
                 assertThat(it.userId).isEqualTo(command.userId)
-                assertThat(it.amount).isEqualByComparingTo(BigDecimal.ZERO)
             })
-            repository.update(withArg<Balance> {
-                assertThat(it.id).isEqualTo(balance.id)
-                assertThat(it.amount).isEqualByComparingTo(command.amount)
-            })
+
+            balance.charge(BalanceAmount.of(command.amount))
         }
     }
 
     @Test
-    fun `charge - 유저 Id에 해당하는 Balance가 있으면 충전 금액을 더한 후 업데이트 한다`() {
-        val existingBalanceId = BalanceMock.id()
-        val existingBalance = BalanceMock.balance(id = existingBalanceId, amount = BigDecimal.ONE)
-        val originalAmount = existingBalance.amount
-        val chargeAmount = 1000.toBigDecimal()
-        val command = ChargeBalanceCommand(userId = existingBalance.userId, amount = chargeAmount)
-        every { repository.findByUserId(command.userId) } returns existingBalance
-        every { repository.save(any()) } returns existingBalanceId
-        every { repository.findById(existingBalanceId.value) } returns existingBalance
+    fun `charge - 유저 Id에 해당하는 Balance가 없으면, 새로 생성된 잔고가 반환된다`() {
+        val userId = UserMock.id()
+        val balanceId = BalanceMock.id()
+        val balance = mockk<Balance>(relaxed = true)
+        val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
+        every { balance.id() } returns balanceId
+        every { repository.findByUserId(userId) } returns null
+        every { repository.save(any()) } returns balance
 
         val result = service.charge(command)
 
-        assertThat(result).isEqualTo(existingBalance.id)
+        assertThat(result).isEqualTo(balanceId)
+    }
+
+    @Test
+    fun `charge - 유저 Id에 해당하는 잔고가 있으면 해당 잔고에 충전한다`() {
+        val existingBalanceId = BalanceMock.id()
+        val existingBalance = mockk<Balance>(relaxed = true)
+        val command = ChargeBalanceCommand(userId = existingBalance.userId, amount = 1000.toBigDecimal())
+        every { existingBalance.id() } returns existingBalanceId
+        every { repository.findByUserId(command.userId) } returns existingBalance
+
+        val result = service.charge(command)
+
         verify {
-            repository.update(withArg<Balance> {
-                assertThat(it.id).isEqualTo(existingBalance.id)
-                assertThat(it.amount).isEqualByComparingTo(originalAmount.add(chargeAmount))
-            })
+            existingBalance.charge(BalanceAmount.of(command.amount))
         }
     }
 
     @Test
-    fun `charge - 충전 중 예외가 발생하면 해당 예외를 그대로 반환하고 잔고를 업데이트 하지 않는다`() {
+    fun `charge - 유저 Id에 해당하는 잔고가 있으면 해당 잔고 Id가 반환된다`() {
+        val existingBalanceId = BalanceMock.id()
+        val existingBalance = mockk<Balance>(relaxed = true)
+        val command = ChargeBalanceCommand(userId = existingBalance.userId, amount = 1000.toBigDecimal())
+        every { existingBalance.id() } returns existingBalanceId
+        every { repository.findByUserId(command.userId) } returns existingBalance
+
+        val result = service.charge(command)
+
+        assertThat(result).isEqualTo(existingBalanceId)
+    }
+
+    @Test
+    fun `charge - 충전시, 레코드를 생성한다`() {
+        val userId = UserMock.id()
+        val balance = BalanceMock.balance(id = BalanceMock.id(), amount = BigDecimal.ZERO)
+        val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
+        every { repository.findByUserId(userId) } returns balance
+
+        service.charge(command)
+
+        verify {
+            recordRepository.save(
+                withArg<BalanceRecord> {
+                    assertThat(it.balanceId).isEqualTo(balance.id())
+                    assertThat(it.type).isEqualTo(BalanceTransactionType.CHARGE)
+                    assertThat(it.amount.value).isEqualByComparingTo(command.amount)
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `charge - 충전 중 예외가 발생하면 해당 예외를 그대로 반환하고 레코드를 생성 하지 않는다`() {
         val userId = UserMock.id()
         val balance = mockk<Balance>()
         val command = ChargeBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
         every { repository.findByUserId(command.userId) } returns balance
-        every { balance.charge(BalanceAmount(command.amount)) } throws ExceedMaxBalanceAmountException(BigDecimal.valueOf(1_000))
+        every { balance.charge(any()) } throws ExceedMaxBalanceAmountException(1_000.toBigDecimal())
 
         assertThrows<ExceedMaxBalanceAmountException> {
             service.charge(command)
         }
 
-        verify(exactly = 0) { repository.save(any()) }
+        verify(exactly = 0) {
+            recordRepository.save(any())
+        }
     }
 
     @Test
-    fun `use - 잔고 사용`() {
-        val balanceId = BalanceMock.id()
-        val existingBalance = BalanceMock.balance(id = balanceId, amount = BigDecimal.valueOf(3_000))
-        val originalAmount = existingBalance.amount
-        val useAmount = BigDecimal.valueOf(1_000)
-        val command = UseBalanceCommand(userId = existingBalance.userId, amount = useAmount)
+    fun `use - 잔고 사용 후 잔고를 업데이트 한다`() {
+        val existingBalanceId = BalanceMock.id()
+        val existingBalance = mockk<Balance>(relaxed = true)
+        val command = UseBalanceCommand(userId = UserMock.id(), amount = BigDecimal.valueOf(1_000))
+        every { existingBalance.id() } returns existingBalanceId
+        every { repository.findByUserId(command.userId) } returns existingBalance
+
+        service.use(command)
+
+        verify {
+            existingBalance.use(BalanceAmount.of(command.amount))
+        }
+    }
+
+    @Test
+    fun `use - 잔고 사용 후 사용된 잔고 정보가 반환된다`() {
+        val existingBalanceId = BalanceMock.id()
+        val existingBalance = mockk<Balance>(relaxed = true)
+        val usedAmount = UsedBalanceAmount(existingBalanceId, BalanceAmount.of(1_000.toBigDecimal()))
+        val command = UseBalanceCommand(userId = UserMock.id(), amount = BigDecimal.valueOf(1_000))
+        every { existingBalance.id() } returns existingBalanceId
+        every { existingBalance.use(any()) } returns usedAmount
         every { repository.findByUserId(command.userId) } returns existingBalance
 
         val result = service.use(command)
 
-        assertThat(result).isEqualTo(UsedBalanceAmount(balanceId, BalanceAmount(useAmount)))
+        assertThat(result).isEqualTo(usedAmount)
+    }
+
+    @Test
+    fun `use - 잔고 사용 후 레코드를 생성한다`() {
+        val existingBalanceId = BalanceMock.id()
+        val existingBalance = mockk<Balance>(relaxed = true)
+        val command = UseBalanceCommand(userId = UserMock.id(), amount = BigDecimal.valueOf(1_000))
+        every { existingBalance.id() } returns existingBalanceId
+        every { repository.findByUserId(command.userId) } returns existingBalance
+
+        service.use(command)
+
         verify {
-            repository.save(withArg<Balance> {
-                assertThat(it.id).isEqualTo(existingBalance.id)
-                assertThat(it.amount).isEqualByComparingTo(originalAmount.minus(useAmount))
-                assertThat(it.updatedAt).isAfter(existingBalance.createdAt)
+            recordRepository.save(withArg<BalanceRecord> {
+                assertThat(it.balanceId).isEqualTo(existingBalanceId)
+                assertThat(it.amount.value).isEqualByComparingTo(command.amount)
             })
         }
     }
@@ -133,18 +204,22 @@ class BalanceServiceTest {
     }
 
     @Test
-    fun `use - 사용 중 예외가 발생하면 해당 예외를 그대로 반환하고 잔고를 업데이트 하지 않는다`() {
+    fun `use - 사용 중 예외가 발생하면 해당 예외를 그대로 반환하고 레코드를 생성하지 않는다`() {
         val userId = UserMock.id()
         val balance = mockk<Balance>()
         val command = UseBalanceCommand(userId = userId, amount = BalanceMock.amount().value)
         every { repository.findByUserId(command.userId) } returns balance
-        every { balance.use(BalanceAmount(command.amount)) } throws InsufficientBalanceException(BalanceMock.id().value, BigDecimal.valueOf(1_000), command.amount)
+        every { balance.use(BalanceAmount.of(command.amount)) } throws BelowMinBalanceAmountException(
+            BigDecimal.valueOf(1_000),
+        )
 
-        assertThrows<InsufficientBalanceException> {
+        assertThrows<BelowMinBalanceAmountException> {
             service.use(command)
         }
 
-        verify(exactly = 0) { repository.save(any()) }
+        verify(exactly = 0) {
+            recordRepository.save(any())
+        }
     }
 
     @Test
@@ -153,17 +228,16 @@ class BalanceServiceTest {
         val balance = BalanceMock.balance(userId = userId)
         every { repository.findByUserId(userId) } returns balance
 
-        val result = service.getOrNullByUerId(userId)
+        val result = service.getOrNullByUserId(userId)
 
         assertAll(
             { assertThat(result).isNotNull() },
-            { assertThat(result?.id).isEqualTo(balance.id) },
+            { assertThat(result?.id).isEqualTo(balance.id()) },
             { assertThat(result?.userId).isEqualTo(balance.userId) },
-            { assertThat(result?.amount).isEqualByComparingTo(balance.amount) },
+            { assertThat(result?.amount).isEqualByComparingTo(balance.amount.value) },
             { assertThat(result?.createdAt).isEqualTo(balance.createdAt) },
             { assertThat(result?.updatedAt).isEqualTo(balance.updatedAt) }
         )
-        verify { repository.findByUserId(userId) }
     }
 
     @Test
@@ -171,10 +245,9 @@ class BalanceServiceTest {
         val userId = UserMock.id()
         every { repository.findByUserId(userId) } returns null
 
-        val result = service.getOrNullByUerId(userId)
+        val result = service.getOrNullByUserId(userId)
 
         assertThat(result).isNull()
-        verify { repository.findByUserId(userId) }
     }
 
     @Test
@@ -186,22 +259,21 @@ class BalanceServiceTest {
         val result = service.get(balanceId.value)
 
         assertAll(
-            { assertThat(result.id).isEqualTo(balance.id) },
+            { assertThat(result.id).isEqualTo(balance.id()) },
             { assertThat(result.userId).isEqualTo(balance.userId) },
-            { assertThat(result.amount).isEqualByComparingTo(balance.amount) },
+            { assertThat(result.amount).isEqualByComparingTo(balance.amount.value) },
             { assertThat(result.createdAt).isEqualTo(balance.createdAt) },
             { assertThat(result.updatedAt).isEqualTo(balance.updatedAt) }
         )
-        verify { repository.findById(balanceId.value) }
     }
 
     @Test
     fun `getOrNullByUerId - 해당 잔고가 없는 경우 - NotFoundBalanceException`() {
-        val balanceId = BalanceMock.id()
-        every { repository.findById(balanceId.value) } returns null
+        val balanceId = IdMock.value()
+        every { repository.findById(balanceId) } returns null
 
         shouldThrow<NotFoundBalanceException> {
-            service.get(balanceId.value)
+            service.get(balanceId)
         }
     }
 }

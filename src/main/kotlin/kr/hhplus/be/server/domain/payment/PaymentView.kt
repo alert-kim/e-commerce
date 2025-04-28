@@ -13,9 +13,9 @@ data class PaymentView(
     val createdAt: Instant,
 ) {
     companion object {
-        fun from(id: PaymentId, payment: Payment) =
+        fun from(payment: Payment) =
             PaymentView(
-                id = id,
+                id = payment.id(),
                 userId = payment.userId,
                 orderId = payment.orderId,
                 amount = payment.amount,

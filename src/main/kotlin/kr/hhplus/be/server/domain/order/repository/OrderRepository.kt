@@ -4,6 +4,6 @@ import kr.hhplus.be.server.domain.order.Order
 import kr.hhplus.be.server.domain.order.OrderId
 
 interface OrderRepository {
-    fun save(order: Order): OrderId
+    fun save(order: Order): Order
     fun findById(orderId: Long): Order?
 }

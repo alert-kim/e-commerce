@@ -34,7 +34,7 @@ class ConsumeOrderEventCommandSpec {
             events = otherEvents + event,
         )
 
-        assertThat(command.event.requireId()).isEqualTo(lastEventId)
+        assertThat(command.event.id()).isEqualTo(lastEventId)
     }
 
     @Test

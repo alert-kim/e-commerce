@@ -16,7 +16,7 @@ class UserViewTest {
         val result = UserView.from(user)
 
         assertAll(
-            { assertThat(result.id).isEqualTo(user.id) },
+            { assertThat(result.id).isEqualTo(user.id()) },
             { assertThat(result.name).isEqualTo(user.name) },
             { assertThat(result.createdAt).isEqualTo(user.createdAt) },
         )

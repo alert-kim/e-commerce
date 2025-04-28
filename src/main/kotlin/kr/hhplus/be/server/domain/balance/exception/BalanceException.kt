@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.balance.exception
 
 import kr.hhplus.be.server.domain.DomainException
+import kr.hhplus.be.server.domain.balance.BalanceId
 import java.math.BigDecimal
 
 abstract class BalanceException : DomainException()
@@ -28,7 +29,7 @@ class BelowMinBalanceAmountException(
 }
 
 class InsufficientBalanceException(
-    balanceId: Long,
+    balanceId: BalanceId,
     amount: BigDecimal,
     required: BigDecimal,
 ) : BalanceException() {

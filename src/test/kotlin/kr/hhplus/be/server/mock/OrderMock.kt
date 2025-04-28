@@ -2,9 +2,9 @@ package kr.hhplus.be.server.mock
 
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
-import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
 import kr.hhplus.be.server.domain.order.event.OrderEventId
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.product.ProductId
@@ -15,15 +15,19 @@ import java.time.Instant
 object OrderMock {
     fun id(): OrderId = OrderId(IdMock.value())
 
+    fun productId(): OrderProductId = OrderProductId(IdMock.value())
+
     fun product(
-        orderId: OrderId = id(),
+        id: OrderProductId? = productId(),
+        order: Order? = null,
         productId: Long = IdMock.value(),
         quantity: Int = 1,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
     ): OrderProduct = OrderProduct(
-        orderId = orderId,
+        id = id?.value,
+        order = order,
         productId = ProductId(productId),
         quantity = quantity,
         unitPrice = unitPrice,
@@ -43,7 +47,7 @@ object OrderMock {
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = Order(
-        id = id,
+        id = id?.value,
         userId = userId,
         status = status,
         couponId = couponId,
@@ -63,7 +67,7 @@ object OrderMock {
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
     ): OrderProductView = OrderProductView(
-        orderId = orderId,
+//        orderId = orderId,
         productId = ProductId(productId),
         quantity = quantity,
         unitPrice = unitPrice,
@@ -104,7 +108,7 @@ object OrderMock {
         snapshot: OrderSnapshot = OrderSnapshot.from(order()),
         createdAt: Instant = Instant.now(),
     ): OrderEvent = OrderEvent(
-        id = id,
+        id = id?.value,
         orderId = orderId,
         type = type,
         snapshot = snapshot,
@@ -113,27 +117,27 @@ object OrderMock {
 
     fun eventConsumerOffset(
         consumerId: String = "test",
-        eventId : OrderEventId = eventId(),
+        eventId: OrderEventId = eventId(),
         eventType: OrderEventType = OrderEventType.COMPLETED,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ): OrderEventConsumerOffset = OrderEventConsumerOffset(
-        consumerId = consumerId,
-        value = eventId,
-        eventType = eventType,
+        id = OrderEventConsumerOffsetId(
+            consumerId = consumerId,
+            eventType = eventType,
+        ),
+        eventId = eventId,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
 
     fun orderProductSnapshot(
-        orderId: Long = IdMock.value(),
         productId: Long = IdMock.value(),
         quantity: Int = 2,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
     ): OrderSnapshot.OrderProductSnapshot = OrderSnapshot.OrderProductSnapshot(
-        orderId = orderId,
         productId = productId,
         quantity = quantity,
         unitPrice = unitPrice,

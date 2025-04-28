@@ -13,7 +13,7 @@ object PaymentMock {
         PaymentId(IdMock.value())
 
     fun payment(
-        id: PaymentId? = id(),
+        id: Long? = IdMock.value(),
         userId: UserId = UserMock.id(),
         orderId: OrderId = OrderMock.id(),
         amount: BigDecimal = BigDecimal.valueOf(1_000),
@@ -40,5 +40,5 @@ object PaymentMock {
             orderId = orderId,
             amount = amount,
             createdAt = createdAt,
-    )
+        )
 }

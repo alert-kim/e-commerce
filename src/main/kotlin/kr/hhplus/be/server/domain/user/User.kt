@@ -1,14 +1,19 @@
 package kr.hhplus.be.server.domain.user
 
+import jakarta.persistence.*
 import kr.hhplus.be.server.domain.user.exception.RequiredUserIdException
 import java.time.Instant
 
+@Entity
+@Table(name = "users")
 class User(
-    var id: UserId? = null,
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected val id: Long? = null,
     val name: String,
     val createdAt: Instant = Instant.now(),
 ) {
-    fun requireId(): UserId {
-        return id ?: throw RequiredUserIdException()
+    fun id(): UserId {
+        return id?.let { UserId(it) } ?: throw RequiredUserIdException()
     }
 }

@@ -7,6 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.domain.user.repository.UserRepository
+import kr.hhplus.be.server.mock.IdMock
 import kr.hhplus.be.server.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -40,13 +41,13 @@ class UserServiceTest {
 
     @Test
     fun `해당 유저가 없는 경우, NotFoundUserException이 발생한다`() {
-        val userId = UserMock.id()
-        every { repository.findById(userId.value) } returns null
+        val userId = IdMock.value()
+        every { repository.findById(userId) } returns null
 
         assertThrows<NotFoundUserException> {
-            service.get(userId.value)
+            service.get(userId)
         }
 
-        verify { repository.findById(userId.value) }
+        verify { repository.findById(userId) }
     }
 }

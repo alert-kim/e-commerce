@@ -9,9 +9,15 @@ import java.math.BigDecimal
 import java.time.Instant
 
 object BalanceMock {
-    fun id(): BalanceId = BalanceId(IdMock.value())
+    fun id(
+        value: Long = IdMock.value(),
+    ) = BalanceId(value)
 
-    fun amount() = BalanceAmount(
+    fun recordId(
+        value: Long = IdMock.value(),
+    ) = BalanceRecordId(value)
+
+    fun amount() = BalanceAmount.of(
         value = Arb.bigDecimal(
             min = BalanceAmount.MIN_AMOUNT,
             max = BalanceAmount.MAX_AMOUNT,
@@ -22,14 +28,12 @@ object BalanceMock {
         id: BalanceId? = id(),
         userId: UserId = UserMock.id(),
         amount: BigDecimal = amount().value,
-        records: List<BalanceRecord> = emptyList(),
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ): Balance = Balance(
-        id = id,
+        id = id?.value,
         userId = userId,
-        amount = amount,
-        records = records,
+        amount = BalanceAmount.of(amount),
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
@@ -46,5 +50,19 @@ object BalanceMock {
         amount = amount,
         createdAt = createdAt,
         updatedAt = updatedAt,
+    )
+
+    fun record(
+        id: BalanceRecordId? = recordId(),
+        balanceId: BalanceId = id(),
+        type: BalanceTransactionType = BalanceTransactionType.CHARGE,
+        amount: BigDecimal = amount().value,
+        createdAt: Instant = Instant.now(),
+    ): BalanceRecord = BalanceRecord(
+        id = id?.value,
+        balanceId = balanceId,
+        type = type,
+        amount = BalanceAmount.of(amount),
+        createdAt = createdAt,
     )
 }

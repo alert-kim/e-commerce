@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.coupon.result.IssuedCoupon
 import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Instant
 
 object CouponMock {
@@ -42,7 +43,7 @@ object CouponMock {
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = Coupon(
-        id = id,
+        id = id?.value,
         userId = userId,
         name = name,
         couponSourceId = couponSourceId,
@@ -95,12 +96,12 @@ object CouponMock {
         updatedAt: Instant = Instant.now(),
     ): CouponSource =
         CouponSource(
-            id = id,
+            id = id?.value,
             name = name,
             status = status,
             quantity = quantity,
             initialQuantity = initialQuantity,
-            discountAmount = discountAmount,
+            discountAmount = discountAmount.setScale(2, RoundingMode.HALF_UP),
             createdAt = createdAt,
             updatedAt = updatedAt,
         )

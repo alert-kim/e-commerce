@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.product.response
 
+import kr.hhplus.be.server.application.product.result.ProductsResult
 import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.domain.product.ProductStatus
 import java.math.BigDecimal
@@ -11,19 +12,19 @@ class ProductResponse(
     val name: String,
     val description: String,
     val price: BigDecimal,
-    val stock: Long,
+    val stock: Int,
     val createdAt: Instant,
 ) {
     companion object {
-        fun from(product: ProductView): ProductResponse =
+        fun from(productWithStock: ProductsResult.ProductWithStock): ProductResponse =
             ProductResponse(
-                id = product.id.value,
-                status = product.status,
-                name = product.name,
-                description = product.description,
-                price = product.price,
-                stock = product.stock,
-                createdAt = product.createdAt
+                id = productWithStock.product.id.value,
+                status = productWithStock.product.status,
+                name = productWithStock.product.name,
+                description = productWithStock.product.description,
+                price = productWithStock.product.price.value,
+                stock = productWithStock.stockQuantity,
+                createdAt = productWithStock.product.createdAt
             )
     }
 }

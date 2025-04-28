@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.domain.order
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.next
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -9,15 +12,19 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
+import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
-import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
+import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
+import kr.hhplus.be.server.domain.product.ProductPrice
+import kr.hhplus.be.server.domain.product.result.PurchasableProduct
+import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.mock.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -36,25 +43,25 @@ class OrderServiceTest {
     private lateinit var eventRepository: OrderEventRepository
 
     @MockK(relaxed = true)
-    private lateinit var eveentConsumerOffsetRepository: OrderEventConsumerOffsetRepository
+    private lateinit var eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository
 
     @MockK(relaxed = true)
     private lateinit var client: OrderSnapshotClient
 
     @BeforeEach
     fun setUp() {
-        clearMocks(repository, eventRepository)
+        clearMocks(repository, eventRepository, eventConsumerOffsetRepository)
     }
 
     @Test
     fun `create - 주문 생성`() {
         val orderId = OrderMock.id()
+        every { repository.save(any()) } returns OrderMock.order(id = orderId)
         val userId = UserMock.id()
-        every { repository.save(any()) } returns orderId
 
         val result = service.createOrder(CreateOrderCommand(userId))
 
-        assertThat(result.orderId).isEqualTo(orderId)
+        assertThat(result).isEqualTo(orderId)
         verify {
             repository.save(withArg {
                 assertThat(it.userId).isEqualTo(userId)
@@ -71,77 +78,57 @@ class OrderServiceTest {
     @Test
     fun `placeStock - 주문 상품 생성`() {
         val orderId = OrderMock.id()
-        val order = OrderMock.order(
-            id = orderId,
-            status = OrderStatus.READY,
-            products = emptyList(),
-            originalAmount = BigDecimal.ZERO,
-            discountAmount = BigDecimal.ZERO,
-            totalAmount = BigDecimal.ZERO,
-            couponId = null,
+        val order = mockk<Order>(relaxed = true)
+        val command = PlaceStockCommand(
+            orderId = orderId,
+            preparedProductForOrder = List(3) {
+                val productId = ProductMock.id()
+                PlaceStockCommand.PreparedProductForOrder(
+                    product = PurchasableProduct(
+                        id = productId,
+                        price = ProductPrice(1000.toBigDecimal()),
+                    ),
+                    stock = AllocatedStock(
+                        productId = productId,
+                        quantity = Arb.int(1..5).next(),
+                    ),
+                )
+            }
         )
-        val stocks = List(3) {
-            ProductMock.stockAllocated()
-        }
-        val totalAmount = stocks.fold(BigDecimal.ZERO) { acc, stock ->
-            acc.add(stock.unitPrice.multiply(BigDecimal(stock.quantity)))
-        }
-        val command = PlaceStockCommand(orderId, stocks)
         every { repository.findById(orderId.value) } returns order
-        every { repository.save(any()) } returns orderId
 
         service.placeStock(command)
 
         verify {
-            repository.save(withArg {
-                assertAll(
-                    { assertThat(it.id).isEqualTo(orderId) },
-                    { assertThat(it.status).isEqualTo(OrderStatus.STOCK_ALLOCATED) },
-                    { assertThat(it.originalAmount).isEqualByComparingTo(totalAmount) },
-                    { assertThat(it.totalAmount).isEqualByComparingTo(totalAmount) },
-                    { assertThat(it.discountAmount).isEqualByComparingTo(BigDecimal.ZERO) },
-                    { assertThat(it.couponId).isNull() },
-                    { assertThat(it.products).hasSize(stocks.size) }
+            command.preparedProductForOrder.forEachIndexed { index, preparedProductForOrder ->
+                order.placeStock(
+                    productId = preparedProductForOrder.productId,
+                    quantity = preparedProductForOrder.stock.quantity,
+                    unitPrice = preparedProductForOrder.product.price,
                 )
-                it.products.forEach { product ->
-                    val stock = stocks.find { it.productId == product.productId }
-                    assertAll(
-                        { assertThat(stock).isNotNull() },
-                        { assertThat(product.orderId).isEqualTo(orderId) },
-                        { assertThat(product.productId).isEqualTo(stock?.productId) },
-                        { assertThat(product.quantity).isEqualTo(stock?.quantity) },
-                        { assertThat(product.unitPrice).isEqualByComparingTo(stock?.unitPrice) },
-                        {
-                            assertThat(product.totalPrice).isEqualByComparingTo(
-                                stock?.unitPrice?.multiply(
-                                    BigDecimal(
-                                        stock.quantity
-                                    )
-                                )
-                            )
-                        }
-                    )
-                }
-                assertThat(it.updatedAt).isAfter(it.createdAt)
-            })
+            }
         }
     }
 
     @Test
     fun `placeStock - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
         val orderId = OrderMock.id()
-        val stocks = List(3) {
-            ProductMock.stockAllocated()
-        }
-        val command = PlaceStockCommand(orderId, stocks)
+        val command = PlaceStockCommand(
+            orderId = orderId,
+            preparedProductForOrder = listOf(
+                ProductMock.id().let {
+                    PlaceStockCommand.PreparedProductForOrder(
+                        product = ProductMock.purchasableProduct(id = it),
+                        stock = StockMock.allocated(productId = it),
+                    )
+                }
+
+            )
+        )
         every { repository.findById(orderId.value) } returns null
 
         shouldThrow<NotFoundOrderException> {
             service.placeStock(command)
-        }
-
-        verify(exactly = 0) {
-            repository.save(any())
         }
     }
 
@@ -154,12 +141,11 @@ class OrderServiceTest {
             usedCoupon = CouponMock.usedCoupon()
         )
         every { repository.findById(orderId.value) } returns order
-        every { repository.save(any()) } returns orderId
 
         service.applyCoupon(command)
 
         verify {
-            repository.save(any())
+            order.applyCoupon(command.usedCoupon)
         }
     }
 
@@ -176,16 +162,12 @@ class OrderServiceTest {
                 )
             )
         }
-
-        verify(exactly = 0) {
-            repository.save(any())
-        }
     }
 
     @Test
     fun `pay  - 결제`() {
         val orderId = OrderMock.id()
-        val order = OrderMock.order(id = orderId)
+        val order = mockk<Order>(relaxed = true)
         val payment = PaymentMock.view(
             orderId = orderId,
             amount = BigDecimal.ZERO,
@@ -193,13 +175,13 @@ class OrderServiceTest {
         val command = PayOrderCommand(
             payment = payment,
         )
+        every { order.id() } returns orderId
         every { repository.findById(orderId.value) } returns order
-        every { repository.save(any()) } returns orderId
 
         service.pay(command)
 
         verify {
-            repository.save(any())
+            order.pay()
             eventRepository.save(withArg {
                 assertThat(it.orderId).isEqualTo(orderId)
                 assertThat(it.type).isEqualTo(OrderEventType.COMPLETED)
@@ -222,10 +204,6 @@ class OrderServiceTest {
 
         shouldThrow<NotFoundOrderException> {
             service.pay(command)
-        }
-
-        verify(exactly = 0) {
-            repository.save(any())
         }
     }
 
@@ -269,38 +247,38 @@ class OrderServiceTest {
             consumerId = "test",
             event = event,
         )
-        every { eveentConsumerOffsetRepository.find(command.consumerId, event.type) } returns null
+        every { eventConsumerOffsetRepository.find(
+            OrderEventConsumerOffsetId(command.consumerId, event.type))
+        } returns null
 
         service.consumeEvent(command)
 
         verify {
-            eveentConsumerOffsetRepository.save(withArg {
-                assertThat(it.consumerId).isEqualTo(command.consumerId)
-                assertThat(it.value).isEqualTo(eventId)
-                assertThat(it.eventType).isEqualTo(event.type)
+            eventConsumerOffsetRepository.save(withArg {
+                assertThat(it.id.consumerId).isEqualTo(command.consumerId)
+                assertThat(it.id.eventType).isEqualTo(command.event.type)
+                assertThat(it.eventId).isEqualTo(eventId)
             })
         }
     }
 
     @Test
     fun `consumeEvent - 이벤트 처리 (이벤트 개수1) - 이미 offset이 있는 경우 update`() {
-        val oldEventId = OrderMock.eventId()
         val eventId = OrderMock.eventId()
         val event = OrderMock.event(id = eventId)
+        val offset = mockk<OrderEventConsumerOffset>(relaxed = true)
         val command = ConsumeOrderEventCommand(
             consumerId = "test",
             event = event,
         )
-        every { eveentConsumerOffsetRepository.find(command.consumerId, event.type) } returns
-                OrderMock.eventConsumerOffset(eventId = oldEventId)
+        every { eventConsumerOffsetRepository.find(
+            OrderEventConsumerOffsetId(command.consumerId, event.type))
+        } returns offset
 
         service.consumeEvent(command)
 
         verify {
-            eveentConsumerOffsetRepository.update(withArg {
-                assertThat(it.consumerId).isEqualTo(command.consumerId)
-                assertThat(it.value).isEqualTo(eventId)
-            })
+            offset.update(eventId)
         }
     }
 
@@ -333,15 +311,15 @@ class OrderServiceTest {
         val eventType = OrderEventType.COMPLETED
         val events = List(3) { OrderMock.event() }
         val offset = OrderMock.eventConsumerOffset()
-        every { eveentConsumerOffsetRepository.find(consumerId, eventType) } returns offset
-        every { eventRepository.findAllByIdGreaterThanOrderByIdAsc(offset.value) } returns events
+        every { eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(consumerId, eventType)) } returns offset
+        every { eventRepository.findAllByIdGreaterThanOrderByIdAsc(offset.eventId) } returns events
 
         val result = service.getAllEventsNotConsumedInOrder(consumerId, eventType)
 
         assertThat(result).hasSize(events.size)
         result.forEachIndexed { index, orderEvent ->
             val expect = events[index]
-            assertThat(orderEvent.id).isEqualTo(expect.id)
+            assertThat(orderEvent.id()).isEqualTo(expect.id())
         }
     }
 
@@ -350,15 +328,15 @@ class OrderServiceTest {
         val consumerId = "test"
         val eventType = OrderEventType.COMPLETED
         val events = List(2) { OrderMock.event() }
-        every { eveentConsumerOffsetRepository.find(consumerId, eventType) } returns null
-        every { eventRepository.findAllOrderByIdAsc() } returns events
+        every { eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(consumerId, eventType)) } returns null
+        every { eventRepository.findAllByIdAsc() } returns events
 
         val result = service.getAllEventsNotConsumedInOrder(consumerId, eventType)
 
         assertThat(result).hasSize(events.size)
         result.forEachIndexed { index, orderEvent ->
             val expect = events[index]
-            assertThat(orderEvent.id).isEqualTo(expect.id)
+            assertThat(orderEvent.id()).isEqualTo(expect.id())
         }
     }
 }

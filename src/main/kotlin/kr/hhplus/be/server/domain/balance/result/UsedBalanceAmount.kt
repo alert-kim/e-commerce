@@ -4,7 +4,7 @@ import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceId
 import java.math.BigDecimal
 
-data class UsedBalanceAmount(
+data class UsedBalanceAmount (
     val balanceId: BalanceId,
     val amount: BalanceAmount,
 ) {

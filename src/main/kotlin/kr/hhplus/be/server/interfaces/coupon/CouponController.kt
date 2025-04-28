@@ -22,32 +22,18 @@ class CouponController(
     private val couponFacade: CouponFacade,
 ) : CouponControllerInterface {
 
-    @GetMapping("/couponSources")
-    override fun getCouponSources(
-    ): ResponseEntity<ServerApiResponse> = handleRequest(
-        block = {
-            val coupons = couponFacade.getAllSourcesIssuable()
-            CouponSourcesResponse.from(coupons)
-        },
-        errorSpec = {
-            when (it) {
-                else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
-            }
-        }
-    )
-
     @PostMapping("/coupons")
     override fun issueCoupon(
         @RequestBody request: IssueCouponRequest,
     ) = handleRequest(
         block = {
-            val coupon = couponFacade.issueCoupon(
+            val result = couponFacade.issueCoupon(
                 IssueCouponFacadeCommand(
-                couponSourceId = request.couponSourceId,
-                userId = request.userId,
+                    couponSourceId = request.couponSourceId,
+                    userId = request.userId,
                 )
             )
-            CouponResponse.from(coupon)
+            CouponResponse.from(result)
         },
         errorSpec = {
             when (it) {
@@ -64,7 +50,7 @@ class CouponController(
         @PathVariable userId: Long,
     ) = handleRequest(
         block = {
-            val coupons = couponFacade.getCoupons(userId)
+            val coupons = couponFacade.getUsableCoupons(userId)
             CouponsResponse.from(coupons)
         },
         errorSpec = {
@@ -75,4 +61,17 @@ class CouponController(
         }
     )
 
+    @GetMapping("/couponSources")
+    override fun getCouponSources(
+    ): ResponseEntity<ServerApiResponse> = handleRequest(
+        block = {
+            val coupons = couponFacade.getAllSourcesIssuable()
+            CouponSourcesResponse.from(coupons)
+        },
+        errorSpec = {
+            when (it) {
+                else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)
+            }
+        }
+    )
 }

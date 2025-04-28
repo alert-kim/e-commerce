@@ -6,7 +6,7 @@ import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorSpec
 import kr.hhplus.be.server.interfaces.common.handleRequest
 import kr.hhplus.be.server.interfaces.product.response.ProductsPageResponse
-import kr.hhplus.be.server.interfaces.product.response.ProductsResponse
+import kr.hhplus.be.server.interfaces.product.response.ProductsListResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -37,8 +37,8 @@ class ProductController(
     override fun getPopularProducts() =
         handleRequest(
             block = {
-                val products = productFacade.getPopularProducts()
-                ProductsResponse.from(products)
+                val result = productFacade.getPopularProducts()
+                ProductsListResponse.from(result)
             },
             errorSpec = {
                 when (it) {

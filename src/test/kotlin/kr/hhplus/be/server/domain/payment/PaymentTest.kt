@@ -11,24 +11,23 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
-import java.math.BigDecimal
 
 class PaymentTest {
     @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
-        val payment = PaymentMock.payment(id = PaymentMock.id())
+    fun `id() - id가 null이 아닌 경우 id 반환`() {
+        val payment = PaymentMock.payment(id = 1L)
 
-        val result = payment.requireId()
+        val result = payment.id()
 
-        assertThat(result).isEqualTo(payment.id)
+        assertThat(result.value).isEqualTo(1L)
     }
 
     @Test
-    fun `requireId - id가 null이면 RequiredPaymentIdException 발생`() {
+    fun `id() - id가 null이면 RequiredPaymentIdException 발생`() {
         val payment = PaymentMock.payment(id = null)
 
         assertThrows<RequiredPaymentIdException> {
-            payment.requireId()
+            payment.id()
         }
     }
 
@@ -38,7 +37,7 @@ class PaymentTest {
         val orderId = OrderMock.id()
         val amount = UsedBalanceAmount(
             balanceId = BalanceMock.id(),
-            amount = BalanceAmount(1000.toBigDecimal()),
+            amount = BalanceAmount.of(1000.toBigDecimal()),
         )
 
         val payment = Payment.new(
@@ -53,6 +52,4 @@ class PaymentTest {
             { assertThat(payment.amount).isEqualByComparingTo(amount.value) },
         )
     }
-
-
 }

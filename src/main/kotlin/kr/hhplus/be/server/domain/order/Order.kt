@@ -1,17 +1,38 @@
 package kr.hhplus.be.server.domain.order
 
+import jakarta.persistence.Access
+import jakarta.persistence.AccessType
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Embedded
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
 import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
-import kr.hhplus.be.server.domain.product.result.ProductStockAllocated
+import kr.hhplus.be.server.domain.product.ProductId
+import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
 
+@Entity
+@Table(name = "orders")
 class Order(
-    val id: OrderId? = null,
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected val id: Long? = null,
+
     val userId: UserId,
     val createdAt: Instant,
     status: OrderStatus,
@@ -22,18 +43,24 @@ class Order(
     couponId: CouponId?,
     updatedAt: Instant,
 ) {
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20)")
     var status: OrderStatus = status
         private set
 
+    @Column(precision = 20, scale = 2)
     var originalAmount: BigDecimal = originalAmount
         private set
 
+    @Column(precision = 20, scale = 2)
     var discountAmount: BigDecimal = discountAmount
         private set
 
+    @Column(precision = 20, scale = 2)
     var totalAmount: BigDecimal = totalAmount
         private set
 
+    @Embedded
     var couponId: CouponId? = couponId
         private set
 
@@ -43,28 +70,36 @@ class Order(
     val products: List<OrderProduct>
         get() = _products.toList()
 
-    private val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
+    @OneToMany(
+        mappedBy = "order",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true,
+        fetch = FetchType.EAGER,
+    )
+    protected val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
 
-    fun requireId(): OrderId =
-        id ?: throw RequiredOrderIdException()
+    fun id(): OrderId =
+        id?.let { OrderId(it) } ?: throw RequiredOrderIdException()
 
-    fun placeStock(stocks: List<ProductStockAllocated>) {
-        if (status != OrderStatus.READY) {
+    fun placeStock(
+        productId: ProductId,
+        quantity: Int,
+        unitPrice: ProductPrice,
+    ) {
+        if (status != OrderStatus.READY && status != OrderStatus.STOCK_ALLOCATED) {
             throw InvalidOrderStatusException(
-                id = requireId(),
+                id = id(),
                 status = status,
                 expect = OrderStatus.READY,
             )
         }
-        stocks.forEach { stock ->
-            OrderProduct.new(
-                orderId = requireId(),
-                productId = stock.productId,
-                quantity = stock.quantity,
-                unitPrice = stock.unitPrice,
-            ).also { orderProduct ->
-                addOrderProduct(orderProduct)
-            }
+        OrderProduct.new(
+            order = this,
+            productId = productId,
+            quantity = quantity,
+            unitPrice = unitPrice.value,
+        ).also { orderProduct ->
+            addOrderProduct(orderProduct)
         }
         status = OrderStatus.STOCK_ALLOCATED
         updatedAt = Instant.now()
@@ -73,24 +108,24 @@ class Order(
     fun applyCoupon(coupon: UsedCoupon) {
         if (status != OrderStatus.STOCK_ALLOCATED) {
             throw InvalidOrderStatusException(
-                id = requireId(),
+                id = id(),
                 status = status,
                 expect = OrderStatus.READY,
             )
         }
         val newCouponId = coupon.id
-        when(val originalCouponId = this.couponId) {
+        when (val originalCouponId = this.couponId) {
             null -> Unit
             newCouponId -> return
             else -> throw AlreadyCouponAppliedException(
-                id = requireId(), couponId = originalCouponId, newCouponId = newCouponId
+                id = id(), couponId = originalCouponId, newCouponId = newCouponId
             )
         }
 
         this.discountAmount = coupon.calculateDiscountAmount(totalAmount)
         this.totalAmount = totalAmount.minus(discountAmount)
         this.couponId = newCouponId
-        updatedAt = Instant.now()
+        this.updatedAt = Instant.now()
     }
 
     private fun addOrderProduct(
@@ -104,7 +139,7 @@ class Order(
     fun pay() {
         if (status != OrderStatus.STOCK_ALLOCATED) {
             throw InvalidOrderStatusException(
-                id = requireId(),
+                id = id(),
                 status = status,
                 expect = OrderStatus.STOCK_ALLOCATED,
             )

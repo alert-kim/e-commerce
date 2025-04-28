@@ -13,7 +13,7 @@ class CouponSourceViewTest {
 
         val result = CouponSourceView.from(coupon)
 
-        assertThat(result.id).isEqualTo(coupon.id)
+        assertThat(result.id).isEqualTo(coupon.id())
     }
 
     @Test

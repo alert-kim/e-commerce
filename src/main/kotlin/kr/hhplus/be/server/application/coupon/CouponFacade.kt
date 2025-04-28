@@ -1,9 +1,9 @@
 package kr.hhplus.be.server.application.coupon
 
 import kr.hhplus.be.server.application.coupon.command.IssueCouponFacadeCommand
-import kr.hhplus.be.server.domain.coupon.CouponView
+import kr.hhplus.be.server.application.coupon.result.CouponResult
+import kr.hhplus.be.server.application.coupon.result.CouponSourcesResult
 import kr.hhplus.be.server.domain.coupon.CouponService
-import kr.hhplus.be.server.domain.coupon.CouponSourceView
 import kr.hhplus.be.server.domain.coupon.CouponSourceService
 import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
@@ -19,17 +19,19 @@ class CouponFacade(
 
     fun issueCoupon(
         command: IssueCouponFacadeCommand
-    ): CouponView {
+    ): CouponResult.Single {
         val userId = userService.get(command.userId).id
         val issuedCoupon = couponSourceService.issue(IssueCouponCommand(command.couponSourceId))
-        return couponService.create(CreateCouponCommand(userId, issuedCoupon))
+        val couponView = couponService.create(CreateCouponCommand(userId, issuedCoupon))
+        return CouponResult.Single(couponView)
     }
 
-    fun getAllSourcesIssuable(): List<CouponSourceView> =
-        couponSourceService.getAllIssuable()
+    fun getAllSourcesIssuable(): CouponSourcesResult =
+        CouponSourcesResult(couponSourceService.getAllIssuable())
 
-    fun getCoupons(userId: Long): List<CouponView> {
+    fun getUsableCoupons(userId: Long): CouponResult.List {
         val userId = userService.get(userId).id
-        return couponService.getAllUnused(userId)
+        val coupons = couponService.getAllUnused(userId)
+        return CouponResult.List(coupons)
     }
 }

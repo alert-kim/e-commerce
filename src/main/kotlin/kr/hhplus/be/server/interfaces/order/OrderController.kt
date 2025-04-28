@@ -2,14 +2,17 @@ package kr.hhplus.be.server.interfaces.order
 
 import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
+import kr.hhplus.be.server.domain.balance.exception.BelowMinBalanceAmountException
 import kr.hhplus.be.server.domain.balance.exception.InsufficientBalanceException
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.ExpiredCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderPriceException
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderProductQuantityException
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
-import kr.hhplus.be.server.domain.product.excpetion.OutOfStockProductException
+import kr.hhplus.be.server.domain.stock.exception.InvalidStockQuantityToAllocateException
+import kr.hhplus.be.server.domain.stock.exception.OutOfStockException
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.ErrorSpec
@@ -33,31 +36,36 @@ class OrderController(
     ) =
         handleRequest(
             block = {
-                val order = orderFacade.order(OrderFacadeCommand(
-                    userId = request.userId,
-                    orderProducts = request.orderProducts.map {
-                        OrderFacadeCommand.OrderProduct(
-                            productId = it.productId,
-                            quantity = it.quantity,
-                            unitPrice = it.unitPrice,
-                            totalPrice = it.totalPrice,
-                        )
-                    },
-                    couponId = request.couponId,
-                    originalAmount = request.originalAmount,
-                    discountAmount = request.discountAmount,
-                    totalAmount = request.totalAmount,
-                ))
+                val result = orderFacade.order(
+                    OrderFacadeCommand(
+                        userId = request.userId,
+                        productsToOrder = request.orderProducts.map {
+                            OrderFacadeCommand.ProductToOrder(
+                                productId = it.productId,
+                                quantity = it.quantity,
+                                unitPrice = it.unitPrice,
+                                totalPrice = it.totalPrice,
+                            )
+                        },
+                        couponId = request.couponId,
+                        originalAmount = request.originalAmount,
+                        discountAmount = request.discountAmount,
+                        totalAmount = request.totalAmount,
+                    )
+                )
 
-                OrderResponse.from(order)
+                OrderResponse.from(result.value)
             },
             errorSpec = {
                 when (it) {
-                    is OutOfStockProductException -> ErrorSpec.badRequest(ErrorCode.OUT_OF_STOCK_PRODUCT)
+                    is OutOfStockException -> ErrorSpec.badRequest(ErrorCode.OUT_OF_STOCK_PRODUCT)
                     is InvalidOrderPriceException -> ErrorSpec.badRequest(ErrorCode.INVALID_ORDER_PRICE)
+                    is InvalidOrderProductQuantityException,
+                    is InvalidStockQuantityToAllocateException -> ErrorSpec.badRequest(ErrorCode.INVALID_ORDER_QUANTITY)
+
                     is AlreadyUsedCouponException -> ErrorSpec.badRequest(ErrorCode.ALREADY_USED_COUPON)
                     is ExpiredCouponException -> ErrorSpec.badRequest(ErrorCode.EXPIRED_COUPON)
-                    is InsufficientBalanceException -> ErrorSpec.badRequest(ErrorCode.INSUFFICIENT_BALANCE)
+                    is BelowMinBalanceAmountException -> ErrorSpec.badRequest(ErrorCode.INSUFFICIENT_BALANCE)
                     is NotOwnedCouponException -> ErrorSpec.forbidden(ErrorCode.NOT_OWNED_COUPON)
                     is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
                     is NotFoundProductException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_PRODUCT)

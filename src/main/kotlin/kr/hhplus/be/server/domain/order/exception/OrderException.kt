@@ -19,10 +19,10 @@ class NotFoundOrderException(
 }
 
 class InvalidOrderPriceException(
-    productId: ProductId,
+    productId: ProductId? = null,
     detail: String,
 ) : OrderException() {
-    override val message: String = "상품(${productId.value})에 대한 주문 가격이 유효하지 않습니다. $detail"
+    override val message: String = "상품(${productId?.value})에 대한 주문 가격이 유효하지 않습니다. $detail"
 }
 
 class InvalidOrderCouponException(
@@ -40,12 +40,23 @@ class InvalidOrderStatusException(
     override val message: String = "주문(${id.value})의 상태($status)가 유효하지 않습니다. expect: $expect"
 }
 
+class InvalidOrderProductQuantityException(
+    detail: String
+) : OrderException() {
+    override val message: String = "주문 상품의 수량이 유효하지 않습니다. $detail"
+}
+
 class AlreadyCouponAppliedException(
     id: OrderId,
     couponId: CouponId,
     newCouponId: CouponId,
 ) : OrderException() {
     override val message: String = "주문(${id.value})에 쿠폰(${couponId.value})이 이미 적용되어 있습니다 (적용 시도 쿠폰 : ${newCouponId.value})"
+}
+
+// order-product
+class RequiredOrderProductIdException : OrderException() {
+    override val message: String = "주문 상품 ID가 필요합니다."
 }
 
 // event
