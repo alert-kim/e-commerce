@@ -41,14 +41,15 @@ class GetPopularProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `인기 상품 조회 - 200 - 오늘 부터 3일 전까지에 대한 인기 상품 조회`() {
-        val startDate = LocalDate.now().minusDays(3)
+    fun `인기 상품 조회 - 200 - 오늘 부터 2일 전까지에 대한 인기 상품 조회`() {
+        val startDate = LocalDate.now().minusDays(2)
         val endDate = LocalDate.now()
         val popularProducts = List(5) { index ->
             val product = savedProduct()
+            val date = Arb.localDate(minDate = startDate, maxDate = endDate).next()
             savedProductDailySale(
                 productId = product.id(),
-                date = Arb.localDate(minDate = startDate, maxDate = endDate).next(),
+                date = date,
                 quantity = 100 - index * 10,
             )
             product

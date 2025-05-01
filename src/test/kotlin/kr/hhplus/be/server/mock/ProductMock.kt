@@ -10,18 +10,6 @@ object ProductMock {
 
     fun id() = ProductId(IdMock.value())
 
-    fun stock(
-        productId: ProductId = id(),
-        quantity: Long = 10,
-        createdAt: Instant = Instant.now(),
-        updatedAt: Instant = Instant.now(),
-    ) = ProductStock(
-        productId = productId,
-        createdAt = createdAt,
-        quantity = quantity,
-        updatedAt = updatedAt,
-    )
-
     fun product(
         id: ProductId? = id(),
         status: ProductStatus = ProductStatus.ON_SALE,

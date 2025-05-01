@@ -31,13 +31,5 @@ class NotOnSaleProductException(
     override val message: String = "상품($id)은 판매중이 아닙니다."
 }
 
-class OutOfStockProductException(
-    productId: Long,
-    required: Int,
-    remaining: Long,
-) : ProductException() {
-    override val message: String = "상품($productId)의 재고($remaining)가 부족합니다. 필요 수량: $required"
-}
-
 
 
