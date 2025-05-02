@@ -12,7 +12,6 @@ class ProductService(
     private val repository: ProductRepository,
     private val dailySaleRepository: ProductDailySaleRepository,
 ) {
-
     fun aggregateProductDailySales(command: RecordProductDailySalesCommand) {
         command.sales.forEach { newSale ->
             val sale = dailySaleRepository.findById(ProductDailySaleId(

@@ -8,7 +8,7 @@ import io.mockk.verify
 import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
-import kr.hhplus.be.server.application.order.result.OrderResult
+import kr.hhplus.be.server.application.order.result.GetOrderFacadeEventResult
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -33,7 +33,7 @@ class OrderCompletionSendingSchedulerTest {
                 OrderCompletionSendingScheduler.SCHEDULER_ID,
                 OrderProductStatsScheduler.eventType,
             )
-        } returns OrderResult.Events(orderEvents)
+        } returns GetOrderFacadeEventResult.List(orderEvents)
 
         orderCompletionSendingScheduler.send()
 

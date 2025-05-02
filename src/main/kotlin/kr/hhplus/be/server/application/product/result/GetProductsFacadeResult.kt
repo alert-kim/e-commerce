@@ -3,9 +3,8 @@ package kr.hhplus.be.server.application.product.result
 import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.domain.stock.StockView
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 
-sealed class ProductsResult {
+sealed class GetProductsFacadeResult {
     data class ProductWithStock(
         val product: ProductView,
         val stockQuantity: Int

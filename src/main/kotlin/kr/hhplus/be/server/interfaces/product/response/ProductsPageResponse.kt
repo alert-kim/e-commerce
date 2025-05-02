@@ -1,9 +1,7 @@
 package kr.hhplus.be.server.interfaces.product.response
 
-import kr.hhplus.be.server.application.product.result.ProductsResult
-import kr.hhplus.be.server.domain.product.ProductView
+import kr.hhplus.be.server.application.product.result.GetProductsFacadeResult
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
-import org.springframework.data.domain.Page
 
 class ProductsPageResponse(
     val totalCount: Long,
@@ -13,7 +11,7 @@ class ProductsPageResponse(
 ) : ServerApiResponse {
     companion object {
         fun from(
-            products: ProductsResult.Paged,
+            products: GetProductsFacadeResult.Paged,
         ) = ProductsPageResponse(
             totalCount = products.value.totalElements,
             page = products.value.number,

@@ -3,7 +3,7 @@ package kr.hhplus.be.server.interfaces.product.response
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
-import kr.hhplus.be.server.application.product.result.ProductsResult
+import kr.hhplus.be.server.application.product.result.GetProductsFacadeResult
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -14,12 +14,12 @@ class ProductsPageResponseTest {
     @Test
     fun `ProductsResult Paged에서 ProductsPageResponse로 변환한다`() {
         val productsWithStock = List(3) {
-            ProductsResult.ProductWithStock(
+            GetProductsFacadeResult.ProductWithStock(
                 product = ProductMock.view(),
                 stockQuantity = Arb.int(2..5).next()
             )
         }
-        val pagedResult = ProductsResult.Paged(
+        val pagedResult = GetProductsFacadeResult.Paged(
             value = PageImpl(productsWithStock, PageRequest.of(0, 10), 1)
         )
 

@@ -49,7 +49,7 @@ class CouponFacadeTest {
             )
         )
 
-        assertThat(result.value.id).isEqualTo(coupon.id)
+        assertThat(result.coupon.id).isEqualTo(coupon.id)
         verify {
             userService.get(userId.value)
             couponSourceService.issue(IssueCouponCommand(couponSourceId.value))

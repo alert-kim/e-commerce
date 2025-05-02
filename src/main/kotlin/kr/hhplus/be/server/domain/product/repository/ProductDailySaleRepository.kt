@@ -2,7 +2,6 @@ package kr.hhplus.be.server.domain.product.repository
 
 import kr.hhplus.be.server.domain.product.ProductDailySale
 import kr.hhplus.be.server.domain.product.ProductDailySaleId
-import kr.hhplus.be.server.domain.product.ProductId
 import java.time.LocalDate
 
 interface ProductDailySaleRepository {

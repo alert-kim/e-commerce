@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
-import kr.hhplus.be.server.application.order.result.OrderResult
+import kr.hhplus.be.server.application.order.result.GetOrderFacadeEventResult
 import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
 import kr.hhplus.be.server.testutil.mock.OrderMock
@@ -37,7 +37,7 @@ class ProductToOrderStatsSchedulerTest {
                 OrderProductStatsScheduler.SCHEDULER_ID,
                 OrderProductStatsScheduler.eventType,
             )
-        } returns OrderResult.Events(orderEvents)
+        } returns GetOrderFacadeEventResult.List(orderEvents)
 
         orderProductStatsScheduler.aggregate()
 

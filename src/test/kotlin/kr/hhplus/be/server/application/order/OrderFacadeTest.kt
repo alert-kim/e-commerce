@@ -9,7 +9,6 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
-import kr.hhplus.be.server.application.order.result.OrderResult
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
@@ -117,8 +116,7 @@ class OrderFacadeTest {
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isInstanceOf(OrderResult.Single::class.java)
-        assertThat(result.value).isEqualTo(order)
+        assertThat(result.order).isEqualTo(order)
         verifyOrder {
             command.validate()
             userService.get(command.userId)
@@ -220,8 +218,7 @@ class OrderFacadeTest {
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isInstanceOf(OrderResult.Single::class.java)
-        assertThat(result.value).isEqualTo(order)
+        assertThat(result.order).isEqualTo(order)
         verifyOrder {
             command.validate()
             userService.get(command.userId)
@@ -302,11 +299,8 @@ class OrderFacadeTest {
         val events = listOf(OrderMock.event())
         every { orderService.getAllEventsNotConsumedInOrder(consumerId, eventType) } returns events
 
-        // when
         val result = orderFacade.getAllEventsNotConsumedInOrder(consumerId, eventType)
 
-        // then
-        assertThat(result).isInstanceOf(OrderResult.Events::class.java)
         assertThat(result.value).isEqualTo(events)
         verify {
             orderService.getAllEventsNotConsumedInOrder(consumerId, eventType)

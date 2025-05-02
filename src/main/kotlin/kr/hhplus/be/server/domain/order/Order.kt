@@ -1,7 +1,5 @@
 package kr.hhplus.be.server.domain.order
 
-import jakarta.persistence.Access
-import jakarta.persistence.AccessType
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Embedded
@@ -12,7 +10,6 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import kr.hhplus.be.server.domain.coupon.CouponId

@@ -3,16 +3,15 @@ package kr.hhplus.be.server.application.order
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
-import kr.hhplus.be.server.application.order.result.OrderResult
+import kr.hhplus.be.server.application.order.result.OrderFacadeResult
+import kr.hhplus.be.server.application.order.result.GetOrderFacadeEventResult
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
@@ -36,14 +35,14 @@ class OrderFacade(
 ) {
     fun order(
         command: OrderFacadeCommand,
-    ): OrderResult.Single {
+    ): OrderFacadeResult {
         command.validate()
         val userId = getUser(command.userId).id
         val orderId = createOrder(userId)
         placeProduct(orderId, command)
         applyCoupon(orderId, userId, command)
         pay(orderId)
-        return OrderResult.Single(orderService.get(orderId.value))
+        return OrderFacadeResult(orderService.get(orderId.value))
     }
 
     fun sendOrderCompletionData(
@@ -61,8 +60,8 @@ class OrderFacade(
     fun getAllEventsNotConsumedInOrder(
         consumerId: String,
         eventType: OrderEventType,
-    ): OrderResult.Events =
-        OrderResult.Events(
+    ): GetOrderFacadeEventResult.List =
+        GetOrderFacadeEventResult.List(
             orderService.getAllEventsNotConsumedInOrder(
                 consumerId = consumerId,
                 eventType = eventType,

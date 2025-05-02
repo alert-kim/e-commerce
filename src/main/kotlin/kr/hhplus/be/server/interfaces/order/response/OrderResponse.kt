@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.order.response
 
+import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.domain.order.OrderProductView
 import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.order.OrderStatus
@@ -53,6 +54,23 @@ data class OrderResponse(
                     discountAmount = discountAmount,
                     totalAmount = totalAmount,
                     orderProducts = order.products.map { OrderProductResponse.from(it) },
+                    createdAt = createdAt,
+                )
+            }
+
+        fun from(
+            result: OrderFacadeResult,
+        ): OrderResponse =
+            with(result.order) {
+                OrderResponse(
+                    id = id.value,
+                    userId = userId.value,
+                    status = status,
+                    couponId = couponId?.value,
+                    originalAmount = originalAmount,
+                    discountAmount = discountAmount,
+                    totalAmount = totalAmount,
+                    orderProducts = products.map { OrderProductResponse.from(it) },
                     createdAt = createdAt,
                 )
             }

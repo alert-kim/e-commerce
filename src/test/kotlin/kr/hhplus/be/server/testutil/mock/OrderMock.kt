@@ -67,7 +67,6 @@ object OrderMock {
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
         createdAt: Instant = Instant.now(),
     ): OrderProductView = OrderProductView(
-//        orderId = orderId,
         productId = ProductId(productId),
         quantity = quantity,
         unitPrice = unitPrice,

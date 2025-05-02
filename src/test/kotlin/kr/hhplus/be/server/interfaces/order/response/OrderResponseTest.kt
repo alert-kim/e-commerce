@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.order.response
 
+import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.Test
@@ -8,8 +9,9 @@ class OrderResponseTest {
     @Test
     fun `주문에 대한 변환 생성`() {
         val order = OrderMock.view()
+        val result = OrderFacadeResult(order)
 
-        val orderResponse = OrderResponse.from(order)
+        val orderResponse = OrderResponse.from(result)
 
         val expect = OrderResponse(
             id = order.id.value,

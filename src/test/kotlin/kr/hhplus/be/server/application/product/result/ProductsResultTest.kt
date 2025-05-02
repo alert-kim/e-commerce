@@ -23,7 +23,7 @@ class ProductsResultTest {
             products.size.toLong()
         )
 
-        val result = ProductsResult.Paged.from(productPage, stocks)
+        val result = GetProductsFacadeResult.Paged.from(productPage, stocks)
 
         assertThat(result.value.totalElements).isEqualTo(productPage.totalElements)
         assertThat(result.value.number).isEqualTo(productPage.number)
@@ -48,7 +48,7 @@ class ProductsResultTest {
         )
 
         shouldThrow<NoSuchElementException> {
-            ProductsResult.Paged.from(productPage, stocks)
+            GetProductsFacadeResult.Paged.from(productPage, stocks)
         }
     }
 
@@ -60,7 +60,7 @@ class ProductsResultTest {
         }
         val stocks = products.map { StockMock.view(productId = it.id) }
 
-        val result = ProductsResult.Listed.from(products, stocks)
+        val result = GetProductsFacadeResult.Listed.from(products, stocks)
 
         assertThat(result.value).hasSize(products.size)
         result.value.forEachIndexed { index, productWithStock ->
@@ -78,7 +78,7 @@ class ProductsResultTest {
         val stocks = listOf(StockMock.view(productId = ProductId(2L)))
 
         shouldThrow<NoSuchElementException> {
-            ProductsResult.Listed.from(products, stocks)
+            GetProductsFacadeResult.Listed.from(products, stocks)
         }
     }
 }
