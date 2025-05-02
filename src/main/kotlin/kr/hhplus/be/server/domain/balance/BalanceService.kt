@@ -23,11 +23,13 @@ class BalanceService(
 
         balance.charge(BalanceAmount.of(command.amount))
 
-        recordRepository.save(BalanceRecord.new(
-            balanceId = balance.id(),
-            type = BalanceTransactionType.CHARGE,
-            amount = BalanceAmount.of(command.amount),
-        ))
+        recordRepository.save(
+            BalanceRecord.new(
+                balanceId = balance.id(),
+                type = BalanceTransactionType.CHARGE,
+                amount = BalanceAmount.of(command.amount),
+            )
+        )
         return balance.id()
     }
 
@@ -38,11 +40,13 @@ class BalanceService(
 
         val usedAmount = balance.use(BalanceAmount.of(command.amount))
 
-        recordRepository.save(BalanceRecord.new(
-            balanceId = balance.id(),
-            type = BalanceTransactionType.USE,
-            amount = BalanceAmount.of(command.amount),
-        ))
+        recordRepository.save(
+            BalanceRecord.new(
+                balanceId = balance.id(),
+                type = BalanceTransactionType.USE,
+                amount = BalanceAmount.of(command.amount),
+            )
+        )
 
         return usedAmount
     }

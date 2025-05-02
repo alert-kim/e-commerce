@@ -11,3 +11,9 @@ class InvalidPageRequestArgumentException(
 ) : CommonException() {
     override val message = "페이지 요청(page: $page, size: $pageSize, sort: ${sort})이 유효하지 않음"
 }
+
+class LockAcquisitionFailException(
+    message: String,
+) : CommonException() {
+    override val message = "Lock acquisition failed: $message"
+}
