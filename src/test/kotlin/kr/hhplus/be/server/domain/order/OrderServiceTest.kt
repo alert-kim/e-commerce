@@ -23,7 +23,12 @@ import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
-import kr.hhplus.be.server.mock.*
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.PaymentMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.StockMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

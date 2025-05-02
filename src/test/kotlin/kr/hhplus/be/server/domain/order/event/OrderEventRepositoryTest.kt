@@ -2,8 +2,8 @@ package kr.hhplus.be.server.domain.order.event
 
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.util.OrderEventAssert.Companion.assertOrderEvent
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.assertion.OrderEventAssert.Companion.assertOrderEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

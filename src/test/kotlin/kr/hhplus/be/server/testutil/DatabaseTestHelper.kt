@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.util
+package kr.hhplus.be.server.testutil
 
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
 import kr.hhplus.be.server.domain.coupon.Coupon
@@ -7,13 +7,22 @@ import kr.hhplus.be.server.domain.coupon.CouponSourceId
 import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
-import kr.hhplus.be.server.domain.product.*
+import kr.hhplus.be.server.domain.product.Product
+import kr.hhplus.be.server.domain.product.ProductDailySale
+import kr.hhplus.be.server.domain.product.ProductId
+import kr.hhplus.be.server.domain.product.ProductRepositoryTestConfig
+import kr.hhplus.be.server.domain.product.ProductStatus
+import kr.hhplus.be.server.domain.product.TestProductRepository
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserRepositoryTestConfig
-import kr.hhplus.be.server.mock.*
+import kr.hhplus.be.server.testutil.mock.BalanceMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.StockMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import java.math.BigDecimal

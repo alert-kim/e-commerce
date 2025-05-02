@@ -4,8 +4,8 @@ import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
 import kr.hhplus.be.server.domain.order.event.OrderEventType
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.util.OrderEventConsumerOffsetAsserts.Companion.assertOrderEventConsumerOffset
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.assertion.OrderEventConsumerOffsetAsserts.Companion.assertOrderEventConsumerOffset
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

@@ -3,11 +3,10 @@ package kr.hhplus.be.server.domain.payment
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
-import kr.hhplus.be.server.mock.PaymentMock
+import kr.hhplus.be.server.testutil.mock.PaymentMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
 
 class PaymentRepositoryTest : RepositoryTest() {
 

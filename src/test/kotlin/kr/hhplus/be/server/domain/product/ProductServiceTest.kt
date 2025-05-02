@@ -14,7 +14,7 @@ import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
-import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

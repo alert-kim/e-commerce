@@ -6,9 +6,9 @@ import kr.hhplus.be.server.domain.product.Product
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.user.UserId
-import kr.hhplus.be.server.mock.BalanceMock
-import kr.hhplus.be.server.mock.ProductMock
-import kr.hhplus.be.server.util.DatabaseTestHelper
+import kr.hhplus.be.server.testutil.mock.BalanceMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.DatabaseTestHelper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest

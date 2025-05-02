@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.stock
 
-import kr.hhplus.be.server.mock.StockMock
+import kr.hhplus.be.server.testutil.mock.StockMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

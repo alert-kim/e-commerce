@@ -1,8 +1,7 @@
-package kr.hhplus.be.server.util
+package kr.hhplus.be.server.testutil.assertion
 
 import kr.hhplus.be.server.domain.order.Order
 import kr.hhplus.be.server.domain.order.OrderProduct
-import kr.hhplus.be.server.util.OrderProductAssert.Companion.assertOrderProduct
 import org.assertj.core.api.AbstractAssert
 
 class OrderAssert(actual: Order?) : AbstractAssert<OrderAssert, Order>(actual, OrderAssert::class.java) {
@@ -29,7 +28,7 @@ class OrderAssert(actual: Order?) : AbstractAssert<OrderAssert, Order>(actual, O
             failWithMessage("OrderProduct list size is not equal to expected")
         }
         this.forEachIndexed { index, actualProduct ->
-            assertOrderProduct(actualProduct).isEqualTo(expected[index])
+            OrderProductAssert.Companion.assertOrderProduct(actualProduct).isEqualTo(expected[index])
         }
     }
 

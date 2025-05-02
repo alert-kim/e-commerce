@@ -2,9 +2,9 @@ package kr.hhplus.be.server.domain.balance
 
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
-import kr.hhplus.be.server.mock.BalanceMock
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.util.BalanceAssert.Companion.assertBalance
+import kr.hhplus.be.server.testutil.mock.BalanceMock
+import kr.hhplus.be.server.testutil.mock.IdMock
+import kr.hhplus.be.server.testutil.assertion.BalanceAssert.Companion.assertBalance
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

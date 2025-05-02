@@ -10,7 +10,7 @@ import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCom
 import kr.hhplus.be.server.application.order.result.OrderResult
 import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
-import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

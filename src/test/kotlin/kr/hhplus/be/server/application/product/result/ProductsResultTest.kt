@@ -2,19 +2,12 @@ package kr.hhplus.be.server.application.product.result
 
 import io.kotest.assertions.throwables.shouldThrow
 import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductPrice
-import kr.hhplus.be.server.domain.product.ProductStatus
-import kr.hhplus.be.server.domain.product.ProductView
-import kr.hhplus.be.server.domain.stock.StockView
-import kr.hhplus.be.server.mock.ProductMock
-import kr.hhplus.be.server.mock.StockMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.StockMock
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import java.math.BigDecimal
-import java.time.Instant
 
 class ProductsResultTest {
 

@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
-import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

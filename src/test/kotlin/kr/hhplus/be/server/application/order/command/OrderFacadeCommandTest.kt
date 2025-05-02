@@ -4,8 +4,8 @@ import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderPriceException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderProductQuantityException
-import kr.hhplus.be.server.mock.OrderCommandMock
-import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.OrderCommandMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

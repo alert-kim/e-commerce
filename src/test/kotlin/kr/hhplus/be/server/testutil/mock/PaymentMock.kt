@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.mock
+package kr.hhplus.be.server.testutil.mock
 
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.payment.Payment

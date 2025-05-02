@@ -5,7 +5,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
-import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

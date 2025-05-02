@@ -6,7 +6,7 @@ import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.order.reqeust.OrderRequest
-import kr.hhplus.be.server.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.IdMock
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

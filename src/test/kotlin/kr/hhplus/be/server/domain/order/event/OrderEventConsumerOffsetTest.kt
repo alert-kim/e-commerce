@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.order.event
 
-import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant

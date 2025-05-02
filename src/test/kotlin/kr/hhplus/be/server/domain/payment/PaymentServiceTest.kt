@@ -9,10 +9,10 @@ import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
-import kr.hhplus.be.server.mock.BalanceMock
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.mock.PaymentMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.BalanceMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.PaymentMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

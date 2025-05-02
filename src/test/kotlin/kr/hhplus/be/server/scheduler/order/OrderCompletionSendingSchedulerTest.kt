@@ -9,8 +9,7 @@ import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
 import kr.hhplus.be.server.application.order.result.OrderResult
-import kr.hhplus.be.server.domain.order.event.OrderEventType
-import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

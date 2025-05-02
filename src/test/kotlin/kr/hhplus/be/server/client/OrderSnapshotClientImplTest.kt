@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.spyk
 import kr.hhplus.be.server.domain.order.OrderSnapshot
-import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory

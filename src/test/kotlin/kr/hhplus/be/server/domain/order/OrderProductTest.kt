@@ -6,8 +6,8 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderProductIdException
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll

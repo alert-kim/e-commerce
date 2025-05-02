@@ -2,7 +2,7 @@ package kr.hhplus.be.server.domain.order.command
 
 import io.kotest.assertions.throwables.shouldThrow
 import kr.hhplus.be.server.domain.order.event.OrderEventId
-import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

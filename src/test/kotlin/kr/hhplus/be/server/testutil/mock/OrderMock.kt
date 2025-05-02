@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.mock
+package kr.hhplus.be.server.testutil.mock
 
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*

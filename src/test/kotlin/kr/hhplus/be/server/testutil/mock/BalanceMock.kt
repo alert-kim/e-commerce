@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.mock
+package kr.hhplus.be.server.testutil.mock
 
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.bigDecimal

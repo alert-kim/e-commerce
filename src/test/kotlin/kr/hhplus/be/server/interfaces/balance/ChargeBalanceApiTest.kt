@@ -3,10 +3,9 @@ package kr.hhplus.be.server.interfaces.balance
 import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
-import kr.hhplus.be.server.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.IdMock
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import java.math.BigDecimal
 import java.math.RoundingMode

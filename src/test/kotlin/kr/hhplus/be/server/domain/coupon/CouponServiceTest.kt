@@ -9,13 +9,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
-import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.result.UsedCoupon
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

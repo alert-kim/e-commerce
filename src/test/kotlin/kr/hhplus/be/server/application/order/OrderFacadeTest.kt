@@ -16,7 +16,6 @@ import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
-import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.command.*
@@ -31,7 +30,13 @@ import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
-import kr.hhplus.be.server.mock.*
+import kr.hhplus.be.server.testutil.mock.BalanceMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.OrderCommandMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.PaymentMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

@@ -12,8 +12,8 @@ import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.stock.exception.NotFoundStockException
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
-import kr.hhplus.be.server.mock.ProductMock
-import kr.hhplus.be.server.mock.StockMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.StockMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

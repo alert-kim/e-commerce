@@ -12,9 +12,9 @@ import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
-import kr.hhplus.be.server.mock.BalanceMock
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.BalanceMock
+import kr.hhplus.be.server.testutil.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

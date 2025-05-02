@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.util
+package kr.hhplus.be.server.testutil.assertion
 
 import kr.hhplus.be.server.domain.coupon.Coupon
 import org.assertj.core.api.AbstractAssert

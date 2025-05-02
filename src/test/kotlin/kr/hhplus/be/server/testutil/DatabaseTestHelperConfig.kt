@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.util
+package kr.hhplus.be.server.testutil
 
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -11,4 +11,3 @@ class DatabaseTestHelperConfig {
         return helper
     }
 }
-

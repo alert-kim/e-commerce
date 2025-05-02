@@ -11,8 +11,8 @@ import kr.hhplus.be.server.domain.coupon.CouponSourceService
 import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
 import kr.hhplus.be.server.domain.user.UserService
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

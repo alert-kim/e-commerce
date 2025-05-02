@@ -4,7 +4,7 @@ import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
-import kr.hhplus.be.server.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.IdMock
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.post

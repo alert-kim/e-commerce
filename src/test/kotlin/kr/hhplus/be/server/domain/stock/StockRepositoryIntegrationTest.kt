@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.domain.stock
 
 import kr.hhplus.be.server.domain.RepositoryTest
-import kr.hhplus.be.server.mock.ProductMock
-import kr.hhplus.be.server.mock.StockMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.StockMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
