@@ -41,13 +41,16 @@ class DatabaseTestHelper(
     private val couponSourceRepository: CouponSourceRepository,
     private val stockRepository: StockRepository,
 ) {
+    // user
     fun savedUser() = testUserRepository.save(UserMock.user(id = null))
 
+    // balance
     fun savedBalance(
         userId: UserId,
         amount: BigDecimal = BalanceMock.amount().value,
     ) = balanceRepository.save(BalanceMock.balance(id = null, userId = userId, amount = amount))
 
+    // coupon
     fun savedCouponSource(
         name: String = "테스트 쿠폰",
         discountAmount: BigDecimal = BigDecimal.valueOf(1000),
@@ -87,6 +90,11 @@ class DatabaseTestHelper(
         return couponRepository.save(coupon)
     }
 
+    fun findCouponSource(
+        id: CouponSourceId,
+    ): CouponSource? = couponSourceRepository.findById(id.value)
+
+    // product
     fun savedProduct(
         status: ProductStatus = ProductStatus.ON_SALE,
         name: String = "테스트 상품",
