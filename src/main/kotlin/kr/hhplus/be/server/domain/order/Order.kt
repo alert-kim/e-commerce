@@ -28,7 +28,7 @@ import java.time.Instant
 class Order(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
 
     val userId: UserId,
     val createdAt: Instant,
@@ -73,7 +73,7 @@ class Order(
         orphanRemoval = true,
         fetch = FetchType.EAGER,
     )
-    protected val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
+    private val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
 
     fun id(): OrderId =
         id?.let { OrderId(it) } ?: throw RequiredOrderIdException()

@@ -11,7 +11,7 @@ import kr.hhplus.be.server.infra.order.OrderSnapshotConverter
 @Table(name = "order_events")
 class OrderEvent(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val orderId: OrderId,
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(20)")

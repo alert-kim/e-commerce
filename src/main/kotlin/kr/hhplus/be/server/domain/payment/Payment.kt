@@ -14,7 +14,7 @@ import java.time.Instant
 class Payment(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val userId: UserId,
     val orderId: OrderId,
     @Column(precision = 20, scale = 2)

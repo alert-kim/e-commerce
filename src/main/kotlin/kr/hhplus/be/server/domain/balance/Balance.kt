@@ -9,9 +9,9 @@ import java.time.Instant
 
 @Entity
 @Table(name = "balances")
-class Balance(
+class Balance (
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val userId: UserId,
     val createdAt: Instant,
     amount: BalanceAmount,

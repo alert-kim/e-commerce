@@ -17,7 +17,7 @@ import java.time.Instant
 class Stock(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
 
     val productId: ProductId,
     val createdAt: Instant = Instant.now(),

@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Embeddable
-data class BalanceAmount private constructor(
+data class BalanceAmount (
     @Column(precision = 20, scale = 2)
     val value: BigDecimal
 ) {

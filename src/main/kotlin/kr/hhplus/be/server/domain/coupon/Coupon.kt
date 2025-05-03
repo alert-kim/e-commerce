@@ -19,7 +19,7 @@ import java.time.Instant
 @Table(name = "coupons")
 class Coupon(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val userId: UserId,
     val name: String,
     val couponSourceId: CouponSourceId,
