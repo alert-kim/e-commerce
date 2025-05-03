@@ -6,5 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface StockJpaRepository : JpaRepository<Stock, Long> {
+    fun findByProductId(productId: Long): Stock?
+
     fun findAllByProductIdIn(productIds: Collection<Long>): List<Stock>
 }

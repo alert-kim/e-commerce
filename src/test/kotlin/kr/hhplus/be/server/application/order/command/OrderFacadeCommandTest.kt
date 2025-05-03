@@ -11,46 +11,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class OrderFacadeCommandTest {
-    @Test
-    fun `orderProductIds() 주문 요청 상품의 상품 ID가 반환된다`() {
-        val productId = ProductMock.id()
-        val productsToOrder = listOf(
-            OrderCommandMock.productToOrder(
-                productId = productId.value,
-            ),
-            OrderCommandMock.productToOrder(),
-        )
-        val command = OrderCommandMock.facade(
-            productsToOrder = productsToOrder,
-        )
-
-        val result = command.orderProductIds()
-
-
-        assertThat(result).containsAll(productsToOrder.map { it.productId })
-    }
-
-    @Test
-    fun `quantityOfProduct() 상품 ID에 해당하는 상품의 수량이 반환된다`() {
-        val productId = ProductMock.id()
-        val quantity = 2
-        val productsToOrder = listOf(
-            OrderCommandMock.productToOrder(
-                productId = productId.value,
-                quantity = quantity,
-            ),
-            OrderCommandMock.productToOrder(
-                quantity = 3,
-            ),
-        )
-        val command = OrderCommandMock.facade(
-            productsToOrder = productsToOrder,
-        )
-
-        val result = command.quantityOfProduct(productId)
-
-        assertThat(result).isEqualTo(quantity)
-    }
 
     @Test
     fun `validate() 모든 가격 계산이 맞으면 에러가 발생하지 않는다`() {
@@ -218,6 +178,4 @@ class OrderFacadeCommandTest {
             command.validate()
         }
     }
-
-
 }

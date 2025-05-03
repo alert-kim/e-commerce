@@ -32,13 +32,11 @@ class OrderService(
     ) {
         val order = doGet(command.orderId.value)
 
-        command.preparedProductForOrder.forEach {
-            order.placeStock(
-                productId = it.product.id,
-                quantity = it.stock.quantity,
-                unitPrice = it.product.price,
-            )
-        }
+        order.placeStock(
+            productId = command.product.id,
+            quantity = command.stock.quantity,
+            unitPrice = command.product.price,
+        )
     }
 
     @Transactional

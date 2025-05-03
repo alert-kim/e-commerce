@@ -1,9 +1,6 @@
 package kr.hhplus.be.server.domain.order
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.next
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -16,14 +13,9 @@ import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
-import kr.hhplus.be.server.domain.product.ProductPrice
-import kr.hhplus.be.server.domain.product.result.PurchasableProduct
-import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.testutil.mock.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import java.math.BigDecimal
@@ -47,211 +39,229 @@ class OrderServiceTest {
         clearMocks(repository, publisher, client)
     }
 
-    @Test
-    fun `create - 주문 생성`() {
-        val orderId = OrderMock.id()
-        every { repository.save(any()) } returns OrderMock.order(id = orderId)
-        val userId = UserMock.id()
+    @Nested
+    @DisplayName("주문 생성")
+    inner class CreateOrder {
+        @Test
+        @DisplayName("사용자 ID로 주문을 생성")
+        fun createOrder() {
+            val orderId = OrderMock.id()
+            every { repository.save(any()) } returns OrderMock.order(id = orderId)
+            val userId = UserMock.id()
 
-        val result = service.createOrder(CreateOrderCommand(userId))
+            val result = service.createOrder(CreateOrderCommand(userId))
 
-        assertThat(result).isEqualTo(orderId)
-        verify {
-            repository.save(withArg {
-                assertThat(it.userId).isEqualTo(userId)
-                assertThat(it.status).isEqualTo(OrderStatus.READY)
-                assertThat(it.originalAmount).isEqualByComparingTo(BigDecimal.ZERO)
-                assertThat(it.discountAmount).isEqualByComparingTo(BigDecimal.ZERO)
-                assertThat(it.totalAmount).isEqualByComparingTo(BigDecimal.ZERO)
-                assertThat(it.couponId).isNull()
-                assertThat(it.products).isEmpty()
-            })
-        }
-    }
-
-    @Test
-    fun `placeStock - 주문 상품 생성`() {
-        val orderId = OrderMock.id()
-        val order = mockk<Order>(relaxed = true)
-        val command = PlaceStockCommand(
-            orderId = orderId,
-            preparedProductForOrder = List(3) {
-                val productId = ProductMock.id()
-                PlaceStockCommand.PreparedProductForOrder(
-                    product = PurchasableProduct(
-                        id = productId,
-                        price = ProductPrice(1000.toBigDecimal()),
-                    ),
-                    stock = AllocatedStock(
-                        productId = productId,
-                        quantity = Arb.int(1..5).next(),
-                    ),
-                )
-            }
-        )
-        every { repository.findById(orderId.value) } returns order
-
-        service.placeStock(command)
-
-        verify {
-            command.preparedProductForOrder.forEachIndexed { index, preparedProductForOrder ->
-                order.placeStock(
-                    productId = preparedProductForOrder.productId,
-                    quantity = preparedProductForOrder.stock.quantity,
-                    unitPrice = preparedProductForOrder.product.price,
-                )
+            assertThat(result).isEqualTo(orderId)
+            verify {
+                repository.save(withArg {
+                    assertThat(it.userId).isEqualTo(userId)
+                    assertThat(it.status).isEqualTo(OrderStatus.READY)
+                    assertThat(it.originalAmount).isEqualByComparingTo(BigDecimal.ZERO)
+                    assertThat(it.discountAmount).isEqualByComparingTo(BigDecimal.ZERO)
+                    assertThat(it.totalAmount).isEqualByComparingTo(BigDecimal.ZERO)
+                    assertThat(it.couponId).isNull()
+                    assertThat(it.products).isEmpty()
+                })
             }
         }
     }
 
-    @Test
-    fun `placeStock - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
-        val orderId = OrderMock.id()
-        val command = PlaceStockCommand(
-            orderId = orderId,
-            preparedProductForOrder = listOf(
-                ProductMock.id().let {
-                    PlaceStockCommand.PreparedProductForOrder(
-                        product = ProductMock.purchasableProduct(id = it),
-                        stock = StockMock.allocated(productId = it),
-                    )
-                }
-
+    @Nested
+    @DisplayName("상품 주문 배치")
+    inner class PlaceStock {
+        @Test
+        @DisplayName("상품 주문 배치")
+        fun place() {
+            val orderId = OrderMock.id()
+            val order = mockk<Order>(relaxed = true)
+            val product = ProductMock.purchasableProduct()
+            val stock = StockMock.allocated(productId = product.id)
+            val command = PlaceStockCommand(
+                orderId = orderId,
+                product = product,
+                stock = stock
             )
-        )
-        every { repository.findById(orderId.value) } returns null
+            every { repository.findById(orderId.value) } returns order
 
-        shouldThrow<NotFoundOrderException> {
             service.placeStock(command)
-        }
-    }
 
-    @Test
-    fun `applyCoupon  - 쿠폰 적용`() {
-        val orderId = OrderMock.id()
-        val order = mockk<Order>(relaxed = true)
-        val command = ApplyCouponCommand(
-            orderId = orderId,
-            usedCoupon = CouponMock.usedCoupon()
-        )
-        every { repository.findById(orderId.value) } returns order
-
-        service.applyCoupon(command)
-
-        verify {
-            order.applyCoupon(command.usedCoupon)
-        }
-    }
-
-    @Test
-    fun `applyCoupon - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
-        val orderId = OrderMock.id()
-        every { repository.findById(orderId.value) } returns null
-
-        shouldThrow<NotFoundOrderException> {
-            service.applyCoupon(
-                ApplyCouponCommand(
-                    orderId = orderId,
-                    usedCoupon = CouponMock.usedCoupon(),
+            verify {
+                order.placeStock(
+                    productId = command.product.id,
+                    quantity = command.stock.quantity,
+                    unitPrice = command.product.price
                 )
+            }
+        }
+
+        @Test
+        @DisplayName("주문을 찾을 수 없으면 NotFoundOrderException 예외 발생")
+        fun notFoundOrder() {
+            val orderId = OrderMock.id()
+            val product = ProductMock.purchasableProduct()
+            val stock = StockMock.allocated(productId = product.id)
+            val command = PlaceStockCommand(
+                orderId = orderId,
+                product = product,
+                stock = stock
             )
+            every { repository.findById(orderId.value) } returns null
+
+            shouldThrow<NotFoundOrderException> {
+                service.placeStock(command)
+            }
         }
     }
 
-    @Test
-    fun `pay  - 결제`() {
-        val orderId = OrderMock.id()
-        val order = mockk<Order>(relaxed = true)
-        val payment = PaymentMock.view(
-            orderId = orderId,
-            amount = BigDecimal.ZERO,
-        )
-        val command = PayOrderCommand(
-            payment = payment,
-        )
-        every { order.id() } returns orderId
-        every { repository.findById(orderId.value) } returns order
+    @Nested
+    @DisplayName("쿠폰 적용")
+    inner class ApplyCoupon {
+        @Test
+        @DisplayName("쿠폰을 적용")
+        fun apply() {
+            val orderId = OrderMock.id()
+            val order = mockk<Order>(relaxed = true)
+            val command = ApplyCouponCommand(
+                orderId = orderId,
+                usedCoupon = CouponMock.usedCoupon()
+            )
+            every { repository.findById(orderId.value) } returns order
 
-        service.pay(command)
+            service.applyCoupon(command)
 
-        verify {
-            order.pay()
-            publisher.publishEvent(withArg<OrderCompletedEvent> {
-                assertThat(it.orderId).isEqualTo(orderId)
-            })
+            verify {
+                order.applyCoupon(command.usedCoupon)
+            }
+        }
+
+        @Test
+        @DisplayName("주문을 찾을 수 없으면 NotFoundOrderException 예외가 발생한다")
+        fun notFoundOrder() {
+            val orderId = OrderMock.id()
+            every { repository.findById(orderId.value) } returns null
+
+            shouldThrow<NotFoundOrderException> {
+                service.applyCoupon(
+                    ApplyCouponCommand(
+                        orderId = orderId,
+                        usedCoupon = CouponMock.usedCoupon(),
+                    )
+                )
+            }
         }
     }
 
+    @Nested
+    @DisplayName("주문 결제")
+    inner class PayOrder {
+        @Test
+        @DisplayName("주문을 결제 처리")
+        fun pay() {
+            val orderId = OrderMock.id()
+            val order = mockk<Order>(relaxed = true)
+            val payment = PaymentMock.view(
+                orderId = orderId,
+                amount = BigDecimal.ZERO,
+            )
+            val command = PayOrderCommand(
+                payment = payment,
+            )
+            every { order.id() } returns orderId
+            every { repository.findById(orderId.value) } returns order
 
-    @Test
-    fun `pay - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
-        val orderId = OrderMock.id()
-        val payment = PaymentMock.view(
-            orderId = orderId,
-            amount = BigDecimal.ZERO,
-        )
-        val command = PayOrderCommand(
-            payment = payment,
-        )
-        every { repository.findById(orderId.value) } returns null
-
-        shouldThrow<NotFoundOrderException> {
             service.pay(command)
+
+            verify {
+                order.pay()
+                publisher.publishEvent(withArg<OrderCompletedEvent> {
+                    assertThat(it.orderId).isEqualTo(orderId)
+                })
+            }
+        }
+
+        @Test
+        @DisplayName("주문을 찾을 수 없으면 NotFoundOrderException 예외가 발생한다")
+        fun notFoundOrder() {
+            val orderId = OrderMock.id()
+            val payment = PaymentMock.view(
+                orderId = orderId,
+                amount = BigDecimal.ZERO,
+            )
+            val command = PayOrderCommand(
+                payment = payment,
+            )
+            every { repository.findById(orderId.value) } returns null
+
+            shouldThrow<NotFoundOrderException> {
+                service.pay(command)
+            }
         }
     }
 
-    @Test
-    fun `sendOrderCompleted - 주문 완료 전송`() {
-        val orderId = OrderMock.id()
-        val order = OrderMock.order(id = orderId, status = OrderStatus.COMPLETED)
-        val command = SendOrderCompletedCommand(
-            orderSnapshot = OrderSnapshot.from(order),
-        )
+    @Nested
+    @DisplayName("주문 완료 전송")
+    inner class SendOrderCompleted {
+        @Test
+        @DisplayName("완료된 주문을 전송")
+        fun sendCompletedOrder() {
+            val orderId = OrderMock.id()
+            val order = OrderMock.order(id = orderId, status = OrderStatus.COMPLETED)
+            val command = SendOrderCompletedCommand(
+                orderSnapshot = OrderSnapshot.from(order),
+            )
 
-        service.sendOrderCompleted(command)
-
-        verify {
-            client.send(command.orderSnapshot)
-        }
-    }
-
-    @Test
-    fun `sendOrderCompleted - 완료 되지 않은 주문 에러 - InvalidOrderStatusException 발생`() {
-        val orderId = OrderMock.id()
-        val order = OrderMock.order(id = orderId, status = OrderStatus.READY)
-        val command = SendOrderCompletedCommand(
-            orderSnapshot = OrderSnapshot.from(order),
-        )
-
-        assertThrows<InvalidOrderStatusException> {
             service.sendOrderCompleted(command)
+
+            verify {
+                client.send(command.orderSnapshot)
+            }
         }
 
-        verify(exactly = 0) {
-            client.send(any())
+        @Test
+        @DisplayName("완료되지 않은 주문을 전송하면 InvalidOrderStatusException 예외가 발생한다")
+        fun notCompletedOrder() {
+            val orderId = OrderMock.id()
+            val order = OrderMock.order(id = orderId, status = OrderStatus.READY)
+            val command = SendOrderCompletedCommand(
+                orderSnapshot = OrderSnapshot.from(order),
+            )
+
+            assertThrows<InvalidOrderStatusException> {
+                service.sendOrderCompleted(command)
+            }
+
+            verify(exactly = 0) {
+                client.send(any())
+            }
         }
     }
 
-    @Test
-    fun `get - 주문 조회`() {
-        val orderId = OrderMock.id()
-        every { repository.findById(orderId.value) } returns OrderMock.order(id = orderId)
+    @Nested
+    @DisplayName("주문 조회")
+    inner class GetOrder {
+        @Test
+        @DisplayName("주문 ID로 주문을 조회한다")
+        fun getOrderById() {
+            val orderId = OrderMock.id()
+            every { repository.findById(orderId.value) } returns OrderMock.order(id = orderId)
 
-        val result = service.get(orderId.value)
+            val result = service.get(orderId.value)
 
-        assertThat(result.id).isEqualTo(orderId)
-        verify {
-            repository.findById(orderId.value)
+            assertThat(result.id).isEqualTo(orderId)
+            verify {
+                repository.findById(orderId.value)
+            }
         }
-    }
 
-    @Test
-    fun `get - 주문을 찾을 수 없음 - NotFoundOrderException발생`() {
-        val orderId = OrderMock.id()
-        every { repository.findById(orderId.value) } returns null
+        @Test
+        @DisplayName("주문을 찾을 수 없으면 NotFoundOrderException 예외가 발생한다")
+        fun notFoundOrder() {
+            val orderId = OrderMock.id()
+            every { repository.findById(orderId.value) } returns null
 
-        shouldThrow<NotFoundOrderException> {
-            service.get(orderId.value)
+            shouldThrow<NotFoundOrderException> {
+                service.get(orderId.value)
+            }
         }
     }
 }

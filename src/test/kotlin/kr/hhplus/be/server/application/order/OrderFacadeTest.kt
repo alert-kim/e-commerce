@@ -7,6 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
@@ -17,14 +18,9 @@ import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
-import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductService
-import kr.hhplus.be.server.domain.product.ProductsView
-import kr.hhplus.be.server.domain.stock.StockService
-import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
@@ -53,13 +49,10 @@ class OrderFacadeTest {
     private lateinit var paymentService: PaymentService
 
     @MockK(relaxed = true)
-    private lateinit var productService: ProductService
-
-    @MockK(relaxed = true)
-    private lateinit var stockService: StockService
-
-    @MockK(relaxed = true)
     private lateinit var userService: UserService
+
+    @MockK(relaxed = true)
+    private lateinit var orderProductProcessor: OrderProductProcessor
 
     @Test
     fun `order - 쿠폰이 있는 경우`() {
@@ -75,18 +68,6 @@ class OrderFacadeTest {
                 price = it.unitPrice,
             )
         }
-        val purchasableProduct = products.map {
-            ProductMock.purchasableProduct(
-                id = it.id,
-                price = it.price.value,
-            )
-        }
-        val stocks = command.productsToOrder.map {
-            AllocatedStock(
-                productId = ProductId(it.productId),
-                quantity = it.quantity,
-            )
-        }
         val usedAmount = UsedBalanceAmount(
             balanceId = BalanceMock.id(),
             amount = BalanceAmount.of(command.totalAmount),
@@ -100,8 +81,6 @@ class OrderFacadeTest {
         val order = OrderMock.view(id = orderId, userId = userId, couponId = couponId)
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
-        every { productService.getAllByIds(any()) } returns ProductsView(products)
-        every { stockService.allocate(any<AllocateStocksCommand>()) } returns stocks
         every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns usedCoupon
         every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
         every { paymentService.pay(any<PayCommand>()) } returns payment
@@ -118,20 +97,14 @@ class OrderFacadeTest {
                     userId = userId,
                 )
             )
-            stockService.allocate(
-                AllocateStocksCommand(
-                    command.productsToOrder.associate {
-                        ProductId(it.productId) to it.quantity
-                    }
-                )
-            )
-            orderService.placeStock(
-                PlaceStockCommand.of(
+            command.productsToOrder.forEach {
+                orderProductProcessor.placeOrderProduct(PlaceOrderProductProcessorCommand(
                     orderId = orderId,
-                    products = purchasableProduct,
-                    stocks = stocks,
-                )
-            )
+                    productId = it.productId,
+                    unitPrice = it.unitPrice,
+                    quantity = it.quantity,
+                ))
+            }
             couponService.use(
                 UseCouponCommand(
                     couponId = couponId.value,
@@ -203,8 +176,6 @@ class OrderFacadeTest {
         val order = OrderMock.view(id = orderId, userId = userId, couponId = null)
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
-        every { productService.getAllByIds(any()) } returns ProductsView(products)
-        every { stockService.allocate(any<AllocateStocksCommand>()) } returns stocks
         every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
         every { paymentService.pay(any<PayCommand>()) } returns payment
         every { orderService.get(orderId.value) } returns order
@@ -220,20 +191,7 @@ class OrderFacadeTest {
                     userId = userId,
                 )
             )
-            stockService.allocate(
-                AllocateStocksCommand(
-                    command.productsToOrder.associate {
-                        ProductId(it.productId) to it.quantity
-                    }
-                )
-            )
-            orderService.placeStock(
-                PlaceStockCommand.of(
-                    orderId = orderId,
-                    products = purchasableProduct,
-                    stocks = stocks,
-                )
-            )
+
             balanceService.use(
                 UseBalanceCommand(
                     userId = userId,

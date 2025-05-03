@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
+import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
@@ -11,12 +12,8 @@ import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
-import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
-import kr.hhplus.be.server.domain.product.ProductService
-import kr.hhplus.be.server.domain.stock.StockService
-import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.domain.user.UserView
@@ -28,9 +25,8 @@ class OrderFacade(
     private val couponService: CouponService,
     private val orderService: OrderService,
     private val paymentService: PaymentService,
-    private val productService: ProductService,
     private val userService: UserService,
-    private val stockService: StockService,
+    private val orderProductProcessor: OrderProductProcessor,
 ) {
     fun order(
         command: OrderFacadeCommand,
@@ -38,7 +34,7 @@ class OrderFacade(
         command.validate()
         val userId = getUser(command.userId).id
         val orderId = createOrder(userId)
-        placeProduct(orderId, command)
+        placeStocks(orderId, command)
         applyCoupon(orderId, userId, command)
         pay(orderId)
         return OrderFacadeResult(orderService.get(orderId.value))
@@ -49,26 +45,15 @@ class OrderFacade(
     ): UserView =
         userService.get(userId)
 
-    private fun placeProduct(
+    private fun placeStocks(
         orderId: OrderId,
         command: OrderFacadeCommand,
     ) {
-        val products = productService.getAllByIds(command.orderProductIds())
-
-        val purchasableProducts = command.productsToOrder.map { orderProduct ->
-            products.validatePurchasable(
-                orderProduct.productId,
-                orderProduct.unitPrice,
+        command.productsToOrder.forEach {
+            orderProductProcessor.placeOrderProduct(
+                PlaceOrderProductProcessorCommand.of(it, orderId)
             )
         }
-
-        val stocksAllocated = stockService.allocate(AllocateStocksCommand(
-            purchasableProducts.associate {
-                it.id to command.quantityOfProduct(it.id)
-            }
-        ))
-
-        orderService.placeStock(PlaceStockCommand.of(orderId, purchasableProducts, stocksAllocated))
     }
 
     private fun applyCoupon(
