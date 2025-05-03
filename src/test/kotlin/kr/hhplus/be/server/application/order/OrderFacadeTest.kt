@@ -4,14 +4,13 @@ import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
-import kr.hhplus.be.server.domain.coupon.CouponService
-import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
@@ -19,7 +18,6 @@ import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.testutil.mock.*
@@ -38,9 +36,6 @@ class OrderFacadeTest {
     private lateinit var balanceService: BalanceService
 
     @MockK(relaxed = true)
-    private lateinit var couponService: CouponService
-
-    @MockK(relaxed = true)
     private lateinit var orderService: OrderService
 
     @MockK(relaxed = true)
@@ -51,6 +46,9 @@ class OrderFacadeTest {
 
     @MockK(relaxed = true)
     private lateinit var orderProductProcessor: OrderProductProcessor
+    
+    @MockK(relaxed = true)
+    private lateinit var orderCouponProcessor: OrderCouponProcessor
 
     @Test
     fun `order - 쿠폰이 있는 경우`() {
@@ -79,7 +77,6 @@ class OrderFacadeTest {
         val order = OrderMock.view(id = orderId, userId = userId, couponId = couponId)
         every { userService.get(command.userId) } returns user
         every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
-        every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns usedCoupon
         every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
         every { paymentService.pay(any<PayCommand>()) } returns payment
         every { orderService.get(orderId.value) } returns order
@@ -103,16 +100,11 @@ class OrderFacadeTest {
                     quantity = it.quantity,
                 ))
             }
-            couponService.use(
-                UseCouponCommand(
-                    couponId = couponId.value,
-                    userId = userId
-                )
-            )
-            orderService.applyCoupon(
-                ApplyCouponCommand(
+            orderCouponProcessor.applyCouponToOrder(
+                ApplyCouponProcessorCommand(
                     orderId = orderId,
-                    usedCoupon = usedCoupon,
+                    userId = userId,
+                    couponId = couponId.value
                 )
             )
             orderService.get(orderId.value)
@@ -144,24 +136,6 @@ class OrderFacadeTest {
         val userId = UserId(command.userId)
         val user = UserMock.view(id = userId)
         val orderId = OrderMock.id()
-        val products = command.productsToOrder.map {
-            ProductMock.view(
-                id = ProductId(it.productId),
-                price = it.unitPrice,
-            )
-        }
-        val purchasableProduct = products.map {
-            ProductMock.purchasableProduct(
-                id = it.id,
-                price = it.price.value,
-            )
-        }
-        val stocks = command.productsToOrder.map {
-            AllocatedStock(
-                productId = ProductId(it.productId),
-                quantity = it.quantity,
-            )
-        }
         val usedAmount = UsedBalanceAmount(
             balanceId = BalanceMock.id(),
             amount = BalanceAmount.of(command.totalAmount),
@@ -211,7 +185,6 @@ class OrderFacadeTest {
             orderService.get(orderId.value)
         }
         verify(exactly = 0) {
-            couponService.use(any<UseCouponCommand>())
             orderService.applyCoupon(any<ApplyCouponCommand>())
         }
     }

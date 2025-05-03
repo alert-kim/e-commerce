@@ -22,7 +22,7 @@ class OrderProductProcessor(
     @DistributedLock(
         keyPrefix = "stock",
         identifier = "#command.productId",
-        strategy = LockStrategy.PUB_SUB,
+        strategy = LockStrategy.SIMPLE,
         waitTime = 2_000,
         leaseTime = 1_500,
         timeUnit = MILLISECONDS,

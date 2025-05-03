@@ -1,15 +1,13 @@
 package kr.hhplus.be.server.application.order
 
+import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
-import kr.hhplus.be.server.domain.coupon.CouponService
-import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
@@ -22,11 +20,11 @@ import org.springframework.stereotype.Service
 @Service
 class OrderFacade(
     private val balanceService: BalanceService,
-    private val couponService: CouponService,
     private val orderService: OrderService,
     private val paymentService: PaymentService,
     private val userService: UserService,
     private val orderProductProcessor: OrderProductProcessor,
+    private val orderCouponProcessor: OrderCouponProcessor,
 ) {
     fun order(
         command: OrderFacadeCommand,
@@ -63,12 +61,10 @@ class OrderFacade(
         userId: UserId,
         command: OrderFacadeCommand,
     ) {
-        if (command.couponId != null) {
-            val usedCoupon = couponService.use(
-                UseCouponCommand(command.couponId, userId)
-            )
-            orderService.applyCoupon(ApplyCouponCommand(orderId, usedCoupon))
-        }
+        val couponId = command.couponId ?: return
+        orderCouponProcessor.applyCouponToOrder(
+            ApplyCouponProcessorCommand(orderId, userId, couponId)
+        )
     }
 
     private fun pay(
