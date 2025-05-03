@@ -2,16 +2,12 @@ package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
+import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.application.order.result.OrderFacadeResult
-import kr.hhplus.be.server.domain.balance.BalanceService
-import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
-import kr.hhplus.be.server.domain.order.command.PayOrderCommand
-import kr.hhplus.be.server.domain.payment.PaymentService
-import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.domain.user.UserView
@@ -19,12 +15,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class OrderFacade(
-    private val balanceService: BalanceService,
     private val orderService: OrderService,
-    private val paymentService: PaymentService,
     private val userService: UserService,
     private val orderProductProcessor: OrderProductProcessor,
     private val orderCouponProcessor: OrderCouponProcessor,
+    private val orderPaymentProcessor: OrderPaymentProcessor,
 ) {
     fun order(
         command: OrderFacadeCommand,
@@ -71,23 +66,7 @@ class OrderFacade(
         orderId: OrderId,
     ) {
         val order = orderService.get(orderId.value)
-
-        val usedAmount = balanceService.use(
-            UseBalanceCommand(
-                userId = order.userId,
-                amount = order.totalAmount,
-            )
-        )
-
-        val payment = paymentService.pay(
-            PayCommand(
-                userId = order.userId,
-                orderId = order.id,
-                amount = usedAmount,
-            )
-        )
-
-        orderService.pay(PayOrderCommand(payment))
+        orderPaymentProcessor.processPayment(PayOrderProcessorCommand(orderId, order.userId, order.totalAmount))
     }
 
     private fun createOrder(
