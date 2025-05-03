@@ -94,6 +94,9 @@ class DatabaseTestHelper(
         id: CouponSourceId,
     ): CouponSource? = couponSourceRepository.findById(id.value)
 
+    fun findCoupon(id: CouponId)
+        = couponRepository.findById(id.value)
+
     // order
     fun savedOrder(
         userId: UserId = UserMock.id(),
@@ -164,4 +167,6 @@ class DatabaseTestHelper(
     fun findStock(
         productId: ProductId,
     ) = stockRepository.findByProductId(productId)
+
+
 }

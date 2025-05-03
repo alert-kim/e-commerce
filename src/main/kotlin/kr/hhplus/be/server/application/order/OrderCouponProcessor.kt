@@ -17,6 +17,13 @@ class OrderCouponProcessor(
     private val orderService: OrderService,
 ) {
 
+    @DistributedLock(
+        keyPrefix = "coupon",
+        identifier = "#command.couponId",
+        strategy = LockStrategy.SIMPLE,
+        leaseTime = 2_000,
+        timeUnit = MILLISECONDS,
+    )
     @Transactional
     fun applyCouponToOrder(command: ApplyCouponProcessorCommand) {
         val usedCoupon = couponService.use(
