@@ -1,11 +1,13 @@
 package kr.hhplus.be.server.domain.stock
 
+import io.kotest.assertions.throwables.shouldThrow
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.testutil.mock.StockMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 
 class StockRepositoryTest : RepositoryTest() {
 
@@ -21,6 +23,17 @@ class StockRepositoryTest : RepositoryTest() {
         assertThat(saved.id()).isNotNull
         assertThat(saved.productId).isEqualTo(stock.productId)
         assertThat(saved.quantity).isEqualTo(stock.quantity)
+    }
+
+    @Test
+    fun `save - 같은 productId로 저장하면 유니크 제약조건 위반 예외 발생`() {
+        val productId = ProductMock.id()
+        stockRepository.save(StockMock.stock(id = null, productId = productId))
+
+        val sameProductIdStock = StockMock.stock(id = null, productId = productId)
+        shouldThrow<DataIntegrityViolationException> {
+            stockRepository.save(sameProductIdStock)
+        }
     }
 
     @Test
