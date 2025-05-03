@@ -49,11 +49,13 @@ class OrderFacade(
         orderId: OrderId,
         command: OrderFacadeCommand,
     ) {
-        command.productsToOrder.forEach {
-            orderProductProcessor.placeOrderProduct(
-                PlaceOrderProductProcessorCommand.of(it, orderId)
-            )
-        }
+        command.productsToOrder
+            .sortedBy { it.productId }
+            .forEach {
+                orderProductProcessor.placeOrderProduct(
+                    PlaceOrderProductProcessorCommand.of(it, orderId)
+                )
+            }
     }
 
     private fun applyCoupon(

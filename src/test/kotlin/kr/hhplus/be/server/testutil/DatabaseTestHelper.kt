@@ -1,10 +1,7 @@
 package kr.hhplus.be.server.testutil
 
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
-import kr.hhplus.be.server.domain.coupon.Coupon
-import kr.hhplus.be.server.domain.coupon.CouponSource
-import kr.hhplus.be.server.domain.coupon.CouponSourceId
-import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
+import kr.hhplus.be.server.domain.coupon.*
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.domain.product.Product
@@ -15,15 +12,16 @@ import kr.hhplus.be.server.domain.product.ProductRepositoryTestConfig
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.product.TestProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.TestProductRepository
+import kr.hhplus.be.server.domain.order.Order
+import kr.hhplus.be.server.domain.order.OrderProduct
+import kr.hhplus.be.server.domain.order.OrderStatus
+import kr.hhplus.be.server.domain.order.repository.OrderRepository
+import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserRepositoryTestConfig
-import kr.hhplus.be.server.testutil.mock.BalanceMock
-import kr.hhplus.be.server.testutil.mock.CouponMock
-import kr.hhplus.be.server.testutil.mock.ProductMock
-import kr.hhplus.be.server.testutil.mock.StockMock
-import kr.hhplus.be.server.testutil.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.*
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -39,6 +37,8 @@ class DatabaseTestHelper(
     private val balanceRepository: BalanceRepository,
     private val couponRepository: CouponRepository,
     private val couponSourceRepository: CouponSourceRepository,
+    private val orderRepository: OrderRepository,
+    private val productRepository: ProductRepository,
     private val stockRepository: StockRepository,
 ) {
     // user
@@ -94,6 +94,29 @@ class DatabaseTestHelper(
         id: CouponSourceId,
     ): CouponSource? = couponSourceRepository.findById(id.value)
 
+    // order
+    fun savedOrder(
+        userId: UserId = UserMock.id(),
+        status: OrderStatus = OrderStatus.READY,
+        couponId: CouponId? = null,
+        originalAmount: BigDecimal = BigDecimal.valueOf(2000),
+        discountAmount: BigDecimal = BigDecimal.ZERO,
+        totalAmount: BigDecimal = BigDecimal.valueOf(2000),
+        products: List<OrderProduct> = emptyList(),
+    ): Order =
+        orderRepository.save(
+            OrderMock.order(
+                id = null,
+                userId = UserMock.id(),
+                status = status,
+                couponId = couponId,
+                originalAmount = originalAmount,
+                discountAmount = discountAmount,
+                totalAmount = totalAmount,
+                products = products,
+            )
+        )
+
     // product
     fun savedProduct(
         status: ProductStatus = ProductStatus.ON_SALE,
@@ -133,4 +156,12 @@ class DatabaseTestHelper(
                 quantity = quantity,
             )
         )
+
+    fun findProduct(
+        id: ProductId,
+    ) = productRepository.findById(id.value)
+
+    fun findStock(
+        productId: ProductId,
+    ) = stockRepository.findByProductId(productId)
 }

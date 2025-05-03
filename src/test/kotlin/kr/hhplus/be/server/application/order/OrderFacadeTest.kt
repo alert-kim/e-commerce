@@ -1,12 +1,10 @@
 package kr.hhplus.be.server.application.order
 
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.spyk
-import io.mockk.verify
-import io.mockk.verifyOrder
+import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
@@ -215,6 +213,35 @@ class OrderFacadeTest {
         verify(exactly = 0) {
             couponService.use(any<UseCouponCommand>())
             orderService.applyCoupon(any<ApplyCouponCommand>())
+        }
+    }
+
+    @Test
+    fun `order - placeStocks - productId 기준으로 정렬되어 처리된다`() {
+        val command = mockk<OrderFacadeCommand>(relaxed = true)
+        every { command.productsToOrder } returns listOf(
+            OrderCommandMock.productToOrder(productId = 3L, unitPrice = 10_000.toBigDecimal(), quantity = 2),
+            OrderCommandMock.productToOrder(productId = 1L, unitPrice = 15_000.toBigDecimal(), quantity = 1),
+            OrderCommandMock.productToOrder(productId = 2L, unitPrice = 10_000.toBigDecimal(), quantity = 3)
+        )
+        val orderId = OrderMock.id()
+        val order = OrderMock.view(id = orderId)
+
+        every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
+        every { orderService.get(orderId.value) } returns order
+
+        orderFacade.order(command)
+
+        verifyOrder {
+            orderProductProcessor.placeOrderProduct(withArg<PlaceOrderProductProcessorCommand> {
+                assertThat(it.productId).isEqualTo(1L)
+            })
+            orderProductProcessor.placeOrderProduct(withArg<PlaceOrderProductProcessorCommand> {
+                assertThat(it.productId).isEqualTo(2L)
+            })
+            orderProductProcessor.placeOrderProduct(withArg<PlaceOrderProductProcessorCommand> {
+                assertThat(it.productId).isEqualTo(3L)
+            })
         }
     }
 }
