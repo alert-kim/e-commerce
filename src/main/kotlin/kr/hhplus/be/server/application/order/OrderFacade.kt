@@ -2,9 +2,8 @@ package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
-import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
-import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.application.order.result.GetOrderFacadeEventResult
+import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.coupon.CouponService
@@ -43,12 +42,6 @@ class OrderFacade(
         applyCoupon(orderId, userId, command)
         pay(orderId)
         return OrderFacadeResult(orderService.get(orderId.value))
-    }
-
-    fun sendOrderCompletionData(
-        command: SendOrderFacadeCommand,
-    ) {
-        orderService.sendOrderCompleted(SendOrderCompletedCommand(command.orderSnapshot))
     }
 
     fun consumeEvent(
