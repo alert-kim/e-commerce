@@ -50,6 +50,10 @@ class DatabaseTestHelper(
         amount: BigDecimal = BalanceMock.amount().value,
     ) = balanceRepository.save(BalanceMock.balance(id = null, userId = userId, amount = amount))
 
+    fun findBalance(
+        userId: UserId,
+    ) = balanceRepository.findByUserId(userId)
+
     // coupon
     fun savedCouponSource(
         name: String = "테스트 쿠폰",

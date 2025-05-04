@@ -1,6 +1,8 @@
 package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
+import kr.hhplus.be.server.common.lock.LockStrategy
+import kr.hhplus.be.server.common.lock.annotation.DistributedLock
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.order.OrderService
@@ -9,6 +11,7 @@ import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 @Service
 class OrderPaymentProcessor(
@@ -17,7 +20,14 @@ class OrderPaymentProcessor(
     private val paymentService: PaymentService,
 ) {
 
-
+    @DistributedLock(
+        keyPrefix = "balance",
+        identifier = "#command.userId",
+        strategy = LockStrategy.SPIN,
+        waitTime = 2_000L,
+        leaseTime = 1_500L,
+        timeUnit = MILLISECONDS,
+    )
     @Transactional
     fun processPayment(command: PayOrderProcessorCommand) {
         val usedAmount = balanceService.use(
