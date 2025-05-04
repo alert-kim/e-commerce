@@ -12,7 +12,7 @@ import java.time.Instant
 @Table(
     name = "stocks",
     uniqueConstraints = [
-        UniqueConstraint(name = "stock_product_unq", columnNames = ["productId"])
+        UniqueConstraint(name = "stock_product_unq_product", columnNames = ["productId"])
     ]
 )
 class Stock(

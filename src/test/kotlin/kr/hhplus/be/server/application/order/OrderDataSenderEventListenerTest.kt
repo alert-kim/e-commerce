@@ -8,9 +8,9 @@ import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-class OrderEventListenerTest {
+class OrderDataSenderEventListenerTest {
     private val service: OrderService = mockk<OrderService>(relaxed = true)
-    private val eventListener = OrderEventListener(service)
+    private val eventListener = OrderDataSenderEventListener(service)
 
     @Test
     @DisplayName("주문 완료 이벤트를 수신하면, 주문 완료 데이터 전송")

@@ -10,7 +10,7 @@ import java.time.Instant
 @Entity
 @Table(name = "balances",
     uniqueConstraints = [
-        UniqueConstraint(name = "balance_user_unq", columnNames = ["user_id"]),
+        UniqueConstraint(name = "balance_unq_user", columnNames = ["user_id"]),
     ]
 )
 class Balance (

@@ -2,6 +2,8 @@ package kr.hhplus.be.server.testutil.mock
 
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
+import kr.hhplus.be.server.domain.product.stat.ProductSaleStat
+import kr.hhplus.be.server.domain.product.stat.ProductSaleStatId
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -9,6 +11,8 @@ import java.time.LocalDate
 object ProductMock {
 
     fun id() = ProductId(IdMock.value())
+
+    fun saleStatId() = ProductSaleStatId(IdMock.value())
 
     fun product(
         id: ProductId? = id(),
@@ -49,6 +53,20 @@ object ProductMock {
         description = description,
         price = ProductPrice(price),
         status = status,
+        createdAt = createdAt,
+    )
+
+    fun saleStat(
+        id: ProductSaleStatId? = saleStatId(),
+        productId: ProductId = id(),
+        quantity: Int = 10,
+        date: LocalDate = LocalDate.now(),
+        createdAt: Instant = Instant.now(),
+    ) = ProductSaleStat(
+        id = id?.value,
+        productId = productId,
+        quantity = quantity,
+        date = date,
         createdAt = createdAt,
     )
 

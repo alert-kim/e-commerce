@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
-class OrderEventListener(
+class OrderDataSenderEventListener(
     private val orderService: OrderService,
 ) {
     @TransactionalEventListener
