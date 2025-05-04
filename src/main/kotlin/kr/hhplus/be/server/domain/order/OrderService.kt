@@ -21,6 +21,7 @@ class OrderService(
     private val eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository,
     private val client: OrderSnapshotClient,
 ) {
+    @Transactional
     fun createOrder(
         command: CreateOrderCommand,
     ): OrderId =
@@ -30,6 +31,7 @@ class OrderService(
             )
         ).id()
 
+    @Transactional
     fun placeStock(
         command: PlaceStockCommand,
     ) {
@@ -44,6 +46,7 @@ class OrderService(
         }
     }
 
+    @Transactional
     fun applyCoupon(
         command: ApplyCouponCommand,
     ) {
@@ -52,6 +55,7 @@ class OrderService(
         order.applyCoupon(command.usedCoupon)
     }
 
+    @Transactional
     fun pay(
         command: PayOrderCommand,
     ) {
@@ -68,6 +72,7 @@ class OrderService(
         eventRepository.save(event)
     }
 
+    @Transactional
     fun sendOrderCompleted(
         command: SendOrderCompletedCommand,
     ) {
@@ -75,6 +80,7 @@ class OrderService(
         client.send(snapshot)
     }
 
+    @Transactional
     fun consumeEvent(
         command: ConsumeOrderEventCommand,
     ) {

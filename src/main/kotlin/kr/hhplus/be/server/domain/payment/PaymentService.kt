@@ -3,11 +3,13 @@ package kr.hhplus.be.server.domain.payment
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PaymentService(
     private val repository: PaymentRepository,
 ) {
+    @Transactional
     fun pay(command: PayCommand): PaymentView {
         val payment = Payment.new(
             orderId = command.orderId,

@@ -6,12 +6,15 @@ import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class ProductService(
     private val repository: ProductRepository,
     private val dailySaleRepository: ProductDailySaleRepository,
 ) {
+    @Transactional
     fun aggregateProductDailySales(command: RecordProductDailySalesCommand) {
         command.sales.forEach { newSale ->
             val sale = dailySaleRepository.findById(ProductDailySaleId(

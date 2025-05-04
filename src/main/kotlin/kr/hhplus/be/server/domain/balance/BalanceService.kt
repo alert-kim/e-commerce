@@ -16,15 +16,6 @@ class BalanceService(
     private val repository: BalanceRepository,
     private val recordRepository: BalanceRecordRepository,
 ) {
-    fun get(id: Long): BalanceView =
-        repository.findById(id)
-            ?.let { BalanceView.from(it) }
-            ?: throw NotFoundBalanceException("by id: $id")
-
-    fun getOrNullByUserId(userId: UserId): BalanceView? =
-        repository.findByUserId(userId)
-            ?.let { BalanceView.from(it) }
-
     @Transactional
     fun charge(command: ChargeBalanceCommand): BalanceId {
         val balance = repository.findByUserId(command.userId)
@@ -55,6 +46,15 @@ class BalanceService(
 
         return usedAmount
     }
+
+    fun get(id: Long): BalanceView =
+        repository.findById(id)
+            ?.let { BalanceView.from(it) }
+            ?: throw NotFoundBalanceException("by id: $id")
+
+    fun getOrNullByUserId(userId: UserId): BalanceView? =
+        repository.findByUserId(userId)
+            ?.let { BalanceView.from(it) }
 
     private fun createAndGet(userId: UserId): Balance {
         val balance = Balance.new(userId)

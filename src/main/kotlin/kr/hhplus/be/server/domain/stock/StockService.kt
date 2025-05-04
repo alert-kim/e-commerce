@@ -12,11 +12,6 @@ import org.springframework.transaction.annotation.Transactional
 class StockService(
     private val stockRepository: StockRepository
 ) {
-    fun getStocks(productIds: List<ProductId>): List<StockView> {
-        val stocks = stockRepository.findAllByProductIds(productIds)
-        return stocks.map { StockView.from(it) }
-    }
-
     @Transactional
     fun allocate(command: AllocateStocksCommand): List<AllocatedStock> {
         val stocksByProductId = stockRepository.findAllByProductIds(command.productIds).associateBy { it.productId }
@@ -26,4 +21,10 @@ class StockService(
             stock.allocate(quantity)
         }
     }
+
+    fun getStocks(productIds: List<ProductId>): List<StockView> {
+        val stocks = stockRepository.findAllByProductIds(productIds)
+        return stocks.map { StockView.from(it) }
+    }
+
 }
