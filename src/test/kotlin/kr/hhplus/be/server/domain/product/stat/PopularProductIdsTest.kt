@@ -37,16 +37,16 @@ class PopularProductIdsTest {
     }
 
     @Test
-    fun `인기 상품 조회의 시작 날짜는 KST기준 2일 전이다`() {
+    fun `인기 상품 조회의 시작 날짜는 KST기준 3일 전이다`() {
         val result = PopularProductsIds.getStartDay()
 
-        Assertions.assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId).minusDays(2))
+        Assertions.assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId).minusDays(3))
     }
 
     @Test
-    fun `인기 상품 조회의 종료 날짜는 KST기준 오늘이다`() {
+    fun `인기 상품 조회의 종료 날짜는 KST기준 1dlf wjs이다`() {
         val result = PopularProductsIds.getEndDay()
 
-        Assertions.assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId))
+        Assertions.assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId).minusDays(1))
     }
 }

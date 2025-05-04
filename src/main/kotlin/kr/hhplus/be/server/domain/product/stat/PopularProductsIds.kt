@@ -15,7 +15,7 @@ data class PopularProductsIds(
 
     companion object {
         const val MAX_SIZE = 5
-        fun getStartDay(): LocalDate = LocalDate.now(TimeZone.KSTId).minusDays(2)
-        fun getEndDay(): LocalDate = LocalDate.now(TimeZone.KSTId)
+        fun getStartDay(): LocalDate = LocalDate.now(TimeZone.KSTId).minusDays(3)
+        fun getEndDay(): LocalDate = LocalDate.now(TimeZone.KSTId).minusDays(1)
     }
 }
