@@ -8,14 +8,13 @@ import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.domain.product.Product
-import kr.hhplus.be.server.domain.product.ProductDailySale
-import kr.hhplus.be.server.domain.product.ProductDailySaleRepositoryTestConfig
+import kr.hhplus.be.server.domain.product.ProductDailySaleStat
+import kr.hhplus.be.server.domain.product.ProductDailySaleStatRepositoryTestConfig
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductRepositoryTestConfig
 import kr.hhplus.be.server.domain.product.ProductStatus
-import kr.hhplus.be.server.domain.product.TestProductDailySaleRepository
+import kr.hhplus.be.server.domain.product.TestProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.TestProductRepository
-import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
 import kr.hhplus.be.server.domain.user.UserId
@@ -32,11 +31,11 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Component
-@Import(UserRepositoryTestConfig::class, ProductRepositoryTestConfig::class, ProductDailySaleRepositoryTestConfig::class)
+@Import(UserRepositoryTestConfig::class, ProductRepositoryTestConfig::class, ProductDailySaleStatRepositoryTestConfig::class)
 class DatabaseTestHelper(
     private val testUserRepository: TestUserRepository,
     private val testProductRepository: TestProductRepository,
-    private val testProductDailySaleRepository: TestProductDailySaleRepository,
+    private val testProductDailySaleStatRepository: TestProductDailySaleStatRepository,
     private val balanceRepository: BalanceRepository,
     private val couponRepository: CouponRepository,
     private val couponSourceRepository: CouponSourceRepository,
@@ -117,8 +116,8 @@ class DatabaseTestHelper(
         productId: ProductId,
         date: LocalDate,
         quantity: Int,
-    ): ProductDailySale =
-        testProductDailySaleRepository.save(
+    ): ProductDailySaleStat =
+        testProductDailySaleStatRepository.save(
             ProductMock.dailySale(
                 productId = productId,
                 date = date,

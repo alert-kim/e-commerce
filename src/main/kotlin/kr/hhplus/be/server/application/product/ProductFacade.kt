@@ -30,10 +30,10 @@ class ProductFacade(
     }
 
     fun getPopularProducts(): GetProductsFacadeResult.Listed {
-        val popularProducts = productService.getPopularProducts()
-        val productIds = popularProducts.products.map { it.id }
-        val stocks = stockService.getStocks(productIds)
+        val popularProductIds = productSaleStatService.getPopularProductIds().value
+        val products = productService.getAllByIds(popularProductIds.map { it.value })
+        val stocks = stockService.getStocks(popularProductIds)
 
-        return GetProductsFacadeResult.Listed.from(popularProducts.products, stocks)
+        return GetProductsFacadeResult.Listed.from(products.value, stocks)
     }
 }

@@ -1,13 +1,18 @@
 package kr.hhplus.be.server.domain.product.stat
 
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.next
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.OrderSnapshot
-import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductSaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
 import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -16,7 +21,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class ProductSaleStatServiceTest {
-    val dailyStatRepository = mockk<ProductDailySaleRepository>(relaxed = true)
+    val dailyStatRepository = mockk<ProductDailySaleStatRepository>(relaxed = true)
     val statRepository = mockk<ProductSaleStatRepository>(relaxed = true)
     val service = ProductSaleStatService(statRepository, dailyStatRepository)
 
@@ -63,6 +68,29 @@ class ProductSaleStatServiceTest {
             verify {
                 dailyStatRepository.aggregateDailyStatsByDate(today)
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("getPopularProductIds")
+    inner class GetPopularProductIds {
+        @Test
+        fun `getPopularProducts - 인기 상품 조회`() {
+            val productIds = List(Arb.int(1..PopularProductsIds.MAX_SIZE).next()) {
+                ProductMock.id()
+            }
+            val sales = productIds.map { ProductMock.dailySale(productId = it) }
+            every {
+                dailyStatRepository.findTopNProductsByQuantity(
+                    startDate = PopularProductsIds.getStartDay(),
+                    endDate = PopularProductsIds.getEndDay(),
+                    limit = PopularProductsIds.MAX_SIZE,
+                )
+            } returns sales
+
+            val result = service.getPopularProductIds()
+
+            assertThat(result.value).isEqualTo(productIds)
         }
     }
 }

@@ -1,9 +1,6 @@
 package kr.hhplus.be.server.domain.product
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.next
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -11,7 +8,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -29,12 +25,9 @@ class ProductServiceTest {
     @MockK(relaxed = true)
     private lateinit var repository: ProductRepository
 
-    @MockK(relaxed = true)
-    private lateinit var saleRepository: ProductDailySaleRepository
-
     @BeforeEach
     fun setUp() {
-        clearMocks(repository, saleRepository)
+        clearMocks(repository)
     }
 
     @Test
@@ -116,29 +109,5 @@ class ProductServiceTest {
         val result = service.getAllByIds(ids)
 
         assertThat(result.value).isEmpty()
-    }
-
-    @Test
-    fun `getPopularProducts - 인기 상품 조회`() {
-        val products = List(Arb.int(1..PopularProducts.MAX_SIZE).next()) {
-            ProductMock.product()
-        }
-        val sales = products.map { ProductMock.dailySale(productId = it.id()) }
-        val productsIds = products.map { it.id().value }
-        every {
-            saleRepository.findTopNProductsByQuantity(
-                startDate = PopularProducts.getStartDay(),
-                endDate = PopularProducts.getEndDay(),
-                limit = PopularProducts.MAX_SIZE,
-            )
-        } returns sales
-        every { repository.findAllByIds(productsIds) } returns products
-
-        val result = service.getPopularProducts()
-
-        assertThat(result.products).hasSize(products.size)
-        result.products.forEachIndexed { index, product ->
-            assertThat(product.id).isEqualTo(products[index].id())
-        }
     }
 }

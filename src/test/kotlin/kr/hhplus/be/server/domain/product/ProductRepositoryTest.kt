@@ -10,7 +10,6 @@ import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageRequest
-import org.springframework.test.annotation.DirtiesContext
 import java.time.Instant
 
 @Import(ProductRepositoryTestConfig::class)

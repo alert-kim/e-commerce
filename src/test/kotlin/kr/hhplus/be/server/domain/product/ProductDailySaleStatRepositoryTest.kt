@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.product
 
-import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStat
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
 import kr.hhplus.be.server.testutil.mock.ProductMock
@@ -16,14 +16,14 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Isolated
-@Import(ProductDailySaleRepositoryTestConfig::class)
+@Import(ProductDailySaleStatRepositoryTestConfig::class)
 @SpringBootTest
-class ProductDailySaleRepositoryTest {
+class ProductDailySaleStatRepositoryTest {
     @Autowired
-    lateinit var repository: ProductDailySaleRepository
+    lateinit var repository: ProductDailySaleStatRepository
 
     @Autowired
-    lateinit var testRepository: TestProductDailySaleRepository
+    lateinit var testRepository: TestProductDailySaleStatRepository
 
     @Autowired
     lateinit var productSaleStatRepository: ProductSaleStatRepository
@@ -64,8 +64,8 @@ class ProductDailySaleRepositoryTest {
     fun aggregateDailyStatsByDate_updatesExistingStats() {
         val today = LocalDate.now()
         val productId = ProductMock.id()
-        val stat = ProductDailySale(
-            id = ProductDailySaleId(today, productId),
+        val stat = ProductDailySaleStat(
+            id = ProductDailySaleStatId(today, productId),
             quantity = 1,
             createdAt = Instant.now(),
             updatedAt = Instant.now(),

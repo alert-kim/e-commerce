@@ -7,10 +7,10 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Entity
-@Table(name = "product_daily_sales")
-class ProductDailySale(
+@Table(name = "product_daily_sale_stats")
+class ProductDailySaleStat(
     @EmbeddedId
-    val id: ProductDailySaleId,
+    val id: ProductDailySaleStatId,
     val createdAt: Instant,
     quantity: Int,
     updatedAt: Instant,

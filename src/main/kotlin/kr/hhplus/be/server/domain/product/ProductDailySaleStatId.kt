@@ -4,7 +4,7 @@ import jakarta.persistence.Embeddable
 import java.time.LocalDate
 
 @Embeddable
-data class ProductDailySaleId(
+data class ProductDailySaleStatId(
     val date: LocalDate,
     val productId: ProductId
 )

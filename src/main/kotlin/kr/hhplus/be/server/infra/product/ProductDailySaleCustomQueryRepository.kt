@@ -9,7 +9,7 @@ class ProductDailySaleCustomQueryRepository(
 ) {
     fun aggregateDailyStatsByDate(date: LocalDate): Int {
         val sql = """
-            INSERT INTO product_daily_sales (date, product_id, quantity, created_at, updated_at)
+            INSERT INTO product_daily_sale_stats (date, product_id, quantity, created_at, updated_at)
             SELECT 
                 p.date,
                 p.product_id,

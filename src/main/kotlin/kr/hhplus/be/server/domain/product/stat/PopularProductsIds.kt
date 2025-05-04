@@ -1,13 +1,14 @@
-package kr.hhplus.be.server.domain.product
+package kr.hhplus.be.server.domain.product.stat
 
+import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.util.TimeZone
 import java.time.LocalDate
 
-data class PopularProducts(
-    val products: List<Product>,
+data class PopularProductsIds(
+    val value: List<ProductId>,
 ) {
     init {
-        require(products.size <= MAX_SIZE) {
+        require(value.size <= MAX_SIZE) {
             "인기 상품은 ${MAX_SIZE}개 이하여야 합니다."
         }
     }

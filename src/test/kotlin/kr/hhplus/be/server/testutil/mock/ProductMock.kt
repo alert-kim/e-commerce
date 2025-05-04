@@ -76,8 +76,8 @@ object ProductMock {
         quantity: Int = 10,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
-    ) = ProductDailySale(
-        id = ProductDailySaleId(date, productId),
+    ) = ProductDailySaleStat(
+        id = ProductDailySaleStatId(date, productId),
         createdAt = createdAt,
         quantity = quantity,
         updatedAt = updatedAt,

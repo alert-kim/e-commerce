@@ -1,21 +1,20 @@
 package kr.hhplus.be.server.infra.product
 
-import kr.hhplus.be.server.domain.product.ProductDailySale
-import kr.hhplus.be.server.domain.product.ProductDailySaleId
-import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
+import kr.hhplus.be.server.domain.product.ProductDailySaleStat
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
 
 @Repository
-class ProductDailySaleRepositoryImpl(
-    private val jpaRepository: ProductDailySaleJpaRepository,
+class ProductDailySaleStatRepositoryImpl(
+    private val jpaRepository: ProductDailySaleStatJpaRepository,
     private val customQueryRepository: ProductDailySaleCustomQueryRepository,
-) : ProductDailySaleRepository {
+) : ProductDailySaleStatRepository {
     override fun findTopNProductsByQuantity(
         startDate: LocalDate,
         endDate: LocalDate,
         limit: Int
-    ): List<ProductDailySale> =
+    ): List<ProductDailySaleStat> =
         jpaRepository.findAllByDateBetweenOrderByQuantityDesc(startDate, endDate).take(limit)
 
     override fun aggregateDailyStatsByDate(date: LocalDate) {

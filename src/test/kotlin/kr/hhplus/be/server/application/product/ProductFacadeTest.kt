@@ -4,10 +4,11 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.*
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.PopularProductsView
+import kr.hhplus.be.server.domain.product.stat.PopularProductsIds
 import kr.hhplus.be.server.domain.product.ProductService
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.product.ProductView
+import kr.hhplus.be.server.domain.product.ProductsView
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStatService
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
 import kr.hhplus.be.server.domain.stock.StockService
@@ -119,15 +120,11 @@ class ProductFacadeTest {
         val products = List(2) {
             ProductMock.view()
         }
-        val popularProducts = PopularProductsView(
-            products = products,
-        )
+        val popularProductIds = products.map { it.id }
         val stocks = products.map { StockMock.view(productId = it.id) }
-
-        every { productService.getPopularProducts() } returns popularProducts
-        every {
-            stockService.getStocks(any())
-        } returns stocks
+        every { productSaleStatService.getPopularProductIds() } returns PopularProductsIds(popularProductIds)
+        every { productService.getAllByIds(popularProductIds.map { it.value }) } returns ProductsView(products)
+        every { stockService.getStocks(any()) } returns stocks
 
         val result = facade.getPopularProducts()
 
@@ -143,7 +140,7 @@ class ProductFacadeTest {
 
     @Test
     fun `getPopularProducts - 인기 상품이 없는 경우 빈 페이지 반환`() {
-        every { productService.getPopularProducts() } returns PopularProductsView(emptyList<ProductView>())
+        every { productSaleStatService.getPopularProductIds() } returns PopularProductsIds(emptyList())
 
         val result = facade.getPopularProducts()
 

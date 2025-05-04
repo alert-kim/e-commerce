@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.product
+package kr.hhplus.be.server.domain.product.stat
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
@@ -7,46 +7,46 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.util.TimeZone
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class PopularProductTest {
+class PopularProductIdsTest {
 
     @Test
     fun `인기 상품은 정해진 수보다 같거나 작아야 한다`() {
-        val size = Arb.int(0..PopularProducts.MAX_SIZE).next()
-        val porducts = List(size) {
-            ProductMock.product()
+        val size = Arb.Companion.int(0..PopularProductsIds.Companion.MAX_SIZE).next()
+        val productIds = List(size) {
+            ProductMock.id()
         }
 
         shouldNotThrowAny {
-            PopularProducts(products = porducts)
+            PopularProductsIds(value = productIds)
         }
     }
 
     @Test
     fun `인기 상품 조회의 개수가 맞지 않다면 예외가 발생한다`() {
-        val porducts = List(PopularProducts.MAX_SIZE + 1) {
-            ProductMock.product()
+        val productIds = List(PopularProductsIds.Companion.MAX_SIZE + 1) {
+            ProductMock.id()
         }
 
         shouldThrow<IllegalArgumentException> {
-            PopularProducts(products = porducts)
+            PopularProductsIds(value = productIds)
         }
     }
 
     @Test
     fun `인기 상품 조회의 시작 날짜는 KST기준 2일 전이다`() {
-        val result = PopularProducts.getStartDay()
+        val result = PopularProductsIds.getStartDay()
 
-        assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId).minusDays(2))
+        Assertions.assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId).minusDays(2))
     }
 
     @Test
     fun `인기 상품 조회의 종료 날짜는 KST기준 오늘이다`() {
-        val result = PopularProducts.getEndDay()
+        val result = PopularProductsIds.getEndDay()
 
-        assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId))
+        Assertions.assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId))
     }
 }

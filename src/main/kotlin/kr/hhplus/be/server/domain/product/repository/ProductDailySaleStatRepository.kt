@@ -1,15 +1,14 @@
 package kr.hhplus.be.server.domain.product.repository
 
-import kr.hhplus.be.server.domain.product.ProductDailySale
-import kr.hhplus.be.server.domain.product.ProductDailySaleId
+import kr.hhplus.be.server.domain.product.ProductDailySaleStat
 import java.time.LocalDate
 
-interface ProductDailySaleRepository {
+interface ProductDailySaleStatRepository {
     fun findTopNProductsByQuantity(
         startDate: LocalDate,
         endDate: LocalDate,
         limit: Int,
-    ): List<ProductDailySale>
+    ): List<ProductDailySaleStat>
 
     fun aggregateDailyStatsByDate(date: LocalDate)
 }

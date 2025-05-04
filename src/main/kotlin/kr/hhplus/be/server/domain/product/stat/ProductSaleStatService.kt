@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.product.stat
 
 import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductSaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
@@ -9,9 +9,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class ProductSaleStatService(
     private val statRepository: ProductSaleStatRepository,
-    private val dailyStatRepository: ProductDailySaleRepository,
+    private val dailyStatRepository: ProductDailySaleStatRepository,
 ) {
     @Transactional
     fun createStats(command: CreateProductSaleStatsCommand) {
@@ -30,4 +31,12 @@ class ProductSaleStatService(
     fun createDailyStats(command: CreateProductDailySaleStatsCommand) {
         dailyStatRepository.aggregateDailyStatsByDate(command.date)
     }
+
+    fun getPopularProductIds(): PopularProductsIds =
+        dailyStatRepository.findTopNProductsByQuantity(
+            startDate = PopularProductsIds.getStartDay(),
+            endDate = PopularProductsIds.getEndDay(),
+            limit = PopularProductsIds.MAX_SIZE,
+        ).map { it.productId }.let { PopularProductsIds(it) }
+
 }
