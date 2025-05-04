@@ -12,6 +12,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
+import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.ApplicationEventPublisher
 import java.math.BigDecimal
 
 @ExtendWith(MockKExtension::class)
@@ -49,6 +51,9 @@ class OrderServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository
+
+    @MockK(relaxed = true)
+    private lateinit var publisher: ApplicationEventPublisher
 
     @MockK(relaxed = true)
     private lateinit var client: OrderSnapshotClient
@@ -187,9 +192,8 @@ class OrderServiceTest {
 
         verify {
             order.pay()
-            eventRepository.save(withArg {
+            publisher.publishEvent(withArg<OrderCompletedEvent> {
                 assertThat(it.orderId).isEqualTo(orderId)
-                assertThat(it.type).isEqualTo(OrderEventType.COMPLETED)
             })
         }
     }

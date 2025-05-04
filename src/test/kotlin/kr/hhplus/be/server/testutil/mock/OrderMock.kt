@@ -2,7 +2,8 @@ package kr.hhplus.be.server.testutil.mock
 
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
-import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
+import kr.hhplus.be.server.domain.order.event.OrderJpaEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
 import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
 import kr.hhplus.be.server.domain.order.event.OrderEventId
@@ -98,6 +99,16 @@ object OrderMock {
         updatedAt = updatedAt,
     )
 
+    fun completedEvent(
+        orderId: OrderId = id(),
+        snapshot: OrderSnapshot = OrderSnapshot.from(order()),
+        createdAt: Instant = Instant.now(),
+    ): OrderCompletedEvent = OrderCompletedEvent(
+        orderId = orderId,
+        snapshot = snapshot,
+        createdAt = createdAt,
+    )
+
     fun eventId(): OrderEventId = OrderEventId(IdMock.value())
 
     fun event(
@@ -106,7 +117,7 @@ object OrderMock {
         type: OrderEventType = OrderEventType.COMPLETED,
         snapshot: OrderSnapshot = OrderSnapshot.from(order()),
         createdAt: Instant = Instant.now(),
-    ): OrderEvent = OrderEvent(
+    ): OrderJpaEvent = OrderJpaEvent(
         id = id?.value,
         orderId = orderId,
         type = type,

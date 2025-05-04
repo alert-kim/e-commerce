@@ -1,11 +1,11 @@
 package kr.hhplus.be.server.testutil.assertion
 
-import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderJpaEvent
 import org.assertj.core.api.AbstractAssert
 
-class OrderEventAssert(actual: OrderEvent?) : AbstractAssert<OrderEventAssert, OrderEvent>(actual, OrderEventAssert::class.java) {
+class OrderEventAssert(actual: OrderJpaEvent?) : AbstractAssert<OrderEventAssert, OrderJpaEvent>(actual, OrderEventAssert::class.java) {
 
-    fun isEqualTo(expected: OrderEvent): OrderEventAssert {
+    fun isEqualTo(expected: OrderJpaEvent): OrderEventAssert {
         when {
             actual == null -> failWithMessage("OrderEvent is null")
             actual.id().value != expected.id().value -> failWithMessage("OrderEvent id is not equal to expected")
@@ -18,7 +18,7 @@ class OrderEventAssert(actual: OrderEvent?) : AbstractAssert<OrderEventAssert, O
     }
 
     companion object {
-        fun assertOrderEvent(actual: OrderEvent?): OrderEventAssert {
+        fun assertOrderEvent(actual: OrderJpaEvent?): OrderEventAssert {
             return OrderEventAssert(actual)
         }
     }

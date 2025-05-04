@@ -1,14 +1,11 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderEvent
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
-import kr.hhplus.be.server.domain.order.event.OrderEventType
+import kr.hhplus.be.server.domain.order.event.*
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -20,6 +17,7 @@ class OrderService(
     private val eventRepository: OrderEventRepository,
     private val eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository,
     private val client: OrderSnapshotClient,
+    private val publisher: ApplicationEventPublisher,
 ) {
     @Transactional
     fun createOrder(
@@ -63,13 +61,12 @@ class OrderService(
         val order = doGet(payment.orderId.value)
 
         order.pay()
-        val event = OrderEvent(
+        val event = OrderCompletedEvent(
             orderId = order.id(),
-            type = OrderEventType.COMPLETED,
             snapshot = OrderSnapshot.from(order),
             createdAt = Instant.now(),
         )
-        eventRepository.save(event)
+        publisher.publishEvent(event)
     }
 
     @Transactional
@@ -84,7 +81,8 @@ class OrderService(
     fun consumeEvent(
         command: ConsumeOrderEventCommand,
     ) {
-        val offset = eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(command.consumerId, command.event.type))
+        val offset =
+            eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(command.consumerId, command.event.type))
         when (offset) {
             null -> eventConsumerOffsetRepository.save(
                 OrderEventConsumerOffset.new(
@@ -107,7 +105,7 @@ class OrderService(
     fun getAllEventsNotConsumedInOrder(
         consumerId: String,
         eventType: OrderEventType,
-    ): List<OrderEvent> {
+    ): List<OrderJpaEvent> {
         val offset = eventConsumerOffsetRepository.find(
             OrderEventConsumerOffsetId(
                 consumerId = consumerId,

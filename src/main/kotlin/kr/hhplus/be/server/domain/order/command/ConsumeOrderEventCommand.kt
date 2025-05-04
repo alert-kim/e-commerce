@@ -1,15 +1,15 @@
 package kr.hhplus.be.server.domain.order.command
 
-import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderJpaEvent
 
 data class ConsumeOrderEventCommand(
     val consumerId: String,
-    val event: OrderEvent,
+    val event: OrderJpaEvent,
 ) {
     companion object {
         fun of(
             consumerId: String,
-            events: List<OrderEvent>,
+            events: List<OrderJpaEvent>,
         ): ConsumeOrderEventCommand {
             require(events.isNotEmpty()) {
                 "이벤트가 존재하지 않습니다."

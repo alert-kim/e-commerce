@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.infra.order
 
-import kr.hhplus.be.server.domain.order.event.OrderEvent
+import kr.hhplus.be.server.domain.order.event.OrderJpaEvent
 import kr.hhplus.be.server.domain.order.event.OrderEventId
 import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import org.springframework.stereotype.Repository
@@ -9,12 +9,12 @@ import org.springframework.stereotype.Repository
 class OrderEventRepositoryImpl(
     private val jpaRepository: OrderEventJpaRepository
 ) : OrderEventRepository {
-    override fun save(event: OrderEvent): OrderEvent =
+    override fun save(event: OrderJpaEvent): OrderJpaEvent =
         jpaRepository.save(event)
 
-    override fun findAllByIdAsc(): List<OrderEvent> =
+    override fun findAllByIdAsc(): List<OrderJpaEvent> =
         jpaRepository.findAllByIdAsc()
 
-    override fun findAllByIdGreaterThanOrderByIdAsc(id: OrderEventId): List<OrderEvent> =
+    override fun findAllByIdGreaterThanOrderByIdAsc(id: OrderEventId): List<OrderJpaEvent> =
         jpaRepository.findAllByIdGreaterThanOrderByIdAsc(id.value)
 }
