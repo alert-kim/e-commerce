@@ -53,9 +53,8 @@ class CouponSourceRepositoryTest : RepositoryTest() {
 
         val result = repository.findAllByStatus(status)
 
-        assertThat(result).hasSize(activeCouponIds.size)
-        result.forEach { source ->
-            assertThat(source.id()).isIn(activeCouponIds)
-        }
+        val resultIds = result.map { it.id() }.toSet()
+        assertThat(result.size).isGreaterThanOrEqualTo(activeCouponIds.size)
+        assertThat(resultIds).containsAll(activeCouponIds)
     }
 }

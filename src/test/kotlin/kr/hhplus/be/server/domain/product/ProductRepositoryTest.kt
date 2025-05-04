@@ -4,13 +4,17 @@ import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.testutil.assertion.ProductAssert.Companion.assertProduct
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageRequest
+import org.springframework.test.annotation.DirtiesContext
 import java.time.Instant
 
 @Import(ProductRepositoryTestConfig::class)
+@Isolated
 class ProductRepositoryTest : RepositoryTest() {
 
     @Autowired
@@ -18,6 +22,11 @@ class ProductRepositoryTest : RepositoryTest() {
 
     @Autowired
     private lateinit var testProductRepository: TestProductRepository
+
+    @BeforeEach
+    fun setup() {
+        testProductRepository.deleteAll()
+    }
 
     @Test
     fun `findAllByIds - 해당 상품 반환`() {

@@ -4,13 +4,26 @@ import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 import java.time.LocalDate
 
+@Isolated
+@Import(ProductDailySaleRepositoryTestConfig::class)
 class ProductDailySaleRepositoryTest : RepositoryTest() {
     @Autowired
     lateinit var repository: ProductDailySaleRepository
+
+    @Autowired
+    lateinit var testRepository: TestProductDailySaleRepository
+
+    @BeforeEach
+    fun setup() {
+        testRepository.deleteAll()
+    }
 
     @Test
     fun `save - 판매 데이터 저장`() {

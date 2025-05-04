@@ -18,4 +18,8 @@ class TestProductRepository(
     fun save(product: Product): Product {
         return productJpaRepository.save(product)
     }
+
+    fun deleteAll() {
+        productJpaRepository.deleteAll()
+    }
 }
