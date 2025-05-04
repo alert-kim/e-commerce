@@ -8,7 +8,8 @@ import java.time.LocalDate
 
 @Repository
 class ProductDailySaleRepositoryImpl(
-    private val jpaRepository: ProductDailySaleJpaRepository
+    private val jpaRepository: ProductDailySaleJpaRepository,
+    private val customQueryRepository: ProductDailySaleCustomQueryRepository,
 ) : ProductDailySaleRepository {
     override fun findById(id: ProductDailySaleId): ProductDailySale? {
         return jpaRepository.findById(id).orElse(null)
@@ -23,4 +24,8 @@ class ProductDailySaleRepositoryImpl(
 
     override fun save(sale: ProductDailySale) =
         jpaRepository.save(sale)
+
+    override fun aggregateDailyStatsByDate(date: LocalDate) {
+        customQueryRepository.aggregateDailyStatsByDate(date)
+    }
 }

@@ -3,6 +3,8 @@ package kr.hhplus.be.server.domain.product.stat
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.OrderSnapshot
+import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
+import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductSaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
 import kr.hhplus.be.server.testutil.mock.OrderMock
@@ -14,11 +16,12 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class ProductSaleStatServiceTest {
-    val repository = mockk<ProductSaleStatRepository>(relaxed = true)
-    val service = ProductSaleStatService(repository)
+    val dailyStatRepository = mockk<ProductDailySaleRepository>(relaxed = true)
+    val statRepository = mockk<ProductSaleStatRepository>(relaxed = true)
+    val service = ProductSaleStatService(statRepository, dailyStatRepository)
 
     @Nested
-    @DisplayName("createAndSaveStat")
+    @DisplayName("createStat")
     inner class CreateStats {
 
         @Test
@@ -35,12 +38,30 @@ class ProductSaleStatServiceTest {
 
             verify {
                 orderProducts.forEach {
-                    repository.save(withArg { stat ->
+                    statRepository.save(withArg { stat ->
                         assertThat(stat.productId).isEqualTo(it.productId)
                         assertThat(stat.quantity).isEqualTo(it.quantity)
                         assertThat(stat.date).isEqualTo(today)
                     })
                 }
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("createDailyStat")
+    inner class CreateDailyStats {
+
+        @Test
+        @DisplayName("일간 판매 데이터 집계")
+        fun create() {
+            val today = LocalDate.now()
+
+            val command = CreateProductDailySaleStatsCommand(today)
+            service.createDailyStats(command)
+
+            verify {
+                dailyStatRepository.aggregateDailyStatsByDate(today)
             }
         }
     }

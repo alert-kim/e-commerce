@@ -14,4 +14,6 @@ interface ProductDailySaleRepository {
     ): List<ProductDailySale>
 
     fun save(sale: ProductDailySale): ProductDailySale
+
+    fun aggregateDailyStatsByDate(date: LocalDate)
 }

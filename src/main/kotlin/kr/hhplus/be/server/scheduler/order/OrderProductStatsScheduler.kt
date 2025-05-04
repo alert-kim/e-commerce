@@ -4,9 +4,11 @@ import kr.hhplus.be.server.application.order.OrderFacade
 import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
+import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFromOrderEventFacadeCommand
 import kr.hhplus.be.server.domain.order.event.OrderEventType
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class OrderProductStatsScheduler(
@@ -19,8 +21,8 @@ class OrderProductStatsScheduler(
         val orderProducts = events.flatMap { it.snapshot.orderProducts }
 
         productFacade.aggregate(
-            AggregateProductDailySalesFacadeCommand(
-               orderProducts
+            AggregateProductDailySalesFromOrderEventFacadeCommand(
+                orderProducts
             )
         )
 
@@ -28,6 +30,16 @@ class OrderProductStatsScheduler(
             ConsumeOrderEventsFacadeCommand(
                 consumerId = SCHEDULER_ID,
                 events = events
+            )
+        )
+    }
+
+    @Scheduled(cron = "0 10 0 * * *")
+    fun aggregateDaily() {
+        val today = LocalDate.now()
+        productFacade.aggregate(
+            AggregateProductDailySalesFacadeCommand(
+                date = today,
             )
         )
     }

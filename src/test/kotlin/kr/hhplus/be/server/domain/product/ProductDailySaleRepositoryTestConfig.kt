@@ -17,6 +17,10 @@ class ProductDailySaleRepositoryTestConfig {
 class TestProductDailySaleRepository(
     private val jpaRepository: ProductDailySaleJpaRepository
 ) {
+    fun save(sale: ProductDailySale): ProductDailySale {
+        return jpaRepository.save(sale)
+    }
+
     fun deleteAll() {
         jpaRepository.deleteAll()
     }

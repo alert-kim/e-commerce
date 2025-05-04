@@ -4,14 +4,15 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
+import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFromOrderEventFacadeCommand
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
+import kr.hhplus.be.server.domain.product.stat.ProductSaleStatService
+import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
 import kr.hhplus.be.server.domain.stock.StockService
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.ProductMock
@@ -20,28 +21,20 @@ import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import java.time.LocalDate
 
-@ExtendWith(MockKExtension::class)
 class ProductFacadeTest {
-
-    @InjectMockKs
-    private lateinit var facade: ProductFacade
-
-    @MockK(relaxed = true)
-    private lateinit var productsService: ProductService
-
-    @MockK(relaxed = true)
-    private lateinit var stockService: StockService
-
+    private val productService = mockk<ProductService>(relaxed = true)
+    private val stockService = mockk<StockService>(relaxed = true)
+    private val productSaleStatService = mockk<ProductSaleStatService>(relaxed = true)
+    private val facade = ProductFacade(productService, productSaleStatService, stockService)
 
     @BeforeEach
     fun setUp() {
-        clearMocks(productsService, stockService)
+        clearMocks(productService, stockService, productSaleStatService)
     }
 
     @Test
@@ -90,14 +83,14 @@ class ProductFacadeTest {
                 quantity = 10,
             )
         )
-        val command = AggregateProductDailySalesFacadeCommand(
+        val command = AggregateProductDailySalesFromOrderEventFacadeCommand(
             sales = sales,
         )
 
         facade.aggregate(command)
 
         verify {
-            productsService.aggregateProductDailySales(
+            productService.aggregateProductDailySales(
                 withArg<RecordProductDailySalesCommand> {
                     it.sales.forEach { productSale ->
                         val expect =
@@ -113,14 +106,27 @@ class ProductFacadeTest {
 
     @Test
     fun `aggregate - 상품 일일 판매량 집계 - 주문 상품이 비어 있으면 집계를 하지 않는다`() {
-        val command = AggregateProductDailySalesFacadeCommand(
+        val command = AggregateProductDailySalesFromOrderEventFacadeCommand(
             sales = emptyList(),
         )
 
         facade.aggregate(command)
 
         verify(exactly = 0) {
-            productsService.aggregateProductDailySales(ofType(RecordProductDailySalesCommand::class))
+            productService.aggregateProductDailySales(ofType(RecordProductDailySalesCommand::class))
+        }
+    }
+
+    @Test
+    fun `aggregate - 상품 일일 판매량 집계 - 해당 일자로 일일 판매량을 집계한다`() {
+        val command = AggregateProductDailySalesFacadeCommand(
+            date = LocalDate.now(TimeZone.KSTId),
+        )
+
+        facade.aggregate(command)
+
+        verify(exactly = 1) {
+            productSaleStatService.createDailyStats(CreateProductDailySaleStatsCommand(command.date))
         }
     }
 
@@ -138,7 +144,7 @@ class ProductFacadeTest {
             products.size.toLong()
         )
         every {
-            productsService.getAllByStatusOnPaged(ProductStatus.ON_SALE, page, pageSize)
+            productService.getAllByStatusOnPaged(ProductStatus.ON_SALE, page, pageSize)
         } returns productPage
         every {
             stockService.getStocks(any())
@@ -164,7 +170,7 @@ class ProductFacadeTest {
         val page = 0
         val pageSize = 10
         val productPage = PageImpl(emptyList<ProductView>())
-        every { productsService.getAllByStatusOnPaged(ProductStatus.ON_SALE, any(), any()) } returns productPage
+        every { productService.getAllByStatusOnPaged(ProductStatus.ON_SALE, any(), any()) } returns productPage
 
         val result = facade.getAllOnSalePaged(page, pageSize)
 
@@ -176,7 +182,7 @@ class ProductFacadeTest {
         val page = 0
         val pageSize = 0
         coEvery {
-            productsService.getAllByStatusOnPaged(
+            productService.getAllByStatusOnPaged(
                 any(),
                 any(),
                 any()
@@ -202,7 +208,7 @@ class ProductFacadeTest {
         )
         val stocks = products.map { StockMock.view(productId = it.id) }
 
-        every { productsService.getPopularProducts() } returns popularProducts
+        every { productService.getPopularProducts() } returns popularProducts
         every {
             stockService.getStocks(any())
         } returns stocks
@@ -221,7 +227,7 @@ class ProductFacadeTest {
 
     @Test
     fun `getPopularProducts - 인기 상품이 없는 경우 빈 페이지 반환`() {
-        every { productsService.getPopularProducts() } returns PopularProductsView(emptyList<ProductView>())
+        every { productService.getPopularProducts() } returns PopularProductsView(emptyList<ProductView>())
 
         val result = facade.getPopularProducts()
 
