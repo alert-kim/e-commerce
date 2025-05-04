@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
+import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import org.springframework.context.ApplicationEventPublisher
@@ -56,7 +57,24 @@ class OrderService(
         val order = doGet(payment.orderId.value)
 
         order.pay()
-        val event = OrderCompletedEvent(
+        publisher.publishEvent(
+            OrderCompletedEvent(
+                orderId = order.id(),
+                snapshot = OrderSnapshot.from(order),
+                createdAt = Instant.now(),
+            )
+        )
+    }
+
+    @Transactional
+    fun failOrder(
+        command: FailOrderCommand
+    ) {
+        val order = doGet(command.orderId.value)
+        if (order.isFailed()) return
+
+        order.fail()
+        val event = OrderFailedEvent(
             orderId = order.id(),
             snapshot = OrderSnapshot.from(order),
             createdAt = Instant.now(),

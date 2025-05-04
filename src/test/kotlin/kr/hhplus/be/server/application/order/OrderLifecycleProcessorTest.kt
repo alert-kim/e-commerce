@@ -6,8 +6,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.order.command.CreateOrderProcessorCommand
+import kr.hhplus.be.server.application.order.command.FailOrderProcessorCommand
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
+import kr.hhplus.be.server.domain.order.command.FailOrderCommand
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.UserMock
@@ -19,10 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 
 @ExtendWith(MockKExtension::class)
-class OrderCreationProcessorTest {
+class OrderLifecycleProcessorTest {
 
     @InjectMockKs
-    private lateinit var processor: OrderCreationProcessor
+    private lateinit var processor: OrderLifecycleProcessor
 
     @MockK(relaxed = true)
     private lateinit var userService: UserService
@@ -56,4 +58,27 @@ class OrderCreationProcessorTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("주문 실패 처리")
+    inner class FailOrder {
+        @Test
+        @DisplayName("주문 실패 처리")
+        fun failOrder() {
+            val orderId = OrderMock.id()
+            val reason = "테스트 실패 사유"
+
+            processor.failOrder(FailOrderProcessorCommand(orderId, reason))
+
+            verify {
+                orderService.failOrder(
+                    FailOrderCommand(
+                        orderId = orderId,
+                        reason = reason
+                    )
+                )
+            }
+        }
+    }
+
 }

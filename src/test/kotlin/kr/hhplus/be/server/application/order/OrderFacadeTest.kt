@@ -1,18 +1,14 @@
 package kr.hhplus.be.server.application.order
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
-import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
-import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
-import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.application.order.command.*
 import kr.hhplus.be.server.application.order.result.OrderCreationProcessorResult
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
-import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.testutil.mock.CouponMock
 import kr.hhplus.be.server.testutil.mock.OrderCommandMock
 import kr.hhplus.be.server.testutil.mock.OrderMock
@@ -32,7 +28,7 @@ class OrderFacadeTest {
     private lateinit var orderService: OrderService
 
     @MockK(relaxed = true)
-    private lateinit var orderCreationProcessor: OrderCreationProcessor
+    private lateinit var orderLifecycleProcessor: OrderLifecycleProcessor
 
     @MockK(relaxed = true)
     private lateinit var orderProductProcessor: OrderProductProcessor
@@ -51,10 +47,9 @@ class OrderFacadeTest {
         fun withCoupon() {
             val couponId = CouponMock.id()
             val command = OrderCommandMock.facade(couponId = couponId).also { spyk(it) }
-            val userId = UserId(command.userId)
             val orderId = OrderMock.id()
-            val order = OrderMock.view(id = orderId, userId = userId, couponId = couponId)
-            every { orderCreationProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
+            val order = OrderMock.view(id = orderId, couponId = couponId)
+            every { orderLifecycleProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
             every { orderService.get(orderId.value) } returns order
 
             val result = orderFacade.order(command)
@@ -62,7 +57,7 @@ class OrderFacadeTest {
             assertThat(result.order).isEqualTo(order)
             verifyOrder {
                 command.validate()
-                orderCreationProcessor.createOrder(
+                orderLifecycleProcessor.createOrder(
                     CreateOrderProcessorCommand(command.userId)
                 )
                 command.productsToOrder.forEach {
@@ -79,7 +74,7 @@ class OrderFacadeTest {
                 orderCouponProcessor.applyCouponToOrder(
                     ApplyCouponProcessorCommand(
                         orderId = orderId,
-                        userId = userId,
+                        userId = order.userId,
                         couponId = couponId.value
                     )
                 )
@@ -99,11 +94,9 @@ class OrderFacadeTest {
         @DisplayName("쿠폰이 없는 주문 처리")
         fun withoutCoupon() {
             val command = OrderCommandMock.facade(couponId = null).also { spyk(it) }
-            val userId = UserId(command.userId)
             val orderId = OrderMock.id()
-            val order = OrderMock.view(id = orderId, userId = userId, couponId = null)
-            val creationResult = OrderCreationProcessorResult(orderId)
-            every { orderCreationProcessor.createOrder(any()) } returns creationResult
+            val order = OrderMock.view(id = orderId, couponId = null)
+            every { orderLifecycleProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
             every { orderService.get(orderId.value) } returns order
 
             val result = orderFacade.order(command)
@@ -111,7 +104,7 @@ class OrderFacadeTest {
             assertThat(result.order).isEqualTo(order)
             verifyOrder {
                 command.validate()
-                orderCreationProcessor.createOrder(
+                orderLifecycleProcessor.createOrder(
                     CreateOrderProcessorCommand(command.userId)
                 )
                 command.productsToOrder.forEach {
@@ -166,6 +159,29 @@ class OrderFacadeTest {
                 orderProductProcessor.placeOrderProduct(withArg<PlaceOrderProductProcessorCommand> {
                     assertThat(it.productId).isEqualTo(3L)
                 })
+            }
+        }
+
+        @Test
+        @DisplayName("주문 중 예외 발생 시 실패 처리")
+        fun handleFailure() {
+            val command = OrderCommandMock.facade().also { spyk(it) }
+            val orderId = OrderMock.id()
+            val failedException = RuntimeException("테스트 예외")
+            every { orderLifecycleProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
+            every { orderProductProcessor.placeOrderProduct(any()) } throws failedException
+
+            shouldThrow<RuntimeException> {
+                orderFacade.order(command)
+            }
+
+            verify {
+                orderLifecycleProcessor.failOrder(
+                    FailOrderProcessorCommand(
+                        orderId = orderId,
+                        reason = "테스트 예외"
+                    )
+                )
             }
         }
     }

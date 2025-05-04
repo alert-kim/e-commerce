@@ -127,14 +127,6 @@ class Order(
         this.updatedAt = Instant.now()
     }
 
-    private fun addOrderProduct(
-        orderProduct: OrderProduct,
-    ) {
-        _products.add(orderProduct)
-        originalAmount = originalAmount.add(orderProduct.totalPrice)
-        totalAmount = totalAmount.add(orderProduct.totalPrice)
-    }
-
     fun pay() {
         if (status != OrderStatus.STOCK_ALLOCATED) {
             throw InvalidOrderStatusException(
@@ -145,6 +137,22 @@ class Order(
         }
         this.status = OrderStatus.COMPLETED
         updatedAt = Instant.now()
+    }
+
+    fun fail() {
+        if (isFailed()) return
+        this.status = OrderStatus.FAILED
+        updatedAt = Instant.now()
+    }
+
+    fun isFailed(): Boolean = status == OrderStatus.FAILED
+
+    private fun addOrderProduct(
+        orderProduct: OrderProduct,
+    ) {
+        _products.add(orderProduct)
+        originalAmount = originalAmount.add(orderProduct.totalPrice)
+        totalAmount = totalAmount.add(orderProduct.totalPrice)
     }
 
     companion object {
@@ -163,4 +171,3 @@ class Order(
         )
     }
 }
-

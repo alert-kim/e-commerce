@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
+import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
@@ -180,7 +181,7 @@ class OrderServiceTest {
         }
 
         @Test
-        @DisplayName("주문을 찾을 수 없으면 NotFoundOrderException 예외가 발생한다")
+        @DisplayName("주문을 찾을 수 없으면 NotFoundOrderException 예외가 발생")
         fun notFoundOrder() {
             val orderId = OrderMock.id()
             val payment = PaymentMock.view(
@@ -194,6 +195,59 @@ class OrderServiceTest {
 
             shouldThrow<NotFoundOrderException> {
                 service.pay(command)
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("주문 실패 처리")
+    inner class FailOrder {
+        @Test
+        @DisplayName("주문을 실패 상태로 변경하고 이벤트를 저장")
+        fun failOrder() {
+            val orderId = OrderMock.id()
+            val order = mockk<Order>(relaxed = true)
+            val command = FailOrderCommand(orderId, "테스트 실패 사유")
+            every { repository.findById(orderId.value) } returns order
+            every { order.id() } returns orderId
+            every { order.isFailed() } returns false
+
+            service.failOrder(command)
+
+            verify {
+                order.fail()
+                publisher.publishEvent(withArg<OrderFailedEvent> {
+                    assertThat(it.orderId).isEqualTo(orderId)
+                })
+            }
+        }
+
+        @Test
+        @DisplayName("이미 실패 상태인 경우 이벤트를 저장하지 않음")
+        fun alreadyFailed() {
+            val orderId = OrderMock.id()
+            val order = mockk<Order>(relaxed = true)
+            val command = FailOrderCommand(orderId, "테스트 실패 사유")
+            every { repository.findById(orderId.value) } returns order
+            every { order.isFailed() } returns true
+
+            service.failOrder(command)
+
+            verify(exactly = 0) {
+                order.fail()
+                publisher.publishEvent(any())
+            }
+        }
+
+        @Test
+        @DisplayName("주문을 찾을 수 없으면 NotFoundOrderException 예외가 발생")
+        fun notFoundOrder() {
+            val orderId = OrderMock.id()
+            val command = FailOrderCommand(orderId, "테스트 실패 사유")
+            every { repository.findById(orderId.value) } returns null
+
+            shouldThrow<NotFoundOrderException> {
+                service.failOrder(command)
             }
         }
     }

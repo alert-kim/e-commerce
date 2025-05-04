@@ -203,4 +203,13 @@ class OrderTest {
             order.pay()
         }
     }
+    
+    @Test
+    fun `isFailed - FAILED 상태인지 확인`() {
+        val failedOrder = OrderMock.order(status = OrderStatus.FAILED)
+        val readyOrder = OrderMock.order(status = OrderStatus.READY)
+        
+        assertThat(failedOrder.isFailed()).isTrue()
+        assertThat(readyOrder.isFailed()).isFalse()
+    }
 }
