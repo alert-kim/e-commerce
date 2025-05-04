@@ -26,24 +26,4 @@ class ProductDailySale(
 
     val date: LocalDate
         get() = id.date
-
-    fun addQuantity(quantity: Int) {
-        this.quantity += quantity
-        this.updatedAt = Instant.now()
-    }
-
-    companion object {
-        fun new(
-            date: LocalDate,
-            productId: ProductId,
-            quantity: Int,
-        ): ProductDailySale {
-            return ProductDailySale(
-                id = ProductDailySaleId(date, productId),
-                quantity = quantity,
-                createdAt = Instant.now(),
-                updatedAt = Instant.now(),
-            )
-        }
-    }
 }

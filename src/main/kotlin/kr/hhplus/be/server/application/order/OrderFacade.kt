@@ -1,8 +1,6 @@
 package kr.hhplus.be.server.application.order
 
-import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
-import kr.hhplus.be.server.application.order.result.GetOrderFacadeEventResult
 import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
@@ -10,8 +8,10 @@ import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderEventType
+import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
+import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
+import kr.hhplus.be.server.domain.order.command.PayOrderCommand
+import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductService
@@ -43,23 +43,6 @@ class OrderFacade(
         pay(orderId)
         return OrderFacadeResult(orderService.get(orderId.value))
     }
-
-    fun consumeEvent(
-        command: ConsumeOrderEventsFacadeCommand,
-    ) {
-        orderService.consumeEvent(ConsumeOrderEventCommand.of(command.consumerId, command.events))
-    }
-
-    fun getAllEventsNotConsumedInOrder(
-        consumerId: String,
-        eventType: OrderEventType,
-    ): GetOrderFacadeEventResult.List =
-        GetOrderFacadeEventResult.List(
-            orderService.getAllEventsNotConsumedInOrder(
-                consumerId = consumerId,
-                eventType = eventType,
-            )
-        )
 
     private fun getUser(
         userId: Long,

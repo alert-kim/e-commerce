@@ -11,19 +11,12 @@ class ProductDailySaleRepositoryImpl(
     private val jpaRepository: ProductDailySaleJpaRepository,
     private val customQueryRepository: ProductDailySaleCustomQueryRepository,
 ) : ProductDailySaleRepository {
-    override fun findById(id: ProductDailySaleId): ProductDailySale? {
-        return jpaRepository.findById(id).orElse(null)
-    }
-
     override fun findTopNProductsByQuantity(
         startDate: LocalDate,
         endDate: LocalDate,
         limit: Int
     ): List<ProductDailySale> =
         jpaRepository.findAllByDateBetweenOrderByQuantityDesc(startDate, endDate).take(limit)
-
-    override fun save(sale: ProductDailySale) =
-        jpaRepository.save(sale)
 
     override fun aggregateDailyStatsByDate(date: LocalDate) {
         customQueryRepository.aggregateDailyStatsByDate(date)

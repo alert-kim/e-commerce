@@ -9,9 +9,11 @@ import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.domain.product.Product
 import kr.hhplus.be.server.domain.product.ProductDailySale
+import kr.hhplus.be.server.domain.product.ProductDailySaleRepositoryTestConfig
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductRepositoryTestConfig
 import kr.hhplus.be.server.domain.product.ProductStatus
+import kr.hhplus.be.server.domain.product.TestProductDailySaleRepository
 import kr.hhplus.be.server.domain.product.TestProductRepository
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.domain.stock.StockRepository
@@ -30,14 +32,14 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Component
-@Import(UserRepositoryTestConfig::class, ProductRepositoryTestConfig::class)
+@Import(UserRepositoryTestConfig::class, ProductRepositoryTestConfig::class, ProductDailySaleRepositoryTestConfig::class)
 class DatabaseTestHelper(
     private val testUserRepository: TestUserRepository,
     private val testProductRepository: TestProductRepository,
+    private val testProductDailySaleRepository: TestProductDailySaleRepository,
     private val balanceRepository: BalanceRepository,
     private val couponRepository: CouponRepository,
     private val couponSourceRepository: CouponSourceRepository,
-    private val productDailySaleRepository: ProductDailySaleRepository,
     private val stockRepository: StockRepository,
 ) {
     fun savedUser() = testUserRepository.save(UserMock.user(id = null))
@@ -116,7 +118,7 @@ class DatabaseTestHelper(
         date: LocalDate,
         quantity: Int,
     ): ProductDailySale =
-        productDailySaleRepository.save(
+        testProductDailySaleRepository.save(
             ProductMock.dailySale(
                 productId = productId,
                 date = date,

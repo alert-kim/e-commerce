@@ -13,23 +13,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
-import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
-import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.product.ProductPrice
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
-import kr.hhplus.be.server.testutil.mock.CouponMock
-import kr.hhplus.be.server.testutil.mock.OrderMock
-import kr.hhplus.be.server.testutil.mock.PaymentMock
-import kr.hhplus.be.server.testutil.mock.ProductMock
-import kr.hhplus.be.server.testutil.mock.StockMock
-import kr.hhplus.be.server.testutil.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,12 +37,6 @@ class OrderServiceTest {
     private lateinit var repository: OrderRepository
 
     @MockK(relaxed = true)
-    private lateinit var eventRepository: OrderEventRepository
-
-    @MockK(relaxed = true)
-    private lateinit var eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository
-
-    @MockK(relaxed = true)
     private lateinit var publisher: ApplicationEventPublisher
 
     @MockK(relaxed = true)
@@ -60,7 +44,7 @@ class OrderServiceTest {
 
     @BeforeEach
     fun setUp() {
-        clearMocks(repository, eventRepository, eventConsumerOffsetRepository)
+        clearMocks(repository, publisher, client)
     }
 
     @Test
@@ -249,49 +233,6 @@ class OrderServiceTest {
     }
 
     @Test
-    fun `consumeEvent - 이벤트 처리 (이벤트 개수 1) - 첫 처리인 경우 새로운 offset저장`() {
-        val eventId = OrderMock.eventId()
-        val event = OrderMock.event(id = eventId)
-        val command = ConsumeOrderEventCommand(
-            consumerId = "test",
-            event = event,
-        )
-        every { eventConsumerOffsetRepository.find(
-            OrderEventConsumerOffsetId(command.consumerId, event.type))
-        } returns null
-
-        service.consumeEvent(command)
-
-        verify {
-            eventConsumerOffsetRepository.save(withArg {
-                assertThat(it.id.consumerId).isEqualTo(command.consumerId)
-                assertThat(it.id.eventType).isEqualTo(command.event.type)
-                assertThat(it.eventId).isEqualTo(eventId)
-            })
-        }
-    }
-
-    @Test
-    fun `consumeEvent - 이벤트 처리 (이벤트 개수1) - 이미 offset이 있는 경우 update`() {
-        val eventId = OrderMock.eventId()
-        val event = OrderMock.event(id = eventId)
-        val offset = mockk<OrderEventConsumerOffset>(relaxed = true)
-        val command = ConsumeOrderEventCommand(
-            consumerId = "test",
-            event = event,
-        )
-        every { eventConsumerOffsetRepository.find(
-            OrderEventConsumerOffsetId(command.consumerId, event.type))
-        } returns offset
-
-        service.consumeEvent(command)
-
-        verify {
-            offset.update(eventId)
-        }
-    }
-
-    @Test
     fun `get - 주문 조회`() {
         val orderId = OrderMock.id()
         every { repository.findById(orderId.value) } returns OrderMock.order(id = orderId)
@@ -311,41 +252,6 @@ class OrderServiceTest {
 
         shouldThrow<NotFoundOrderException> {
             service.get(orderId.value)
-        }
-    }
-
-    @Test
-    fun `getAllEventsNotConsumedInOrder - 처리하지 않은 이벤트 조회 - 처리했던 이벤트 offset이 있을 경우`() {
-        val consumerId = "test"
-        val eventType = OrderEventType.COMPLETED
-        val events = List(3) { OrderMock.event() }
-        val offset = OrderMock.eventConsumerOffset()
-        every { eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(consumerId, eventType)) } returns offset
-        every { eventRepository.findAllByIdGreaterThanOrderByIdAsc(offset.eventId) } returns events
-
-        val result = service.getAllEventsNotConsumedInOrder(consumerId, eventType)
-
-        assertThat(result).hasSize(events.size)
-        result.forEachIndexed { index, orderEvent ->
-            val expect = events[index]
-            assertThat(orderEvent.id()).isEqualTo(expect.id())
-        }
-    }
-
-    @Test
-    fun `getAllEventsNotConsumedInOrder - 처리하지 않은 이벤트 조회 - 처리했던 이벤트 offset이 없을 경우`() {
-        val consumerId = "test"
-        val eventType = OrderEventType.COMPLETED
-        val events = List(2) { OrderMock.event() }
-        every { eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(consumerId, eventType)) } returns null
-        every { eventRepository.findAllByIdAsc() } returns events
-
-        val result = service.getAllEventsNotConsumedInOrder(consumerId, eventType)
-
-        assertThat(result).hasSize(events.size)
-        result.forEachIndexed { index, orderEvent ->
-            val expect = events[index]
-            assertThat(orderEvent.id()).isEqualTo(expect.id())
         }
     }
 }

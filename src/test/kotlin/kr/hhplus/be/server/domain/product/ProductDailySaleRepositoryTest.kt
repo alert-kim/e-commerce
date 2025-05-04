@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.product
 
-import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStat
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
@@ -32,17 +31,6 @@ class ProductDailySaleRepositoryTest {
     @BeforeEach
     fun setup() {
         testRepository.deleteAll()
-    }
-
-    @Test
-    fun `save - 판매 데이터 저장`() {
-        val sale = ProductMock.dailySale()
-
-        val saved = repository.save(sale)
-
-        assertThat(saved.productId).isEqualTo(sale.productId)
-        assertThat(saved.date).isEqualTo(sale.date)
-        assertThat(saved.quantity).isEqualTo(sale.quantity)
     }
 
     @Test
@@ -120,25 +108,12 @@ class ProductDailySaleRepositoryTest {
     }
 
     @Test
-    fun `findById - 판매 데이터 조회`() {
-        val sale = ProductMock.dailySale()
-        val saved = repository.save(sale)
-
-        val found = repository.findById(saved.id)
-
-        assertThat(found).isNotNull
-        assertThat(found?.productId).isEqualTo(sale.productId)
-        assertThat(found?.date).isEqualTo(sale.date)
-        assertThat(found?.quantity).isEqualTo(sale.quantity)
-    }
-
-    @Test
     fun `findTopNProductsByQuantity - 판매량 상위 N개 상품 조회 - limit 보다 상품 수가 많음`() {
         val limit = 3
         val startDate = LocalDate.now().minusDays(3)
         val endDate = LocalDate.now()
         val productsInOrderBySale = List(limit + 1) {
-            repository.save(ProductMock.dailySale(date = startDate, quantity = 10 - it))
+            testRepository.save(ProductMock.dailySale(date = startDate, quantity = 10 - it))
         }
 
         val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
@@ -157,7 +132,7 @@ class ProductDailySaleRepositoryTest {
         val startDate = LocalDate.now().minusDays(3)
         val endDate = LocalDate.now()
         val productsInOrderBySale = List(limit - 1) {
-            repository.save(ProductMock.dailySale(date = startDate, quantity = 10 - it))
+            testRepository.save(ProductMock.dailySale(date = startDate, quantity = 10 - it))
         }
 
         val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
@@ -170,8 +145,8 @@ class ProductDailySaleRepositoryTest {
         val limit = 4
         val startDate = LocalDate.now().minusDays(3)
         val endDate = LocalDate.now()
-        repository.save(ProductMock.dailySale(date = startDate.minusDays(1), quantity = 10))
-        repository.save(ProductMock.dailySale(date = endDate.plusDays(1), quantity = 10))
+        testRepository.save(ProductMock.dailySale(date = startDate.minusDays(1), quantity = 10))
+        testRepository.save(ProductMock.dailySale(date = endDate.plusDays(1), quantity = 10))
 
         val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
 

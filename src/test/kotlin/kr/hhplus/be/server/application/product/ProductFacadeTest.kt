@@ -1,20 +1,16 @@
 package kr.hhplus.be.server.application.product
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.mockk.clearMocks
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
-import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFromOrderEventFacadeCommand
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.*
-import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
+import kr.hhplus.be.server.domain.product.PopularProductsView
+import kr.hhplus.be.server.domain.product.ProductService
+import kr.hhplus.be.server.domain.product.ProductStatus
+import kr.hhplus.be.server.domain.product.ProductView
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStatService
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
 import kr.hhplus.be.server.domain.stock.StockService
-import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.testutil.mock.StockMock
 import kr.hhplus.be.server.util.TimeZone
@@ -35,86 +31,6 @@ class ProductFacadeTest {
     @BeforeEach
     fun setUp() {
         clearMocks(productService, stockService, productSaleStatService)
-    }
-
-    @Test
-    fun `aggregate - 상품 일일 판매량 집계 - 일자별, 상품id별로 판매 수량을 집계한다`() {
-        val today = LocalDate.now(TimeZone.KSTId)
-        val todayInstant = today.atStartOfDay(TimeZone.KSTId).toInstant()
-        val yesterday = today.minusDays(1)
-        val yesterdayInstant = yesterday.atStartOfDay(TimeZone.KSTId).toInstant()
-
-        val sales = listOf(
-            OrderMock.orderProductSnapshot(
-                productId = 1L,
-                quantity = 10,
-                createdAt = yesterdayInstant,
-            ),
-            OrderMock.orderProductSnapshot(
-                productId = 1L,
-                quantity = 10,
-                createdAt = yesterdayInstant,
-            ),
-            OrderMock.orderProductSnapshot(
-                productId = 1L,
-                quantity = 10,
-                createdAt = todayInstant,
-            ),
-            OrderMock.orderProductSnapshot(
-                productId = 2L,
-                quantity = 10,
-                createdAt = todayInstant,
-            ),
-        )
-        val expects = listOf(
-            RecordProductDailySalesCommand.ProductSale(
-                productId = ProductId(1L),
-                date = yesterday,
-                quantity = 20,
-            ),
-            RecordProductDailySalesCommand.ProductSale(
-                productId = ProductId(1L),
-                date = today,
-                quantity = 10,
-            ),
-            RecordProductDailySalesCommand.ProductSale(
-                productId = ProductId(2L),
-                date = today,
-                quantity = 10,
-            )
-        )
-        val command = AggregateProductDailySalesFromOrderEventFacadeCommand(
-            sales = sales,
-        )
-
-        facade.aggregate(command)
-
-        verify {
-            productService.aggregateProductDailySales(
-                withArg<RecordProductDailySalesCommand> {
-                    it.sales.forEach { productSale ->
-                        val expect =
-                            expects.find { it.productId == productSale.productId && it.date == productSale.date }
-                        assertThat(productSale.productId).isEqualTo(expect?.productId)
-                        assertThat(productSale.date).isEqualTo(expect?.date)
-                        assertThat(productSale.quantity).isEqualTo(expect?.quantity)
-                    }
-                }
-            )
-        }
-    }
-
-    @Test
-    fun `aggregate - 상품 일일 판매량 집계 - 주문 상품이 비어 있으면 집계를 하지 않는다`() {
-        val command = AggregateProductDailySalesFromOrderEventFacadeCommand(
-            sales = emptyList(),
-        )
-
-        facade.aggregate(command)
-
-        verify(exactly = 0) {
-            productService.aggregateProductDailySales(ofType(RecordProductDailySalesCommand::class))
-        }
     }
 
     @Test

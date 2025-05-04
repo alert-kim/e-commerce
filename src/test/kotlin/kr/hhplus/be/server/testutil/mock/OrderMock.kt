@@ -3,11 +3,6 @@ package kr.hhplus.be.server.testutil.mock
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
 import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
-import kr.hhplus.be.server.domain.order.event.OrderJpaEvent
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
-import kr.hhplus.be.server.domain.order.event.OrderEventId
-import kr.hhplus.be.server.domain.order.event.OrderEventType
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
@@ -107,38 +102,6 @@ object OrderMock {
         orderId = orderId,
         snapshot = snapshot,
         createdAt = createdAt,
-    )
-
-    fun eventId(): OrderEventId = OrderEventId(IdMock.value())
-
-    fun event(
-        id: OrderEventId? = eventId(),
-        orderId: OrderId = id(),
-        type: OrderEventType = OrderEventType.COMPLETED,
-        snapshot: OrderSnapshot = OrderSnapshot.from(order()),
-        createdAt: Instant = Instant.now(),
-    ): OrderJpaEvent = OrderJpaEvent(
-        id = id?.value,
-        orderId = orderId,
-        type = type,
-        snapshot = snapshot,
-        createdAt = createdAt,
-    )
-
-    fun eventConsumerOffset(
-        consumerId: String = "test",
-        eventId: OrderEventId = eventId(),
-        eventType: OrderEventType = OrderEventType.COMPLETED,
-        createdAt: Instant = Instant.now(),
-        updatedAt: Instant = Instant.now(),
-    ): OrderEventConsumerOffset = OrderEventConsumerOffset(
-        id = OrderEventConsumerOffsetId(
-            consumerId = consumerId,
-            eventType = eventType,
-        ),
-        eventId = eventId,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
     )
 
     fun orderProductSnapshot(

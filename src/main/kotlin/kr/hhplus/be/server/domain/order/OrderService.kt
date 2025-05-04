@@ -1,9 +1,8 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.*
+import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
-import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -14,8 +13,6 @@ import java.time.Instant
 @Transactional(readOnly = true)
 class OrderService(
     private val repository: OrderRepository,
-    private val eventRepository: OrderEventRepository,
-    private val eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository,
     private val client: OrderSnapshotClient,
     private val publisher: ApplicationEventPublisher,
 ) {
@@ -77,48 +74,9 @@ class OrderService(
         client.send(snapshot)
     }
 
-    @Transactional
-    fun consumeEvent(
-        command: ConsumeOrderEventCommand,
-    ) {
-        val offset =
-            eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(command.consumerId, command.event.type))
-        when (offset) {
-            null -> eventConsumerOffsetRepository.save(
-                OrderEventConsumerOffset.new(
-                    consumerId = command.consumerId,
-                    eventId = command.event.id(),
-                    eventType = command.event.type,
-                )
-            )
-
-            else -> offset.update(
-                eventId = command.event.id(),
-            )
-        }
-    }
-
     fun get(
         id: Long,
     ): OrderView = OrderView.from(doGet(id))
-
-    fun getAllEventsNotConsumedInOrder(
-        consumerId: String,
-        eventType: OrderEventType,
-    ): List<OrderJpaEvent> {
-        val offset = eventConsumerOffsetRepository.find(
-            OrderEventConsumerOffsetId(
-                consumerId = consumerId,
-                eventType = eventType,
-            )
-        )
-        return when (offset) {
-            null -> eventRepository.findAllByIdAsc()
-            else -> eventRepository.findAllByIdGreaterThanOrderByIdAsc(
-                id = offset.eventId,
-            )
-        }
-    }
 
     private fun doGet(
         id: Long,

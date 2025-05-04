@@ -9,10 +9,8 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
-import kr.hhplus.be.server.domain.product.command.RecordProductDailySalesCommand
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleRepository
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
@@ -22,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
-import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class ProductServiceTest {
@@ -96,77 +93,6 @@ class ProductServiceTest {
 
         verify(exactly = 0) {
             repository.findAllByStatusOrderByCreatedAtDesc(any(), any())
-        }
-    }
-
-    @Test
-    fun `aggregateProductDailySales - 상품 일일 판매량 집계 - 해당 상품의 집계 데이터가 이미 있는 경우`() {
-        val newSaleQuantity = 10
-        val sales = listOf(
-            ProductMock.dailySale() to mockk<ProductDailySale>(relaxed = true),
-            ProductMock.dailySale() to mockk<ProductDailySale>(relaxed = true)
-        )
-        val command = RecordProductDailySalesCommand(
-            sales = sales.map { (sale, _) ->
-                RecordProductDailySalesCommand.ProductSale(
-                    productId = sale.productId,
-                    date = sale.date,
-                    quantity = newSaleQuantity,
-                )
-            }
-        )
-        sales.forEach { (sale, mockSale) ->
-            every {
-                saleRepository.findById(
-                    ProductDailySaleId(
-                        productId = sale.productId,
-                        date = sale.date
-                    )
-                )
-            } returns mockSale
-        }
-
-        service.aggregateProductDailySales(command)
-
-        sales.forEach { (_, mockSale) ->
-            verify {
-                mockSale.addQuantity(newSaleQuantity)
-            }
-        }
-    }
-
-    @Test
-    fun `aggregateProductDailySales - 상품 일일 판매량 집계 - 해당 상품의 집계 데이터가 없는 경우`() {
-        val date = LocalDate.now()
-        val sales = listOf(
-            RecordProductDailySalesCommand.ProductSale(
-                productId = ProductMock.id(),
-                date = date,
-                quantity = 3,
-            ),
-            RecordProductDailySalesCommand.ProductSale(
-                productId = ProductMock.id(),
-                date = date,
-                quantity = 5,
-            )
-        )
-        val command = RecordProductDailySalesCommand(sales = sales)
-        every {
-            saleRepository.findById(
-                any()
-            )
-        } returns null
-
-        service.aggregateProductDailySales(command)
-
-        sales.forEach { sale ->
-            verify {
-                saleRepository.save(withArg<ProductDailySale> {
-                    assertThat(it.productId).isEqualTo(sale.productId)
-                    assertThat(it.date).isEqualTo(sale.date)
-                    assertThat(it.quantity).isEqualTo(sale.quantity)
-                })
-            }
         }
     }
 
