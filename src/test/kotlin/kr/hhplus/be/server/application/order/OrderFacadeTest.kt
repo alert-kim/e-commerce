@@ -8,14 +8,14 @@ import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
 import kr.hhplus.be.server.application.order.command.OrderFacadeCommand
 import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
+import kr.hhplus.be.server.application.order.command.*
+import kr.hhplus.be.server.application.order.result.OrderCreationProcessorResult
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.user.UserId
-import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.testutil.mock.CouponMock
 import kr.hhplus.be.server.testutil.mock.OrderCommandMock
 import kr.hhplus.be.server.testutil.mock.OrderMock
-import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -30,7 +30,7 @@ class OrderFacadeTest {
     private lateinit var orderService: OrderService
 
     @MockK(relaxed = true)
-    private lateinit var userService: UserService
+    private lateinit var orderCreationProcessor: OrderCreationProcessor
 
     @MockK(relaxed = true)
     private lateinit var orderProductProcessor: OrderProductProcessor
@@ -46,12 +46,9 @@ class OrderFacadeTest {
         val couponId = CouponMock.id()
         val command = OrderCommandMock.facade(couponId = couponId).also { spyk(it) }
         val userId = UserId(command.userId)
-        val user = UserMock.view(id = userId)
         val orderId = OrderMock.id()
         val order = OrderMock.view(id = orderId, userId = userId, couponId = couponId)
-
-        every { userService.get(command.userId) } returns user
-        every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
+        every { orderCreationProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
         every { orderService.get(orderId.value) } returns order
 
         val result = orderFacade.order(command)
@@ -59,11 +56,8 @@ class OrderFacadeTest {
         assertThat(result.order).isEqualTo(order)
         verifyOrder {
             command.validate()
-            userService.get(command.userId)
-            orderService.createOrder(
-                CreateOrderCommand(
-                    userId = userId,
-                )
+            orderCreationProcessor.createOrder(
+                CreateOrderProcessorCommand(command.userId)
             )
             command.productsToOrder.forEach {
                 orderProductProcessor.placeOrderProduct(
@@ -75,6 +69,7 @@ class OrderFacadeTest {
                     )
                 )
             }
+            orderService.get(orderId.value)
             orderCouponProcessor.applyCouponToOrder(
                 ApplyCouponProcessorCommand(
                     orderId = orderId,
@@ -98,12 +93,9 @@ class OrderFacadeTest {
     fun `order - 쿠폰이 없는 경우`() {
         val command = OrderCommandMock.facade(couponId = null).also { spyk(it) }
         val userId = UserId(command.userId)
-        val user = UserMock.view(id = userId)
         val orderId = OrderMock.id()
         val order = OrderMock.view(id = orderId, userId = userId, couponId = null)
-
-        every { userService.get(command.userId) } returns user
-        every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
+        every { orderCreationProcessor.createOrder(any()) } returns  OrderCreationProcessorResult(orderId)
         every { orderService.get(orderId.value) } returns order
 
         val result = orderFacade.order(command)
@@ -111,11 +103,8 @@ class OrderFacadeTest {
         assertThat(result.order).isEqualTo(order)
         verifyOrder {
             command.validate()
-            userService.get(command.userId)
-            orderService.createOrder(
-                CreateOrderCommand(
-                    userId = userId,
-                )
+            orderCreationProcessor.createOrder(
+                CreateOrderProcessorCommand(command.userId)
             )
             command.productsToOrder.forEach {
                 orderProductProcessor.placeOrderProduct(
