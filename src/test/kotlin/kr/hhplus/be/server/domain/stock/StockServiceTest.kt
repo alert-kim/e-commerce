@@ -11,6 +11,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.stock.command.AllocateStockCommand
+import kr.hhplus.be.server.domain.stock.command.RestoreStockCommand
 import kr.hhplus.be.server.domain.stock.exception.NotFoundStockException
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.testutil.mock.ProductMock
@@ -92,6 +93,39 @@ class StockServiceTest {
 
             shouldThrow<NotFoundStockException> {
                 service.allocate(AllocateStockCommand(productId = productId, quantity = 10))
+            }
+
+            verify { repository.findByProductId(productId) }
+        }
+    }
+
+    @Nested
+    @DisplayName("재고 복구")
+    inner class Restore {
+        @Test
+        @DisplayName("상품의 재고를 복구")
+        fun restore() {
+            val productId = ProductMock.id()
+            val quantity = 5
+            val stock = mockk<Stock>(relaxed = true)
+            every { repository.findByProductId(productId) } returns stock
+
+            service.restore(RestoreStockCommand(productId = productId, quantity = quantity))
+
+            verify {
+                repository.findByProductId(productId)
+                stock.restore(quantity)
+            }
+        }
+
+        @Test
+        @DisplayName("상품의 재고가 존재하지 않음 - NotFoundStockException")
+        fun notFoundStock() {
+            val productId = ProductMock.id()
+            every { repository.findByProductId(productId) } returns null
+
+            shouldThrow<NotFoundStockException> {
+                service.restore(RestoreStockCommand(productId = productId, quantity = 10))
             }
 
             verify { repository.findByProductId(productId) }

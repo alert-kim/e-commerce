@@ -9,6 +9,7 @@ import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.product.ProductService
 import kr.hhplus.be.server.domain.stock.StockService
 import kr.hhplus.be.server.domain.stock.command.AllocateStockCommand
+import kr.hhplus.be.server.domain.stock.command.RestoreStockCommand
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -51,6 +52,11 @@ class OrderProductProcessor(
 
     @Transactional
     fun restoreOrderProductStock(command: RestoreStockOrderProductProcessorCommand) {
-        TODO()
+        stockService.restore(
+            RestoreStockCommand(
+                productId = command.productId,
+                quantity = command.quantity,
+            )
+        )
     }
 }

@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.stock
 
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.stock.command.AllocateStockCommand
+import kr.hhplus.be.server.domain.stock.command.RestoreStockCommand
 import kr.hhplus.be.server.domain.stock.exception.NotFoundStockException
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import org.springframework.stereotype.Service
@@ -18,6 +19,14 @@ class StockService(
             ?: throw NotFoundStockException(command.productId)
 
         return stock.allocate(command.quantity)
+    }
+
+    @Transactional
+    fun restore(command: RestoreStockCommand) {
+        val stock = repository.findByProductId(command.productId)
+            ?: throw NotFoundStockException(command.productId)
+
+        stock.restore(command.quantity)
     }
 
     fun getStocks(productIds: List<ProductId>): List<StockView> {
