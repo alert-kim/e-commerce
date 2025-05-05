@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.order
 
+import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
 import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
 import kr.hhplus.be.server.common.lock.LockStrategy
 import kr.hhplus.be.server.common.lock.annotation.DistributedLock
@@ -46,5 +47,10 @@ class OrderPaymentProcessor(
         )
 
         orderService.pay(PayOrderCommand(payment))
+    }
+
+    @Transactional
+    fun cancelPayment(command: CancelOrderPaymentProcessorCommand) {
+        TODO()
     }
 }

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.application.order
 
+import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.common.lock.LockStrategy
 import kr.hhplus.be.server.common.lock.annotation.DistributedLock
@@ -46,5 +47,10 @@ class OrderProductProcessor(
                 stockAllocated,
             )
         )
+    }
+
+    @Transactional
+    fun restoreOrderProductStock(command: RestoreStockOrderProductProcessorCommand) {
+        TODO()
     }
 }

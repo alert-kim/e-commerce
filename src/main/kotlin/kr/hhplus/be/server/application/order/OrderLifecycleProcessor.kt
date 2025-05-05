@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.CreateOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.FailOrderProcessorCommand
+import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledCommand
 import kr.hhplus.be.server.application.order.result.OrderCreationProcessorResult
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
@@ -34,5 +35,10 @@ class OrderLifecycleProcessor(
                 reason = command.reason ?: "알 수 없는 오류",
             )
         )
+    }
+    
+    @Transactional
+    fun markFailHandled(command: MarkOrderFailHandledCommand) {
+        TODO()
     }
 }

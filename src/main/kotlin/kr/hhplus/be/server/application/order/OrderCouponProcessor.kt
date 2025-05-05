@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
+import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCommand
 import kr.hhplus.be.server.common.lock.LockStrategy
 import kr.hhplus.be.server.common.lock.annotation.DistributedLock
 import kr.hhplus.be.server.domain.coupon.CouponService
@@ -33,5 +34,10 @@ class OrderCouponProcessor(
         orderService.applyCoupon(
             ApplyCouponCommand(command.orderId, usedCoupon)
         )
+    }
+
+    @Transactional
+    fun cancelCoupon(command: CancelCouponUseProcessorCommand) {
+        TODO()
     }
 }
