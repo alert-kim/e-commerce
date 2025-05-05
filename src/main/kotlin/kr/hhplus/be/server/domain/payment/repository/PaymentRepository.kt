@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface PaymentRepository {
     fun save(payment: Payment): Payment
+    fun findById(id: Long): Payment?
     fun findByOrderId(orderId: OrderId): Payment?
 } 

@@ -9,9 +9,12 @@ import java.time.Instant
 data class PaymentView(
     val id: PaymentId,
     val userId: UserId,
+    val status: PaymentStatus,
     val orderId: OrderId,
     val amount: BigDecimal,
+    val canceledAt: Instant?,
     val createdAt: Instant,
+    val updatedAt: Instant,
 ) {
     fun checkUser(userId: UserId): PaymentView {
         if (this.userId != userId) {
@@ -29,9 +32,12 @@ data class PaymentView(
             PaymentView(
                 id = payment.id(),
                 userId = payment.userId,
+                status = payment.status,
                 orderId = payment.orderId,
                 amount = payment.amount,
+                canceledAt = payment.canceledAt,
                 createdAt = payment.createdAt,
+                updatedAt = payment.updatedAt,
             )
     }
 }

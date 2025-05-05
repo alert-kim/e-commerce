@@ -23,9 +23,12 @@ class PaymentViewTest {
 
             assertThat(result.id).isEqualTo(payment.id())
             assertThat(result.userId).isEqualTo(payment.userId)
+            assertThat(result.status).isEqualTo(payment.status)
             assertThat(result.orderId).isEqualTo(payment.orderId)
             assertThat(result.amount).isEqualByComparingTo(payment.amount)
+            assertThat(result.canceledAt).isEqualTo(payment.canceledAt)
             assertThat(result.createdAt).isEqualTo(payment.createdAt)
+            assertThat(result.updatedAt).isEqualTo(payment.updatedAt)
         }
     }
 

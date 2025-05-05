@@ -13,6 +13,10 @@ class PaymentRepositoryImpl(
     override fun save(payment: Payment): Payment =
         jpaRepository.save(payment)
 
+    override fun findById(id: Long): Payment? =
+        jpaRepository.findById(id)
+            .orElse(null)
+
     override fun findByOrderId(orderId: OrderId): Payment? =
         jpaRepository.findByOrderId(orderId)
 }
