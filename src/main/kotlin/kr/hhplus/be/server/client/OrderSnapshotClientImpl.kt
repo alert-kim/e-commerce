@@ -23,7 +23,9 @@ class OrderSnapshotClientImpl(
         webClient
             .post()
             .uri(PATH)
-            .bodyValue(snapshot)
+            .bodyValue(mapOf(
+                "id" to snapshot.id.value,
+            ))
             .retrieve()
             .bodyToMono<Void>()
             .doOnSuccess {

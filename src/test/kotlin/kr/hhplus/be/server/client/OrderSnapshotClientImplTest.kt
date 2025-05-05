@@ -50,7 +50,7 @@ class OrderSnapshotClientImplTest {
 
         server.verify(
             postRequestedFor(urlPathEqualTo(OrderSnapshotClientImpl.PATH))
-                .withRequestBody(equalToJson(mapper.writeValueAsString(orderSnapshot)))
+                .withRequestBody(equalToJson("""{"id":${orderSnapshot.id.value}}"""))
         )
     }
 }

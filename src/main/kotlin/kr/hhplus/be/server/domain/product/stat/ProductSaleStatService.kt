@@ -20,7 +20,7 @@ class ProductSaleStatService(
 
         order.orderProducts.forEach {
             val stat = ProductSaleStat.new(
-                productId = ProductId(it.productId),
+                productId = it.productId,
                 quantity = it.quantity,
             )
             statRepository.save(stat)

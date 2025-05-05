@@ -15,13 +15,13 @@ class OrderSnapshotTest {
 
         val orderSnapshot = OrderSnapshot.from(order)
 
-        assertThat(orderSnapshot.id).isEqualTo(orderId.value)
+        assertThat(orderSnapshot.id).isEqualTo(orderId)
         assertThat(orderSnapshot.userId).isEqualTo(order.userId)
         assertThat(orderSnapshot.status).isEqualTo(order.status)
         assertThat(orderSnapshot.originalAmount).isEqualByComparingTo(order.originalAmount)
         assertThat(orderSnapshot.discountAmount).isEqualByComparingTo(order.discountAmount)
         assertThat(orderSnapshot.totalAmount).isEqualByComparingTo(order.totalAmount)
-        assertThat(orderSnapshot.couponId).isEqualTo(order.couponId?.value)
+        assertThat(orderSnapshot.couponId).isEqualTo(order.couponId)
         assertThat(orderSnapshot.createdAt).isEqualTo(order.createdAt)
         assertThat(orderSnapshot.updatedAt).isEqualTo(order.updatedAt)
         assertThat(orderSnapshot.orderProducts).hasSize(order.products.size)

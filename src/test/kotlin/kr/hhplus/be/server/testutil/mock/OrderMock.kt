@@ -105,7 +105,7 @@ object OrderMock {
     )
 
     fun orderProductSnapshot(
-        productId: Long = IdMock.value(),
+        productId: ProductId = ProductMock.id(),
         quantity: Int = 2,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
