@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.domain.balance
 
 enum class BalanceTransactionType {
-    CHARGE, USE;
+    CHARGE,
+    USE,
+    CANCEL_USE
 }

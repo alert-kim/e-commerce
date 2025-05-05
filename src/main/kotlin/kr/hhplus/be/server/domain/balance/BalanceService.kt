@@ -38,23 +38,36 @@ class BalanceService(
     fun use(command: UseBalanceCommand): UsedBalanceAmount {
         val balance = repository.findByUserId(command.userId)
             ?: throw NotFoundBalanceException("by userId: ${command.userId}")
+        val amount = BalanceAmount.of(command.amount)
 
-        val usedAmount = balance.use(BalanceAmount.of(command.amount))
+        val usedAmount = balance.use(amount)
 
         recordRepository.save(
             BalanceRecord.new(
                 balanceId = balance.id(),
                 type = BalanceTransactionType.USE,
-                amount = BalanceAmount.of(command.amount),
+                amount = amount,
             )
         )
 
         return usedAmount
     }
-
+    
     @Transactional
     fun cancelUse(command: CancelBalanceUseCommand) {
-        TODO()
+        val balance = repository.findByUserId(command.userId)
+            ?: throw NotFoundBalanceException("by userId: ${command.userId}")
+        val amount = BalanceAmount.of(command.amount)
+
+        balance.cancelUse(amount)
+
+        recordRepository.save(
+            BalanceRecord.new(
+                balanceId = balance.id(),
+                type = BalanceTransactionType.CANCEL_USE,
+                amount = amount,
+            )
+        )
     }
 
     fun get(id: Long): BalanceView =
