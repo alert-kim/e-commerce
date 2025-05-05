@@ -4,9 +4,11 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.reflect.MethodSignature
 import java.lang.reflect.Method
 
-class JoinPointContext(private val joinPoint: ProceedingJoinPoint) {
+class JoinPointContext(val joinPoint: ProceedingJoinPoint) {
     val signature: MethodSignature by lazy { joinPoint.signature as MethodSignature }
+    val className: String by lazy { signature.declaringType.simpleName }
     val method: Method by lazy { signature.method }
+    val methodName: String by lazy { signature.name }
     val parameterNames: Array<String> by lazy { signature.parameterNames }
     val arguments: Array<Any?> by lazy { joinPoint.args }
 

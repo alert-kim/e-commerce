@@ -13,6 +13,8 @@ import java.lang.reflect.Method
 
 class JoinPointContextTest {
 
+    data class TestClass(val name: String)
+
     @Test
     @DisplayName("signature는 JoinPoint의 signature")
     fun getSignature() {
@@ -25,6 +27,20 @@ class JoinPointContextTest {
 
         verify(exactly = 1) { joinPoint.signature }
         assertThat(signature).isSameAs(methodSignature)
+    }
+
+    @Test
+    @DisplayName("className은 declaringType의 simpleName")
+    fun getClassName() {
+        val joinPoint = mockk<ProceedingJoinPoint>()
+        val methodSignature = mockk<MethodSignature>()
+        val context = JoinPointContext(joinPoint)
+        every { joinPoint.signature } returns methodSignature
+        every { methodSignature.declaringType } returns TestClass::class.java
+
+        val className = context.className
+
+        assertThat(className).isEqualTo(TestClass::class.java.simpleName)
     }
 
     @Test
@@ -42,6 +58,22 @@ class JoinPointContextTest {
         verify(exactly = 1) { methodSignature.method }
         assertThat(actual).isSameAs(method)
     }
+
+    @Test
+    @DisplayName("methodName은 signature의 name")
+    fun getMethodName() {
+        val joinPoint = mockk<ProceedingJoinPoint>()
+        val methodSignature = mockk<MethodSignature>()
+        val context = JoinPointContext(joinPoint)
+        val expected = "testMethod"
+        every { joinPoint.signature } returns methodSignature
+        every { methodSignature.name } returns expected
+
+        val methodName = context.methodName
+
+        assertThat(methodName).isEqualTo(expected)
+    }
+
 
     @Test
     @DisplayName("parameterNames는 MethodSignature의 parameterNames")
