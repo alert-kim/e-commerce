@@ -7,9 +7,12 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.application.order.command.CreateOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.FailOrderProcessorCommand
+import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.domain.order.OrderService
+import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.FailOrderCommand
+import kr.hhplus.be.server.domain.order.command.MarkOrderFailHandledCommand
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.UserMock
@@ -81,4 +84,19 @@ class OrderLifecycleProcessorTest {
         }
     }
 
+    @Nested
+    @DisplayName("실패 처리 완료 표시")
+    inner class MarkFailHandled {
+        @Test
+        @DisplayName("실패한 주문을 처리됨으로 표시")
+        fun mark() {
+            val orderId = OrderMock.id()
+
+            processor.markFailHandled(MarkOrderFailHandledProcessorCommand(orderId))
+
+            verify {
+                orderService.markFailHandled(MarkOrderFailHandledCommand(orderId))
+            }
+        }
+    }
 }

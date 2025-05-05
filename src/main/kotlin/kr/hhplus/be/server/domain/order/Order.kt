@@ -145,6 +145,18 @@ class Order(
         updatedAt = Instant.now()
     }
 
+    fun failHandled() {
+        if (!isFailed()) {
+            throw InvalidOrderStatusException(
+                id = id(),
+                status = status,
+                expect = OrderStatus.FAILED,
+            )
+        }
+        this.status = OrderStatus.FAIL_HANDLED
+        updatedAt = Instant.now()
+    }
+
     fun isFailed(): Boolean = status == OrderStatus.FAILED
 
     private fun addOrderProduct(

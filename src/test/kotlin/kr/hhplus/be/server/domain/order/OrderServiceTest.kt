@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.order
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -21,23 +22,18 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import java.math.BigDecimal
 
-@ExtendWith(MockKExtension::class)
 class OrderServiceTest {
-    @InjectMockKs
+
     private lateinit var service: OrderService
 
-    @MockK(relaxed = true)
-    private lateinit var repository: OrderRepository
-
-    @MockK(relaxed = true)
-    private lateinit var publisher: ApplicationEventPublisher
-
-    @MockK(relaxed = true)
-    private lateinit var client: OrderSnapshotClient
+    private val repository = mockk<OrderRepository>(relaxed = true)
+    private val publisher = mockk<ApplicationEventPublisher>(relaxed = true)
+    private val client = mockk<OrderSnapshotClient>(relaxed = true)
 
     @BeforeEach
     fun setUp() {
-        clearMocks(repository, publisher, client)
+        clearAllMocks()
+        service = OrderService(repository, client, publisher)
     }
 
     @Nested
@@ -248,6 +244,40 @@ class OrderServiceTest {
 
             shouldThrow<NotFoundOrderException> {
                 service.failOrder(command)
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("실패 주문 처리됨 표시")
+    inner class MarkFailHandled {
+        @Test
+        @DisplayName("주문을 실패 처리됨으로 표시한다")
+        fun markFailHandled() {
+            val orderId = OrderMock.id()
+            val order = mockk<Order>(relaxed = true)
+            every { repository.findById(orderId.value) } returns order
+
+            service.markFailHandled(MarkOrderFailHandledCommand(orderId))
+
+            verify {
+                repository.findById(orderId.value)
+                order.failHandled()
+            }
+        }
+
+        @Test
+        @DisplayName("주문이 존재하지 않으면 NotFoundOrderException가 발생한다")
+        fun orderNotFound() {
+            val orderId = OrderMock.id()
+            every { repository.findById(orderId.value) } returns null
+
+            assertThrows<NotFoundOrderException> {
+                service.markFailHandled(MarkOrderFailHandledCommand(orderId))
+            }
+
+            verify {
+                repository.findById(orderId.value)
             }
         }
     }

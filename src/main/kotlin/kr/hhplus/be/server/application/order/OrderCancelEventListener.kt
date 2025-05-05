@@ -2,7 +2,7 @@ package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCommand
 import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
-import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledCommand
+import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
@@ -39,7 +39,7 @@ class OrderCancelEventListener(
 
         if (isSuccess) {
             orderLifecycleProcessor.markFailHandled(
-                MarkOrderFailHandledCommand(orderId = snapshot.id)
+                MarkOrderFailHandledProcessorCommand(orderId = snapshot.id)
             )
         }
     }

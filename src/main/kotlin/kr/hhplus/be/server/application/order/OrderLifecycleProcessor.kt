@@ -2,11 +2,12 @@ package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.CreateOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.FailOrderProcessorCommand
-import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledCommand
+import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.application.order.result.OrderCreationProcessorResult
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.FailOrderCommand
+import kr.hhplus.be.server.domain.order.command.MarkOrderFailHandledCommand
 import kr.hhplus.be.server.domain.user.UserService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,7 +39,7 @@ class OrderLifecycleProcessor(
     }
     
     @Transactional
-    fun markFailHandled(command: MarkOrderFailHandledCommand) {
-        TODO()
+    fun markFailHandled(command: MarkOrderFailHandledProcessorCommand) {
+        orderService.markFailHandled(MarkOrderFailHandledCommand(command.orderId))
     }
 }

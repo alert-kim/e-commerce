@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.order
 
+import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
 import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
@@ -81,6 +82,15 @@ class OrderService(
         )
         publisher.publishEvent(event)
     }
+
+
+    @Transactional
+    fun markFailHandled(command: MarkOrderFailHandledCommand) {
+        val order = doGet(command.orderId.value)
+
+        order.failHandled()
+    }
+
 
     @Transactional
     fun sendOrderCompleted(

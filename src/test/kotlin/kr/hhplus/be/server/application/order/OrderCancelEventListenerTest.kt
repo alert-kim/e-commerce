@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.*
 import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCommand
 import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
-import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledCommand
+import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderSnapshot
@@ -76,7 +76,7 @@ class OrderCancelEventListenerTest {
                 orderCouponProcessor.cancelCoupon(ofType(CancelCouponUseProcessorCommand::class))
                 orderProductProcessor.restoreOrderProductStock(ofType(RestoreStockOrderProductProcessorCommand::class))
                 orderPaymentProcessor.cancelPayment(ofType(CancelOrderPaymentProcessorCommand::class))
-                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledCommand::class))
+                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledProcessorCommand::class))
             }
         }
 
@@ -113,7 +113,7 @@ class OrderCancelEventListenerTest {
                 orderPaymentProcessor.cancelPayment(ofType(CancelOrderPaymentProcessorCommand::class))
             }
             verify(exactly = 0) {
-                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledCommand::class))
+                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledProcessorCommand::class))
             }
         }
 
@@ -220,7 +220,7 @@ class OrderCancelEventListenerTest {
                 orderPaymentProcessor.cancelPayment(ofType(CancelOrderPaymentProcessorCommand::class))
             }
             verify(exactly = 0) {
-                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledCommand::class))
+                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledProcessorCommand::class))
             }
         }
 
@@ -259,7 +259,7 @@ class OrderCancelEventListenerTest {
                 orderProductProcessor.restoreOrderProductStock(ofType(RestoreStockOrderProductProcessorCommand::class))
             }
             verify(exactly = 0) {
-                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledCommand::class))
+                orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledProcessorCommand::class))
             }
         }
 
