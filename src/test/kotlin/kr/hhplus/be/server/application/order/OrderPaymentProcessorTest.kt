@@ -1,43 +1,43 @@
 package kr.hhplus.be.server.application.order
 
-import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
-import io.mockk.verifyOrder
+import io.mockk.*
+import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
 import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
+import kr.hhplus.be.server.domain.balance.command.CancelBalanceUseCommand
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.PayOrderCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
+import kr.hhplus.be.server.domain.payment.command.CancelPaymentCommand
 import kr.hhplus.be.server.domain.payment.command.PayCommand
+import kr.hhplus.be.server.domain.payment.exception.NotOwnedPaymentException
 import kr.hhplus.be.server.testutil.mock.BalanceMock
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.PaymentMock
 import kr.hhplus.be.server.testutil.mock.UserMock
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.*
 import java.math.BigDecimal
 
-@ExtendWith(MockKExtension::class)
 class OrderPaymentProcessorTest {
 
-    @InjectMockKs
     private lateinit var processor: OrderPaymentProcessor
 
-    @MockK(relaxed = true)
-    private lateinit var balanceService: BalanceService
+    private val balanceService = mockk<BalanceService>(relaxed = true)
+    private val orderService = mockk<OrderService>(relaxed = true)
+    private val paymentService = mockk<PaymentService>(relaxed = true)
 
-    @MockK(relaxed = true)
-    private lateinit var orderService: OrderService
-
-    @MockK(relaxed = true)
-    private lateinit var paymentService: PaymentService
+    @BeforeEach
+    fun setUp() {
+        clearAllMocks()
+        processor = OrderPaymentProcessor(
+            balanceService = balanceService,
+            orderService = orderService,
+            paymentService = paymentService,
+        )
+    }
 
     @Nested
     @DisplayName("주문 결제 처리")
@@ -86,6 +86,62 @@ class OrderPaymentProcessorTest {
                         payment = payment
                     )
                 )
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("결제 취소 처리")
+    inner class CancelPayment {
+        @Test
+        @DisplayName("결제를 취소한다")
+        fun cancel() {
+            val payment = PaymentMock.view()
+            every { paymentService.getOrNullByOrderId(payment.orderId) } returns payment
+
+            processor.cancelPayment(CancelOrderPaymentProcessorCommand(payment.orderId, payment.userId))
+
+            verifyOrder {
+                paymentService.getOrNullByOrderId(payment.orderId)
+                paymentService.cancelPay(CancelPaymentCommand(payment.id))
+                balanceService.cancelUse(CancelBalanceUseCommand(payment.userId, payment.amount))
+            }
+        }
+
+        @Test
+        @DisplayName("결제 정보가 없으면 취소 처리 없이 종료한다")
+        fun noPayment() {
+            every { paymentService.getOrNullByOrderId(any()) } returns null
+
+            processor.cancelPayment(
+                CancelOrderPaymentProcessorCommand(
+                    OrderMock.id(), UserMock.id()
+                )
+            )
+
+            verify(exactly = 0) {
+                paymentService.cancelPay(any())
+                balanceService.cancelUse(any())
+            }
+        }
+
+        @Test
+        @DisplayName("다른 사용자의 결제를 취소하려고 하면 예외가 발생한다")
+        fun notOwnedPayment() {
+            val paymentOwnerId = UserMock.id(1)
+            val requestUserId = UserMock.id(2)
+            val payment = PaymentMock.view(
+                userId = paymentOwnerId,
+            )
+            every { paymentService.getOrNullByOrderId(payment.orderId) } returns payment
+
+            assertThrows<NotOwnedPaymentException> {
+                processor.cancelPayment(CancelOrderPaymentProcessorCommand(payment.orderId, requestUserId))
+            }
+
+            verify(exactly = 0) {
+                paymentService.cancelPay(any())
+                balanceService.cancelUse(any())
             }
         }
     }

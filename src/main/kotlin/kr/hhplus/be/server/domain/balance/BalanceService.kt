@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.balance
 
+import kr.hhplus.be.server.domain.balance.command.CancelBalanceUseCommand
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
@@ -49,6 +50,11 @@ class BalanceService(
         )
 
         return usedAmount
+    }
+
+    @Transactional
+    fun cancelUse(command: CancelBalanceUseCommand) {
+        TODO()
     }
 
     fun get(id: Long): BalanceView =
