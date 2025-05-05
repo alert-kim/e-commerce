@@ -1,7 +1,7 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
-import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
+import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand
 import kr.hhplus.be.server.common.lock.LockStrategy
 import kr.hhplus.be.server.common.lock.annotation.DistributedLock
 import kr.hhplus.be.server.domain.order.OrderService
@@ -12,7 +12,7 @@ import kr.hhplus.be.server.domain.stock.command.AllocateStockCommand
 import kr.hhplus.be.server.domain.stock.command.RestoreStockCommand
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit
 
 @Service
 class OrderProductProcessor(
@@ -27,7 +27,7 @@ class OrderProductProcessor(
         strategy = LockStrategy.PUB_SUB,
         waitTime = 2_000,
         leaseTime = 1_500,
-        timeUnit = MILLISECONDS,
+        timeUnit = TimeUnit.MILLISECONDS,
     )
     @Transactional
     fun placeOrderProduct(command: PlaceOrderProductProcessorCommand) {
@@ -56,7 +56,7 @@ class OrderProductProcessor(
         strategy = LockStrategy.PUB_SUB,
         waitTime = 2_000,
         leaseTime = 1_500,
-        timeUnit = MILLISECONDS,
+        timeUnit = TimeUnit.MILLISECONDS,
     )
     @Transactional
     fun restoreOrderProductStock(command: RestoreStockOrderProductProcessorCommand) {

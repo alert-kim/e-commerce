@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
 import kr.hhplus.be.server.application.order.command.PlaceOrderProductProcessorCommand
 import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand

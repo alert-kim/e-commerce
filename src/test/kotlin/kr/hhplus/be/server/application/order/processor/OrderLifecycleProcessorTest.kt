@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -9,19 +9,17 @@ import kr.hhplus.be.server.application.order.command.CreateOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.FailOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
 import kr.hhplus.be.server.domain.order.command.FailOrderCommand
 import kr.hhplus.be.server.domain.order.command.MarkOrderFailHandledCommand
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.UserMock
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-
 
 @ExtendWith(MockKExtension::class)
 class OrderLifecycleProcessorTest {
@@ -50,7 +48,7 @@ class OrderLifecycleProcessorTest {
             val command = CreateOrderProcessorCommand(userId.value)
             val result = processor.createOrder(command)
 
-            assertThat(result.orderId).isEqualTo(orderId)
+            Assertions.assertThat(result.orderId).isEqualTo(orderId)
             verify {
                 userService.get(userId.value)
                 orderService.createOrder(

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
 import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
 import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCommand
@@ -7,7 +7,7 @@ import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.testutil.DatabaseTestHelper
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -75,12 +75,12 @@ class OrderCouponProcessorConcurrencyTest {
             completionLatch.await()
             executor.shutdown()
 
-            assertThat(successCounter.get()).isEqualTo(1)
-            assertThat(alreadyUsedCounter.get() + lockFailCounter.get()).isEqualTo(threadCount - 1)
-            assertThat(otherErrorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(successCounter.get()).isEqualTo(1)
+            Assertions.assertThat(alreadyUsedCounter.get() + lockFailCounter.get()).isEqualTo(threadCount - 1)
+            Assertions.assertThat(otherErrorCounter.get()).isEqualTo(0)
             val updatedCoupon = databaseTestHelper.findCoupon(coupon.id())
             require(updatedCoupon != null)
-            assertThat(updatedCoupon.usedAt).isNotNull()
+            Assertions.assertThat(updatedCoupon.usedAt).isNotNull()
         }
 
         @Test
@@ -121,15 +121,15 @@ class OrderCouponProcessorConcurrencyTest {
             completionLatch.await()
             executor.shutdown()
 
-            assertThat(successCounter.get()).isEqualTo(couponCount)
-            assertThat(errorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(successCounter.get()).isEqualTo(couponCount)
+            Assertions.assertThat(errorCounter.get()).isEqualTo(0)
             couponAndOrders.forEach { (coupon, order) ->
                 val updatedCoupon = databaseTestHelper.findCoupon(coupon.id())
                 require(updatedCoupon != null)
-                assertThat(updatedCoupon.usedAt).isNotNull()
+                Assertions.assertThat(updatedCoupon.usedAt).isNotNull()
 
                 val updatedOrder = orderService.get(order.id().value)
-                assertThat(updatedOrder.couponId).isEqualTo(coupon.id())
+                Assertions.assertThat(updatedOrder.couponId).isEqualTo(coupon.id())
             }
         }
     }
@@ -170,12 +170,12 @@ class OrderCouponProcessorConcurrencyTest {
             completionLatch.await()
             executor.shutdown()
 
-            assertThat(successCounter.get()).isEqualTo(1)
-            assertThat(lockFailCounter.get()).isEqualTo(threadCount - 1)
-            assertThat(otherErrorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(successCounter.get()).isEqualTo(1)
+            Assertions.assertThat(lockFailCounter.get()).isEqualTo(threadCount - 1)
+            Assertions.assertThat(otherErrorCounter.get()).isEqualTo(0)
             val updatedCoupon = databaseTestHelper.findCoupon(coupon.id())
             require(updatedCoupon != null)
-            assertThat(updatedCoupon.usedAt).isNull()
+            Assertions.assertThat(updatedCoupon.usedAt).isNull()
         }
 
         @Test
@@ -187,7 +187,7 @@ class OrderCouponProcessorConcurrencyTest {
                     usedAt = Instant.now()
                 )
             }
-            
+
             val threadCount = couponCount
             val executor = Executors.newFixedThreadPool(threadCount)
             val barrier = CyclicBarrier(threadCount)
@@ -212,13 +212,13 @@ class OrderCouponProcessorConcurrencyTest {
             completionLatch.await()
             executor.shutdown()
 
-            assertThat(successCounter.get()).isEqualTo(couponCount)
-            assertThat(errorCounter.get()).isEqualTo(0)
-            
+            Assertions.assertThat(successCounter.get()).isEqualTo(couponCount)
+            Assertions.assertThat(errorCounter.get()).isEqualTo(0)
+
             coupons.forEach { coupon ->
                 val updatedCoupon = databaseTestHelper.findCoupon(coupon.id())
                 require(updatedCoupon != null)
-                assertThat(updatedCoupon.usedAt).isNull()
+                Assertions.assertThat(updatedCoupon.usedAt).isNull()
             }
         }
     }
@@ -279,18 +279,18 @@ class OrderCouponProcessorConcurrencyTest {
             completionLatch.await()
             executor.shutdown()
 
-            assertThat(lockFailCounter.get()).isEqualTo(1)
-            assertThat(otherErrorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(lockFailCounter.get()).isEqualTo(1)
+            Assertions.assertThat(otherErrorCounter.get()).isEqualTo(0)
             val updatedCoupon = databaseTestHelper.findCoupon(coupon.id())
             require(updatedCoupon != null)
             when {
                 applySuccess.get() == true  -> {
-                    assertThat(cancelSuccess.get()).isFalse()
-                    assertThat(updatedCoupon.usedAt).isNotNull()
+                    Assertions.assertThat(cancelSuccess.get()).isFalse()
+                    Assertions.assertThat(updatedCoupon.usedAt).isNotNull()
                 }
                 cancelSuccess.get() == true -> {
-                    assertThat(applySuccess.get()).isFalse()
-                    assertThat(updatedCoupon.usedAt).isNull()
+                    Assertions.assertThat(applySuccess.get()).isFalse()
+                    Assertions.assertThat(updatedCoupon.usedAt).isNull()
                 }
             }
         }
@@ -343,14 +343,14 @@ class OrderCouponProcessorConcurrencyTest {
             completionLatch.await()
             executor.shutdown()
 
-            assertThat(successCounter.get()).isEqualTo(2)
-            assertThat(errorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(successCounter.get()).isEqualTo(2)
+            Assertions.assertThat(errorCounter.get()).isEqualTo(0)
             val usedCoupon = databaseTestHelper.findCoupon(couponToUse.id())
             require(usedCoupon != null)
-            assertThat(usedCoupon.usedAt).isNotNull()
+            Assertions.assertThat(usedCoupon.usedAt).isNotNull()
             val usagedCanceledCoupon = databaseTestHelper.findCoupon(couponToCancelUsage.id())
             require(usagedCanceledCoupon != null)
-            assertThat(usagedCanceledCoupon.usedAt).isNull()
+            Assertions.assertThat(usagedCanceledCoupon.usedAt).isNull()
         }
     }
 }

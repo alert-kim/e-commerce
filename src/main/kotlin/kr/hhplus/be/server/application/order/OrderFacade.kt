@@ -1,6 +1,10 @@
 package kr.hhplus.be.server.application.order
 
 import kr.hhplus.be.server.application.order.command.*
+import kr.hhplus.be.server.application.order.processor.OrderCouponProcessor
+import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
+import kr.hhplus.be.server.application.order.processor.OrderPaymentProcessor
+import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
 import kr.hhplus.be.server.application.order.result.OrderFacadeResult
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService

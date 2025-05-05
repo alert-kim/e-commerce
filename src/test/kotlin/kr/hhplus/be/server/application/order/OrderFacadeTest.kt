@@ -6,6 +6,10 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kr.hhplus.be.server.application.order.command.*
+import kr.hhplus.be.server.application.order.processor.OrderCouponProcessor
+import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
+import kr.hhplus.be.server.application.order.processor.OrderPaymentProcessor
+import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
 import kr.hhplus.be.server.application.order.result.OrderCreationProcessorResult
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand

@@ -6,6 +6,10 @@ import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCom
 import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
 import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand
+import kr.hhplus.be.server.application.order.processor.OrderCouponProcessor
+import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
+import kr.hhplus.be.server.application.order.processor.OrderPaymentProcessor
+import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.OrderStatus

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
 import io.mockk.clearAllMocks
 import io.mockk.every

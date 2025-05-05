@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
 import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
 import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
@@ -14,7 +14,7 @@ import kr.hhplus.be.server.domain.payment.command.CancelPaymentCommand
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit
 
 @Service
 class OrderPaymentProcessor(
@@ -29,7 +29,7 @@ class OrderPaymentProcessor(
         strategy = LockStrategy.SPIN,
         waitTime = 2_000L,
         leaseTime = 1_500L,
-        timeUnit = MILLISECONDS,
+        timeUnit = TimeUnit.MILLISECONDS,
     )
     @Transactional
     fun processPayment(command: PayOrderProcessorCommand) {
@@ -57,7 +57,7 @@ class OrderPaymentProcessor(
         strategy = LockStrategy.SPIN,
         waitTime = 2_000L,
         leaseTime = 1_500L,
-        timeUnit = MILLISECONDS,
+        timeUnit = TimeUnit.MILLISECONDS,
     )
     @Transactional
     fun cancelPayment(command: CancelOrderPaymentProcessorCommand) {
@@ -66,7 +66,8 @@ class OrderPaymentProcessor(
 
         paymentService.cancelPay(CancelPaymentCommand(payment.id))
 
-        balanceService.cancelUse(CancelBalanceUseCommand(
+        balanceService.cancelUse(
+            CancelBalanceUseCommand(
                 userId = payment.userId,
                 amount = payment.amount
             )

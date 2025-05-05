@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
 import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
 import kr.hhplus.be.server.application.order.command.PayOrderProcessorCommand
@@ -10,7 +10,7 @@ import kr.hhplus.be.server.domain.payment.exception.NotOwnedPaymentException
 import kr.hhplus.be.server.testutil.DatabaseTestHelper
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.UserMock
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -85,15 +85,15 @@ class OrderPaymentProcessorConcurrencyTest {
             completionLatch.await(30, TimeUnit.SECONDS)
             executor.shutdown()
 
-            assertThat(successCounter.get()).isEqualTo(orderCount)
-            assertThat(insufficientBalanceCounter.get()).isEqualTo(0)
-            assertThat(otherErrorCounter.get()).isEqualTo(0)
-            assertThat(lockFailCounter.get()).isEqualTo(0)
+            Assertions.assertThat(successCounter.get()).isEqualTo(orderCount)
+            Assertions.assertThat(insufficientBalanceCounter.get()).isEqualTo(0)
+            Assertions.assertThat(otherErrorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(lockFailCounter.get()).isEqualTo(0)
             val updatedBalance = databaseTestHelper.findBalance(userId)
             require(updatedBalance != null)
             val expectedRemainingBalance =
                 initialBalance.subtract(orderAmount.multiply(BigDecimal.valueOf(successCounter.get().toLong())))
-            assertThat(updatedBalance.amount.value).isEqualByComparingTo(expectedRemainingBalance)
+            Assertions.assertThat(updatedBalance.amount.value).isEqualByComparingTo(expectedRemainingBalance)
         }
 
 
@@ -144,14 +144,14 @@ class OrderPaymentProcessorConcurrencyTest {
             executor.shutdown()
 
             val expectedSuccessCount = initialBalance.toInt() / orderAmount.toInt()
-            assertThat(successCounter.get()).isEqualTo(expectedSuccessCount)
-            assertThat(insufficientBalanceCounter.get()).isEqualTo(orderCount - expectedSuccessCount)
-            assertThat(otherErrorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(successCounter.get()).isEqualTo(expectedSuccessCount)
+            Assertions.assertThat(insufficientBalanceCounter.get()).isEqualTo(orderCount - expectedSuccessCount)
+            Assertions.assertThat(otherErrorCounter.get()).isEqualTo(0)
             val updatedBalance = databaseTestHelper.findBalance(userId)
             require(updatedBalance != null)
             val expectedRemainingBalance =
                 initialBalance.subtract(orderAmount.multiply(BigDecimal.valueOf(successCounter.get().toLong())))
-            assertThat(updatedBalance.amount.value).isEqualByComparingTo(expectedRemainingBalance)
+            Assertions.assertThat(updatedBalance.amount.value).isEqualByComparingTo(expectedRemainingBalance)
         }
 
         @Test
@@ -185,7 +185,7 @@ class OrderPaymentProcessorConcurrencyTest {
             completionLatch.await(30, TimeUnit.SECONDS)
             executor.shutdown()
 
-            assertThat(errorCount.get()).isEqualTo(threadCount)
+            Assertions.assertThat(errorCount.get()).isEqualTo(threadCount)
         }
     }
 
@@ -242,12 +242,12 @@ class OrderPaymentProcessorConcurrencyTest {
             completionLatch.await()
             executor.shutdown()
 
-            assertThat(successCounter.get()).isEqualTo(orderIds.size)
-            assertThat(otherErrorCounter.get()).isEqualTo(0)
-            assertThat(lockFailCounter.get()).isEqualTo(0)
+            Assertions.assertThat(successCounter.get()).isEqualTo(orderIds.size)
+            Assertions.assertThat(otherErrorCounter.get()).isEqualTo(0)
+            Assertions.assertThat(lockFailCounter.get()).isEqualTo(0)
             val updatedBalance = databaseTestHelper.findBalance(userId)
             require(updatedBalance != null)
-            assertThat(updatedBalance.amount.value).isEqualByComparingTo(
+            Assertions.assertThat(updatedBalance.amount.value).isEqualByComparingTo(
                 initialBalance.add(cancelAmount.multiply(orderIds.size.toBigDecimal()))
             )
         }
@@ -294,11 +294,11 @@ class OrderPaymentProcessorConcurrencyTest {
             completionLatch.await(30, TimeUnit.SECONDS)
             executor.shutdown()
 
-            assertThat(notOwnedExCounter.get()).isEqualTo(threadCount)
-            assertThat(otherExCounter.get()).isEqualTo(0)
+            Assertions.assertThat(notOwnedExCounter.get()).isEqualTo(threadCount)
+            Assertions.assertThat(otherExCounter.get()).isEqualTo(0)
             val updatedBalance = databaseTestHelper.findBalance(userId)
             require(updatedBalance != null)
-            assertThat(updatedBalance.amount.value).isEqualByComparingTo(initialBalance)
+            Assertions.assertThat(updatedBalance.amount.value).isEqualByComparingTo(initialBalance)
         }
 
         @Test
@@ -356,11 +356,11 @@ class OrderPaymentProcessorConcurrencyTest {
             completionLatch.await(30, TimeUnit.SECONDS)
             executor.shutdown()
 
-            assertThat(paySuccess.get()).isTrue
-            assertThat(cancelSuccess.get()).isTrue
+            Assertions.assertThat(paySuccess.get()).isTrue
+            Assertions.assertThat(cancelSuccess.get()).isTrue
             val updatedBalance = databaseTestHelper.findBalance(userId)
             require(updatedBalance != null)
-            assertThat(updatedBalance.amount.value).isEqualByComparingTo(
+            Assertions.assertThat(updatedBalance.amount.value).isEqualByComparingTo(
                 initialBalance.subtract(payAmount).add(cancelAmount)
             )
         }

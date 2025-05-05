@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.application.order
+package kr.hhplus.be.server.application.order.processor
 
 import kr.hhplus.be.server.application.order.command.CreateOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.FailOrderProcessorCommand
@@ -27,7 +27,7 @@ class OrderLifecycleProcessor(
         )
         return OrderCreationProcessorResult(orderId)
     }
-    
+
     @Transactional
     fun failOrder(command: FailOrderProcessorCommand) {
         orderService.failOrder(
@@ -37,7 +37,7 @@ class OrderLifecycleProcessor(
             )
         )
     }
-    
+
     @Transactional
     fun markFailHandled(command: MarkOrderFailHandledProcessorCommand) {
         orderService.markFailHandled(MarkOrderFailHandledCommand(command.orderId))
