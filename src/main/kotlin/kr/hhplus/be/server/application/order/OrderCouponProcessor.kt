@@ -5,6 +5,7 @@ import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCom
 import kr.hhplus.be.server.common.lock.LockStrategy
 import kr.hhplus.be.server.common.lock.annotation.DistributedLock
 import kr.hhplus.be.server.domain.coupon.CouponService
+import kr.hhplus.be.server.domain.coupon.command.CancelCouponUseCommand
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
@@ -38,6 +39,8 @@ class OrderCouponProcessor(
 
     @Transactional
     fun cancelCoupon(command: CancelCouponUseProcessorCommand) {
-        TODO()
+        couponService.cancelUse(
+            CancelCouponUseCommand(command.couponId.value)
+        )
     }
 }

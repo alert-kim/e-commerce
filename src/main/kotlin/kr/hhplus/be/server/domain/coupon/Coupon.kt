@@ -47,12 +47,20 @@ class Coupon(
         }
         val usedAt = Instant.now()
         this.usedAt = usedAt
+        this.updatedAt = usedAt
         return UsedCoupon(
             id = id(),
             userId = userId,
             discountAmount = discountAmount,
             usedAt = usedAt,
         )
+    }
+
+    fun cancelUse() {
+        if (usedAt == null) return
+
+        usedAt = null
+        updatedAt = Instant.now()
     }
 
     fun calculateDiscountAmount(totalAmount: BigDecimal): BigDecimal =
