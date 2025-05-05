@@ -37,7 +37,13 @@ class OrderCouponProcessor(
         )
     }
 
-    @Transactional
+    @DistributedLock(
+        keyPrefix = "coupon",
+        identifier = "#command.couponId.value",
+        strategy = LockStrategy.SIMPLE,
+        leaseTime = 2_000,
+        timeUnit = MILLISECONDS,
+    )
     fun cancelCoupon(command: CancelCouponUseProcessorCommand) {
         couponService.cancelUse(
             CancelCouponUseCommand(command.couponId.value)
