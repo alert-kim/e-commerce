@@ -4,7 +4,6 @@ import kr.hhplus.be.server.application.order.command.ApplyCouponProcessorCommand
 import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCommand
 import kr.hhplus.be.server.domain.common.LockAcquisitionFailException
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
-import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.testutil.DatabaseTestHelper
