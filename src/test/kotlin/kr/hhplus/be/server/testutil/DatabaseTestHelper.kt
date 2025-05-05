@@ -13,9 +13,12 @@ import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.product.TestProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.TestProductRepository
 import kr.hhplus.be.server.domain.order.Order
+import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderProduct
 import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
+import kr.hhplus.be.server.domain.payment.PaymentStatus
+import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
@@ -38,6 +41,7 @@ class DatabaseTestHelper(
     private val couponRepository: CouponRepository,
     private val couponSourceRepository: CouponSourceRepository,
     private val orderRepository: OrderRepository,
+    private val paymentRepository: PaymentRepository,
     private val productRepository: ProductRepository,
     private val stockRepository: StockRepository,
 ) {
@@ -123,6 +127,29 @@ class DatabaseTestHelper(
                 products = products,
             )
         )
+
+    // payment
+    fun savedPayment(
+        userId: UserId = UserMock.id(),
+        status: PaymentStatus = PaymentStatus.COMPLETED,
+        orderId: OrderId = OrderMock.id(),
+        amount: BigDecimal = 2000.toBigDecimal(),
+        canceledAt: Instant? = null,
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now(),
+    ) {
+        val payment = PaymentMock.payment(
+            id = null,
+            userId = userId,
+            status = status,
+            orderId = orderId,
+            amount = amount,
+            canceledAt = canceledAt,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+        )
+        paymentRepository.save(payment)
+    }
 
     // product
     fun savedProduct(

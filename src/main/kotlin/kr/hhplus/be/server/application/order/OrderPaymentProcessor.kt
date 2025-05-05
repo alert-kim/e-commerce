@@ -51,6 +51,14 @@ class OrderPaymentProcessor(
         orderService.pay(PayOrderCommand(payment))
     }
 
+    @DistributedLock(
+        keyPrefix = "balance",
+        identifier = "#command.userId",
+        strategy = LockStrategy.SPIN,
+        waitTime = 2_000L,
+        leaseTime = 1_500L,
+        timeUnit = MILLISECONDS,
+    )
     @Transactional
     fun cancelPayment(command: CancelOrderPaymentProcessorCommand) {
         val payment = paymentService.getOrNullByOrderId(command.orderId) ?: return
