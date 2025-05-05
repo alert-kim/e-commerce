@@ -28,6 +28,7 @@ class PaymentService(
     }
 
     fun getOrNullByOrderId(orderId: OrderId): PaymentView? =
-        TODO()
+        repository.findByOrderId(orderId)
+            ?.let { PaymentView.from(it) }
 
 }
