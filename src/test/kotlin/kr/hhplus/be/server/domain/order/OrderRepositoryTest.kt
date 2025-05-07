@@ -1,14 +1,13 @@
 package kr.hhplus.be.server.domain.order
 
-import io.mockk.impl.annotations.SpyK
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.product.ProductPrice
+import kr.hhplus.be.server.testutil.assertion.OrderAssert.Companion.assertOrder
 import kr.hhplus.be.server.testutil.mock.IdMock
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.ProductMock
-import kr.hhplus.be.server.testutil.assertion.OrderAssert.Companion.assertOrder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

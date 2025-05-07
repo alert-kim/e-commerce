@@ -67,12 +67,12 @@ abstract class ApiTest {
             price = price,
         )
 
-    fun savedProductDailySale(
+    fun savedProductDailySaleStat(
         productId: ProductId = ProductMock.id(),
         date: LocalDate = LocalDate.now(),
         quantity: Int = 100,
     ) =
-        databaseTestHelper.savedProductDailySale(
+        databaseTestHelper.savedProductDailySaleStat(
             productId = productId,
             date = date,
             quantity = quantity

@@ -18,6 +18,8 @@ class OrderProduct(
     @JoinColumn(name = "order_id")
     private var order: Order? = null,
 
+    @Embedded
+    @AttributeOverride(name = "value", column = Column(name = "product_id"))
     val productId: ProductId,
     val quantity: Int,
 

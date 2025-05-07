@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDate
 
 @Repository
-interface ProductDailySaleStatJpaRepository : JpaRepository<ProductDailySaleStat, ProductDailySaleStatId> {
+interface ProductDailySaleStatJpaRepository : JpaRepository<ProductDailySaleStat, Long> {
 
     @Query(
         """
