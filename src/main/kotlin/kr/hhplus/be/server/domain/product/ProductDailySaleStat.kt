@@ -10,7 +10,8 @@ class ProductDailySaleStat(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-
+    @Embedded
+    @AttributeOverride(name = "value", column = Column(name = "product_id"))
     val productId: ProductId,
     val date: LocalDate,
     val createdAt: Instant,

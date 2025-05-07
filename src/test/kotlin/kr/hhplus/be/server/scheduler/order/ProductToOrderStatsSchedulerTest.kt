@@ -23,7 +23,7 @@ class ProductToOrderStatsSchedulerTest {
     }
 
     @Test
-    fun `일일 집계 - 오늘 날짜로 상품 판매 집계를 수행한다`() {
+    fun `일일 집계 - 오늘 날짜로 상품 판매 집계를 수행하고 캐시에 넣어주기 위해 인기 상품을 조회한다`() {
         val today = LocalDate.now()
 
         orderProductStatsScheduler.aggregateDaily()
@@ -34,6 +34,7 @@ class ProductToOrderStatsSchedulerTest {
                     assertThat(it.date).isEqualTo(today)
                 }
             )
+            productFacade.getPopularProducts()
         }
     }
 }

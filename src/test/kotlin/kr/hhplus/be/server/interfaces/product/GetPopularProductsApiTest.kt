@@ -18,7 +18,7 @@ class GetPopularProductsApiTest : ApiTest() {
         val popularProductsSize = 5
         val products = List(productsSize) { index ->
             val product = savedProduct()
-            savedProductDailySale(
+            savedProductDailySaleStat(
                 productId = product.id(),
                 date = LocalDate.now(TimeZone.KSTId).minusDays(1),
                 quantity = 100 - index * 10,
@@ -48,19 +48,19 @@ class GetPopularProductsApiTest : ApiTest() {
         val popularProducts = List(5) { index ->
             val product = savedProduct()
             val date = Arb.localDate(minDate = startDate, maxDate = endDate).next()
-            savedProductDailySale(
+            savedProductDailySaleStat(
                 productId = product.id(),
                 date = date,
                 quantity = 100 - index * 10,
             )
             product
         }
-        savedProductDailySale(
+        savedProductDailySaleStat(
             productId = savedProduct().id(),
             date = startDate.minusDays(1),
             quantity = 1000,
         )
-        savedProductDailySale(
+        savedProductDailySaleStat(
             productId = savedProduct().id(),
             date = endDate.plusDays(1),
             quantity = 1000,

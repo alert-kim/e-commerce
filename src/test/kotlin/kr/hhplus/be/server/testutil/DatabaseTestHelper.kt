@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.testutil
 
+import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
 import kr.hhplus.be.server.domain.coupon.*
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
@@ -177,10 +178,23 @@ class DatabaseTestHelper(
         return saved
     }
 
-    fun savedProductDailySale(
+    fun findProduct(
+        id: ProductId,
+    ) = productRepository.findById(id.value)
+
+    fun findStock(
         productId: ProductId,
-        date: LocalDate,
-        quantity: Int,
+    ) = stockRepository.findByProductId(productId)
+
+    // product-stat
+    fun clearProductDailySaleStat() {
+        testProductDailySaleStatRepository.deleteAll()
+    }
+
+    fun savedProductDailySaleStat(
+        productId: ProductId = ProductMock.id(),
+        date: LocalDate = LocalDate.now(TimeZone.KSTId).minusDays(1),
+        quantity: Int = 10,
     ): ProductDailySaleStat =
         testProductDailySaleStatRepository.save(
             ProductMock.dailySale(
@@ -190,14 +204,5 @@ class DatabaseTestHelper(
                 quantity = quantity,
             )
         )
-
-    fun findProduct(
-        id: ProductId,
-    ) = productRepository.findById(id.value)
-
-    fun findStock(
-        productId: ProductId,
-    ) = stockRepository.findByProductId(productId)
-
 
 }
