@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.user
 
 import kr.hhplus.be.server.domain.user.exception.RequiredUserIdException
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

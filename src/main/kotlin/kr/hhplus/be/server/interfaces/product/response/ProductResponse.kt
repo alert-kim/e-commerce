@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.interfaces.product.response
 
-import kr.hhplus.be.server.application.product.result.ProductsResult
-import kr.hhplus.be.server.domain.product.ProductView
+import kr.hhplus.be.server.application.product.result.GetProductsFacadeResult
 import kr.hhplus.be.server.domain.product.ProductStatus
 import java.math.BigDecimal
 import java.time.Instant
@@ -16,7 +15,7 @@ class ProductResponse(
     val createdAt: Instant,
 ) {
     companion object {
-        fun from(productWithStock: ProductsResult.ProductWithStock): ProductResponse =
+        fun from(productWithStock: GetProductsFacadeResult.ProductWithStock): ProductResponse =
             ProductResponse(
                 id = productWithStock.product.id.value,
                 status = productWithStock.product.status,

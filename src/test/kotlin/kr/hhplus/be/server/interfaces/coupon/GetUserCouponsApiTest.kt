@@ -2,7 +2,7 @@ package kr.hhplus.be.server.interfaces.coupon
 
 import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
-import kr.hhplus.be.server.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.IdMock
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.get

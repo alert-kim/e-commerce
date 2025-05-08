@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.domain.order
 
-import jakarta.persistence.Access
-import jakarta.persistence.AccessType
+import jakarta.persistence.AttributeOverride
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Embedded
@@ -12,7 +11,6 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import kr.hhplus.be.server.domain.coupon.CouponId
@@ -31,7 +29,7 @@ import java.time.Instant
 class Order(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
 
     val userId: UserId,
     val createdAt: Instant,
@@ -61,6 +59,7 @@ class Order(
         private set
 
     @Embedded
+    @AttributeOverride(name = "value", column = Column(name = "coupon_id"))
     var couponId: CouponId? = couponId
         private set
 
@@ -76,7 +75,7 @@ class Order(
         orphanRemoval = true,
         fetch = FetchType.EAGER,
     )
-    protected val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
+    private val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
 
     fun id(): OrderId =
         id?.let { OrderId(it) } ?: throw RequiredOrderIdException()

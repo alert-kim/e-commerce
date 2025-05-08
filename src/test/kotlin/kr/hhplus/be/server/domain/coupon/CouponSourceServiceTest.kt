@@ -11,7 +11,7 @@ import io.mockk.verify
 import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
-import kr.hhplus.be.server.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

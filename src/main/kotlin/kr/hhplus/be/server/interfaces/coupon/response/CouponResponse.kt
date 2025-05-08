@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.interfaces.coupon.response
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import kr.hhplus.be.server.application.coupon.result.CouponResult
+import kr.hhplus.be.server.application.coupon.result.IssueCouponFacadeResult
 import kr.hhplus.be.server.domain.coupon.CouponView
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
@@ -16,11 +15,6 @@ class CouponResponse(
     val updatedAt: Instant,
 ) : ServerApiResponse {
     companion object {
-        fun from(result: CouponResult.Single): CouponResponse =
-            from(
-                result.value
-            )
-
         fun from(coupon: CouponView): CouponResponse {
             return CouponResponse(
                 id = coupon.id.value,
@@ -29,6 +23,17 @@ class CouponResponse(
                 discountAmount = coupon.discountAmount,
                 createdAt = coupon.createdAt,
                 updatedAt = coupon.updatedAt,
+            )
+        }
+
+        fun from(result: IssueCouponFacadeResult): CouponResponse = with(result.coupon) {
+            CouponResponse(
+                id = id.value,
+                userId = userId.value,
+                name = name,
+                discountAmount = discountAmount,
+                createdAt = createdAt,
+                updatedAt = updatedAt,
             )
         }
     }

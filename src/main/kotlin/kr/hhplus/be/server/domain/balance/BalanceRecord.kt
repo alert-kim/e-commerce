@@ -8,7 +8,7 @@ import java.time.Instant
 @Table(name = "balance_records")
 class BalanceRecord(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val balanceId: BalanceId,
     val type: BalanceTransactionType,
     val amount: BalanceAmount,

@@ -7,8 +7,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.domain.user.repository.UserRepository
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll

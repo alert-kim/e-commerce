@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.balance.response
 
-import kr.hhplus.be.server.application.balance.result.BalanceResult
+import kr.hhplus.be.server.application.balance.result.BalanceChargeFacadeResult
+import kr.hhplus.be.server.application.balance.result.GetBalanceFacadeResult
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 import java.math.BigDecimal
 
@@ -9,16 +10,22 @@ data class BalanceResponse(
     val balance: BigDecimal,
 ) : ServerApiResponse {
     companion object {
-        fun of(result: BalanceResult): BalanceResponse =
+        fun of(result: GetBalanceFacadeResult): BalanceResponse =
             when (result) {
-                is BalanceResult.Found -> BalanceResponse(
+                is GetBalanceFacadeResult.Found -> BalanceResponse(
                     userId = result.value.userId.value,
                     balance = result.value.amount,
                 )
-                is BalanceResult.Empty -> BalanceResponse(
+                is GetBalanceFacadeResult.Empty -> BalanceResponse(
                     userId = result.userId.value,
                     balance = BigDecimal.ZERO,
                 )
             }
+
+        fun of(result: BalanceChargeFacadeResult): BalanceResponse =
+            BalanceResponse(
+                userId = result.balance.userId.value,
+                balance = result.balance.amount,
+            )
     }
 }

@@ -1,10 +1,6 @@
 package kr.hhplus.be.server.domain.stock
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.stock.exception.InvalidStockQuantityToAllocateException
 import kr.hhplus.be.server.domain.stock.exception.OutOfStockException
@@ -13,11 +9,16 @@ import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import java.time.Instant
 
 @Entity
-@Table(name = "stocks")
+@Table(
+    name = "stocks",
+    uniqueConstraints = [
+        UniqueConstraint(name = "stock_product_unq_product", columnNames = ["productId"])
+    ]
+)
 class Stock(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
 
     val productId: ProductId,
     val createdAt: Instant = Instant.now(),

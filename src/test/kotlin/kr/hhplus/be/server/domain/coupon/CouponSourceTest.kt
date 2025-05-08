@@ -5,7 +5,7 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
 import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponSourceIdException
-import kr.hhplus.be.server.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll

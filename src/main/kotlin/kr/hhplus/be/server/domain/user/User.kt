@@ -9,7 +9,7 @@ import java.time.Instant
 class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val name: String,
     val createdAt: Instant = Instant.now(),
 ) {

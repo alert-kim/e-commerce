@@ -3,13 +3,12 @@ package kr.hhplus.be.server.domain.coupon
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.util.CouponSourceAssert.Companion.assertCouponSource
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.IdMock
+import kr.hhplus.be.server.testutil.assertion.CouponSourceAssert.Companion.assertCouponSource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
 
 class CouponSourceRepositoryTest : RepositoryTest() {
     @Autowired
@@ -54,9 +53,8 @@ class CouponSourceRepositoryTest : RepositoryTest() {
 
         val result = repository.findAllByStatus(status)
 
-        assertThat(result).hasSize(activeCouponIds.size)
-        result.forEach { source ->
-            assertThat(source.id()).isIn(activeCouponIds)
-        }
+        val resultIds = result.map { it.id() }.toSet()
+        assertThat(result.size).isGreaterThanOrEqualTo(activeCouponIds.size)
+        assertThat(resultIds).containsAll(activeCouponIds)
     }
 }

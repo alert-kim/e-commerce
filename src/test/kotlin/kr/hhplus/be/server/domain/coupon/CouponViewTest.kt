@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.coupon
 
-import kr.hhplus.be.server.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll

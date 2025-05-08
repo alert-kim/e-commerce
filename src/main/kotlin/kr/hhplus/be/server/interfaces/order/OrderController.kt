@@ -54,7 +54,7 @@ class OrderController(
                     )
                 )
 
-                OrderResponse.from(result.value)
+                OrderResponse.from(result)
             },
             errorSpec = {
                 when (it) {

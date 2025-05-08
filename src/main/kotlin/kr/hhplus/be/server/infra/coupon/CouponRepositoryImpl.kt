@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.infra.coupon
 
 import kr.hhplus.be.server.domain.coupon.Coupon
-import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.user.UserId
 import org.springframework.stereotype.Repository

@@ -1,16 +1,20 @@
 package kr.hhplus.be.server.domain.order
 
+import io.mockk.impl.annotations.SpyK
 import kr.hhplus.be.server.domain.RepositoryTest
+import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.product.ProductPrice
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.mock.ProductMock
-import kr.hhplus.be.server.util.OrderAssert.Companion.assertOrder
+import kr.hhplus.be.server.testutil.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.assertion.OrderAssert.Companion.assertOrder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class OrderRepositoryTest : RepositoryTest() {
     @Autowired
     lateinit var repository: OrderRepository
@@ -41,7 +45,7 @@ class OrderRepositoryTest : RepositoryTest() {
 
     @Test
     fun `findById - ID로 주문을 찾을 수 있음`() {
-        val order = OrderMock.order(id = null, products = emptyList())
+        val order = OrderMock.order(id = null, products = emptyList(), couponId = CouponId(IdMock.value()))
         order.placeStock(
             productId = ProductMock.id(),
             quantity = 2,

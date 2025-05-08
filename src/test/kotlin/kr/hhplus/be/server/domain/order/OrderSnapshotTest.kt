@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
-import kr.hhplus.be.server.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -15,19 +15,19 @@ class OrderSnapshotTest {
 
         val orderSnapshot = OrderSnapshot.from(order)
 
-        assertThat(orderSnapshot.id).isEqualTo(orderId.value)
+        assertThat(orderSnapshot.id).isEqualTo(orderId)
         assertThat(orderSnapshot.userId).isEqualTo(order.userId)
         assertThat(orderSnapshot.status).isEqualTo(order.status)
         assertThat(orderSnapshot.originalAmount).isEqualByComparingTo(order.originalAmount)
         assertThat(orderSnapshot.discountAmount).isEqualByComparingTo(order.discountAmount)
         assertThat(orderSnapshot.totalAmount).isEqualByComparingTo(order.totalAmount)
-        assertThat(orderSnapshot.couponId).isEqualTo(order.couponId?.value)
+        assertThat(orderSnapshot.couponId).isEqualTo(order.couponId)
         assertThat(orderSnapshot.createdAt).isEqualTo(order.createdAt)
         assertThat(orderSnapshot.updatedAt).isEqualTo(order.updatedAt)
         assertThat(orderSnapshot.orderProducts).hasSize(order.products.size)
         orderSnapshot.orderProducts.forEachIndexed { index, product ->
             val expect = order.products[index]
-            assertThat(product.productId).isEqualTo(expect.productId.value)
+            assertThat(product.productId).isEqualTo(expect.productId)
             assertThat(product.quantity).isEqualTo(expect.quantity)
             assertThat(product.unitPrice).isEqualByComparingTo(expect.unitPrice)
             assertThat(product.totalPrice).isEqualByComparingTo(expect.totalPrice)

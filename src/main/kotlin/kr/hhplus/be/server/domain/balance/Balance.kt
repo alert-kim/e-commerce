@@ -8,10 +8,14 @@ import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
-@Table(name = "balances")
-class Balance(
+@Table(name = "balances",
+    uniqueConstraints = [
+        UniqueConstraint(name = "balance_unq_user", columnNames = ["user_id"]),
+    ]
+)
+class Balance (
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val userId: UserId,
     val createdAt: Instant,
     amount: BalanceAmount,

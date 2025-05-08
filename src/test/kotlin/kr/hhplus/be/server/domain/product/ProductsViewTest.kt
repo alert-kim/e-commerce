@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.product
 
-import kr.hhplus.be.server.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

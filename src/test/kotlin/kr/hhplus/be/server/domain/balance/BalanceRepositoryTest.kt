@@ -1,13 +1,19 @@
 package kr.hhplus.be.server.domain.balance
 
+import io.kotest.assertions.throwables.shouldThrow
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
-import kr.hhplus.be.server.mock.BalanceMock
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.util.BalanceAssert.Companion.assertBalance
+import kr.hhplus.be.server.domain.user.User
+import kr.hhplus.be.server.domain.user.UserId
+import kr.hhplus.be.server.testutil.mock.BalanceMock
+import kr.hhplus.be.server.testutil.mock.IdMock
+import kr.hhplus.be.server.testutil.assertion.BalanceAssert.Companion.assertBalance
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 
 class BalanceRepositoryTest : RepositoryTest() {
     @Autowired
@@ -20,6 +26,17 @@ class BalanceRepositoryTest : RepositoryTest() {
         val saved = repository.save(balance)
 
         assertBalance(saved).isEqualTo(balance)
+    }
+
+    @Test
+    fun `save - 같은 userId로 저장하면 유니크 제약조건 위반 예외 발생`() {
+        val userId = UserMock.id()
+        repository.save(BalanceMock.balance(id = null, userId = userId))
+
+        val sameUserIdBalance = BalanceMock.balance(id = null, userId = userId)
+        shouldThrow<DataIntegrityViolationException> {
+            repository.save(sameUserIdBalance)
+        }
     }
 
     @Test

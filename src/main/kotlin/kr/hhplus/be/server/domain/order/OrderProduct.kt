@@ -12,11 +12,11 @@ import java.time.Instant
 class OrderProduct(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    protected var order: Order? = null,
+    private var order: Order? = null,
 
     val productId: ProductId,
     val quantity: Int,

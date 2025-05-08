@@ -1,24 +1,19 @@
 package kr.hhplus.be.server.interfaces.order
 
-import kr.hhplus.be.server.application.user.UserFacade
 import kr.hhplus.be.server.domain.order.OrderStatus
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.order.reqeust.OrderRequest
-import kr.hhplus.be.server.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.IdMock
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.post
 import java.math.BigDecimal
 import java.time.Instant
 
 class OrderApiTest : ApiTest() {
-
-    @Autowired
-    private lateinit var userFacade: UserFacade
 
     @Test
     fun `주문 - 200 - 쿠폰 사용안함`() {

@@ -7,20 +7,17 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
-import kr.hhplus.be.server.application.order.command.ConsumeOrderEventsFacadeCommand
-import kr.hhplus.be.server.application.order.command.SendOrderFacadeCommand
-import kr.hhplus.be.server.application.order.result.OrderResult
 import kr.hhplus.be.server.domain.balance.BalanceAmount
 import kr.hhplus.be.server.domain.balance.BalanceService
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
 import kr.hhplus.be.server.domain.coupon.CouponService
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
-import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.OrderSnapshot
-import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderEventType
+import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
+import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
+import kr.hhplus.be.server.domain.order.command.PayOrderCommand
+import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
 import kr.hhplus.be.server.domain.payment.PaymentService
 import kr.hhplus.be.server.domain.payment.command.PayCommand
 import kr.hhplus.be.server.domain.product.ProductId
@@ -31,7 +28,7 @@ import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserService
-import kr.hhplus.be.server.mock.*
+import kr.hhplus.be.server.testutil.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -112,8 +109,7 @@ class OrderFacadeTest {
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isInstanceOf(OrderResult.Single::class.java)
-        assertThat(result.value).isEqualTo(order)
+        assertThat(result.order).isEqualTo(order)
         verifyOrder {
             command.validate()
             userService.get(command.userId)
@@ -215,8 +211,7 @@ class OrderFacadeTest {
 
         val result = orderFacade.order(command)
 
-        assertThat(result).isInstanceOf(OrderResult.Single::class.java)
-        assertThat(result.value).isEqualTo(order)
+        assertThat(result.order).isEqualTo(order)
         verifyOrder {
             command.validate()
             userService.get(command.userId)
@@ -262,49 +257,6 @@ class OrderFacadeTest {
         verify(exactly = 0) {
             couponService.use(any<UseCouponCommand>())
             orderService.applyCoupon(any<ApplyCouponCommand>())
-        }
-    }
-
-    @Test
-    fun `sendOrderCompletionData - 주문 완료 데이터를 전송한다`() {
-        val orderSnapshot = OrderSnapshot.from(OrderMock.order())
-        val command = SendOrderFacadeCommand(orderSnapshot)
-
-        orderFacade.sendOrderCompletionData(command)
-
-        verify {
-            orderService.sendOrderCompleted(SendOrderCompletedCommand(orderSnapshot))
-        }
-    }
-
-    @Test
-    fun `consumeEvent - 주문 이벤트를 소비한다`() {
-        val consumerId = "test-consumer"
-        val events = listOf(OrderMock.event())
-        val command = ConsumeOrderEventsFacadeCommand(consumerId, events)
-
-        orderFacade.consumeEvent(command)
-
-        verify {
-            orderService.consumeEvent(ConsumeOrderEventCommand.of(consumerId, events))
-        }
-    }
-
-    @Test
-    fun `getAllEventsNotConsumedInOrder - 소비되지 않은 주문 이벤트를 조회한다`() {
-        val consumerId = "test-consumer"
-        val eventType = OrderEventType.COMPLETED
-        val events = listOf(OrderMock.event())
-        every { orderService.getAllEventsNotConsumedInOrder(consumerId, eventType) } returns events
-
-        // when
-        val result = orderFacade.getAllEventsNotConsumedInOrder(consumerId, eventType)
-
-        // then
-        assertThat(result).isInstanceOf(OrderResult.Events::class.java)
-        assertThat(result.value).isEqualTo(events)
-        verify {
-            orderService.getAllEventsNotConsumedInOrder(consumerId, eventType)
         }
     }
 }

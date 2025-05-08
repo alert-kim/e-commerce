@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.payment
 
-import kr.hhplus.be.server.mock.PaymentMock
+import kr.hhplus.be.server.testutil.mock.PaymentMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

@@ -5,11 +5,13 @@ import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.domain.coupon.result.IssuedCoupon
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CouponSourceService(
     private val repository: CouponSourceRepository,
 ) {
+    @Transactional
     fun issue(command: IssueCouponCommand): IssuedCoupon {
         val couponSource = repository.findById(command.couponSourceId) ?: throw NotFoundCouponSourceException("by id: ${command.couponSourceId}")
         val issued = couponSource.issue()

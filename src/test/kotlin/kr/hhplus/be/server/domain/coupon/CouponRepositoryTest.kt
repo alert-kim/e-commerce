@@ -3,14 +3,13 @@ package kr.hhplus.be.server.domain.coupon
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import kr.hhplus.be.server.domain.RepositoryTest
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.IdMock
-import kr.hhplus.be.server.mock.UserMock
-import kr.hhplus.be.server.util.CouponAssert.Companion.assertCoupon
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.IdMock
+import kr.hhplus.be.server.testutil.mock.UserMock
+import kr.hhplus.be.server.testutil.assertion.CouponAssert.Companion.assertCoupon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 class CouponRepositoryTest : RepositoryTest() {

@@ -1,14 +1,10 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderEvent
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffset
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetId
-import kr.hhplus.be.server.domain.order.event.OrderEventConsumerOffsetRepository
-import kr.hhplus.be.server.domain.order.event.OrderEventType
+import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
-import kr.hhplus.be.server.domain.order.repository.OrderEventRepository
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -17,10 +13,10 @@ import java.time.Instant
 @Transactional(readOnly = true)
 class OrderService(
     private val repository: OrderRepository,
-    private val eventRepository: OrderEventRepository,
-    private val eventConsumerOffsetRepository: OrderEventConsumerOffsetRepository,
     private val client: OrderSnapshotClient,
+    private val publisher: ApplicationEventPublisher,
 ) {
+    @Transactional
     fun createOrder(
         command: CreateOrderCommand,
     ): OrderId =
@@ -30,6 +26,7 @@ class OrderService(
             )
         ).id()
 
+    @Transactional
     fun placeStock(
         command: PlaceStockCommand,
     ) {
@@ -44,6 +41,7 @@ class OrderService(
         }
     }
 
+    @Transactional
     fun applyCoupon(
         command: ApplyCouponCommand,
     ) {
@@ -52,6 +50,7 @@ class OrderService(
         order.applyCoupon(command.usedCoupon)
     }
 
+    @Transactional
     fun pay(
         command: PayOrderCommand,
     ) {
@@ -59,15 +58,15 @@ class OrderService(
         val order = doGet(payment.orderId.value)
 
         order.pay()
-        val event = OrderEvent(
+        val event = OrderCompletedEvent(
             orderId = order.id(),
-            type = OrderEventType.COMPLETED,
             snapshot = OrderSnapshot.from(order),
             createdAt = Instant.now(),
         )
-        eventRepository.save(event)
+        publisher.publishEvent(event)
     }
 
+    @Transactional
     fun sendOrderCompleted(
         command: SendOrderCompletedCommand,
     ) {
@@ -75,46 +74,9 @@ class OrderService(
         client.send(snapshot)
     }
 
-    fun consumeEvent(
-        command: ConsumeOrderEventCommand,
-    ) {
-        val offset = eventConsumerOffsetRepository.find(OrderEventConsumerOffsetId(command.consumerId, command.event.type))
-        when (offset) {
-            null -> eventConsumerOffsetRepository.save(
-                OrderEventConsumerOffset.new(
-                    consumerId = command.consumerId,
-                    eventId = command.event.id(),
-                    eventType = command.event.type,
-                )
-            )
-
-            else -> offset.update(
-                eventId = command.event.id(),
-            )
-        }
-    }
-
     fun get(
         id: Long,
     ): OrderView = OrderView.from(doGet(id))
-
-    fun getAllEventsNotConsumedInOrder(
-        consumerId: String,
-        eventType: OrderEventType,
-    ): List<OrderEvent> {
-        val offset = eventConsumerOffsetRepository.find(
-            OrderEventConsumerOffsetId(
-                consumerId = consumerId,
-                eventType = eventType,
-            )
-        )
-        return when (offset) {
-            null -> eventRepository.findAllByIdAsc()
-            else -> eventRepository.findAllByIdGreaterThanOrderByIdAsc(
-                id = offset.eventId,
-            )
-        }
-    }
 
     private fun doGet(
         id: Long,

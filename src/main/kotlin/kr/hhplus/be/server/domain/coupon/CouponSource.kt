@@ -19,7 +19,7 @@ import java.time.Instant
 @Table(name = "coupon_sources")
 class CouponSource(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected val id: Long? = null,
+    private val id: Long? = null,
     val name: String,
     @Column(precision = 20, scale = 2)
     val discountAmount: BigDecimal,

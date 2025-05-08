@@ -9,10 +9,10 @@ import kr.hhplus.be.server.domain.order.exception.AlreadyCouponAppliedException
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
 import kr.hhplus.be.server.domain.product.ProductPrice
-import kr.hhplus.be.server.mock.CouponMock
-import kr.hhplus.be.server.mock.OrderMock
-import kr.hhplus.be.server.mock.ProductMock
-import kr.hhplus.be.server.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll

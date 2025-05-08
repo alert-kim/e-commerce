@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces.coupon.response
 
-import kr.hhplus.be.server.application.coupon.result.CouponResult
+import kr.hhplus.be.server.application.coupon.result.GetCouponFacadeResult
 import kr.hhplus.be.server.interfaces.common.ServerApiResponse
 
 class CouponsResponse(
@@ -8,7 +8,7 @@ class CouponsResponse(
 ) : ServerApiResponse {
     companion object {
         fun from(
-            result: CouponResult.List,
+            result: GetCouponFacadeResult.List,
         ): CouponsResponse =
             CouponsResponse(
                 coupons = result.value.map {

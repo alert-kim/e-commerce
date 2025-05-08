@@ -4,6 +4,7 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.localDate
 import io.kotest.property.arbitrary.next
 import kr.hhplus.be.server.interfaces.ApiTest
+import kr.hhplus.be.server.util.TimeZone
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.get
@@ -19,7 +20,7 @@ class GetPopularProductsApiTest : ApiTest() {
             val product = savedProduct()
             savedProductDailySale(
                 productId = product.id(),
-                date = LocalDate.now(),
+                date = LocalDate.now(TimeZone.KSTId).minusDays(1),
                 quantity = 100 - index * 10,
             )
             product
@@ -41,14 +42,15 @@ class GetPopularProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `인기 상품 조회 - 200 - 오늘 부터 3일 전까지에 대한 인기 상품 조회`() {
-        val startDate = LocalDate.now().minusDays(3)
-        val endDate = LocalDate.now()
+    fun `인기 상품 조회 - 200 - 1일 전부터 3일 전까지에 대한 인기 상품 조회`() {
+        val startDate = LocalDate.now(TimeZone.KSTId).minusDays(3)
+        val endDate = LocalDate.now(TimeZone.KSTId).minusDays(1)
         val popularProducts = List(5) { index ->
             val product = savedProduct()
+            val date = Arb.localDate(minDate = startDate, maxDate = endDate).next()
             savedProductDailySale(
                 productId = product.id(),
-                date = Arb.localDate(minDate = startDate, maxDate = endDate).next(),
+                date = date,
                 quantity = 100 - index * 10,
             )
             product
