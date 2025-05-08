@@ -4,10 +4,18 @@ import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import org.hamcrest.Matchers.hasSize
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.test.web.servlet.get
 
+@Isolated
 class GetProductsApiTest : ApiTest() {
+
+    @BeforeEach
+    fun setup() {
+        clearProducts()
+    }
 
     @Test
     fun `상품 목록 조회 - 200 - 해당 상태의 상품 조회`() {

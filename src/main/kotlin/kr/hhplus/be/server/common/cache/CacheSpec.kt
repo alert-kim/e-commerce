@@ -7,4 +7,5 @@ enum class CacheSpec(
     val ttl: Duration,
 ) {
     POPULAR_PRODUCTS(CacheNames.POPULAR_PRODUCTS, Duration.ofHours(25)),
+    PRODUCT(CacheNames.PRODUCT, Duration.ofHours(1))
 }
