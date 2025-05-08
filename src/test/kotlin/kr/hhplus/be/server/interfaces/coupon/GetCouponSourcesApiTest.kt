@@ -3,10 +3,18 @@ package kr.hhplus.be.server.interfaces.coupon
 import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 import kr.hhplus.be.server.interfaces.ApiTest
 import org.hamcrest.Matchers.hasSize
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.test.web.servlet.get
 
+@Isolated
 class GetCouponSourcesApiTest : ApiTest() {
+
+    @BeforeEach
+    fun setUp() {
+       clearCouponSource()
+    }
 
     @Test
     fun `발급 가능 쿠폰 목록 조회 - 200`() {

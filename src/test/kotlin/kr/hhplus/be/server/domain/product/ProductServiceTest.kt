@@ -2,11 +2,9 @@ package kr.hhplus.be.server.domain.product
 
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
@@ -16,22 +14,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 
-@ExtendWith(MockKExtension::class)
 class ProductServiceTest {
-    @InjectMockKs
     private lateinit var service: ProductService
-
-    @MockK(relaxed = true)
-    private lateinit var repository: ProductRepository
+    private val cachedReader = mockk<ProductCacheReader>(relaxed = true)
+    private val repository = mockk<ProductRepository>(relaxed = true)
 
     @BeforeEach
     fun setUp() {
-        clearMocks(repository)
+        clearAllMocks()
+        service = ProductService(cachedReader, repository)
     }
 
     @Nested
@@ -108,29 +103,27 @@ class ProductServiceTest {
         @DisplayName("주어진 ID에 해당하는 상품 반환")
         fun getProduct() {
             val id = ProductMock.id()
-            val product = ProductMock.product(id = id)
-            every { repository.findById(id.value) } returns product
+            val product = ProductMock.view(id = id)
+            every { cachedReader.getOrNull(id.value) } returns product
 
             val result = service.get(id.value)
 
             assertThat(result.id).isEqualTo(id)
             verify {
-                repository.findById(id.value)
+                cachedReader.getOrNull(id.value)
             }
         }
 
         @Test
-        @DisplayName("주어진 ID에 해당하는 상품이 없으면 NotFoundProductException 발생")
-        fun returnEmptyListWhenNoMatchingProducts() {
+        @DisplayName("존재하지 않는 ID로 조회 시 NotFoundProductException이 발생한다")
+        fun throwsExceptionForNonExistentProduct() {
             val id = ProductMock.id()
-            every { repository.findById(id.value) } returns null
+            every { cachedReader.getOrNull(id.value) } returns null
 
             shouldThrow<NotFoundProductException> {
                 service.get(id.value)
             }
-            verify {
-                repository.findById(id.value)
-            }
+            verify { cachedReader.getOrNull(id.value) }
         }
     }
 
@@ -141,14 +134,19 @@ class ProductServiceTest {
         @DisplayName("주어진 ID 목록에 해당하는 상품 반환")
         fun getAllProduct() {
             val ids = listOf(1L, 2L, 3L)
-            val products = ids.map { ProductMock.product(id = ProductId(it)) }
-            every { repository.findAllByIds(ids) } returns products
+            val products = ids.map { ProductMock.view(id = ProductId(it)) }
+            products.forEach {
+                every { cachedReader.getOrNull(it.id.value) } returns it
+            }
 
             val result = service.getAllByIds(ids)
 
             assertThat(result.value).hasSize(products.size)
             result.value.forEachIndexed { index, product ->
-                assertThat(product.id).isEqualTo(products[index].id())
+                assertThat(product.id).isEqualTo(products[index].id)
+            }
+            verify {
+                ids.forEach { cachedReader.getOrNull(it) }
             }
         }
 
@@ -156,7 +154,7 @@ class ProductServiceTest {
         @DisplayName("주어진 ID 목록에 해당하는 상품이 없으면 빈 리스트 반환")
         fun emptyList() {
             val ids = listOf(1L, 2L, 3L)
-            every { repository.findAllByIds(ids) } returns kotlin.collections.emptyList()
+            every { cachedReader.getOrNull(any()) } returns null
 
             val result = service.getAllByIds(ids)
 

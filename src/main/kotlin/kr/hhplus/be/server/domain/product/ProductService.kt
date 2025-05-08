@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class ProductService(
+    private val cacheReader: ProductCacheReader,
     private val repository: ProductRepository,
 ) {
     fun getAllByStatusOnPaged(status: ProductStatus, page: Int, pageSize: Int): Page<ProductView> {
@@ -19,14 +20,11 @@ class ProductService(
             .map { ProductView.from(it) }
     }
 
-    fun get(id: Long): ProductView {
-        val product = repository.findById(id) ?: throw NotFoundProductException("by id : $id")
-        return ProductView.from(product)
-    }
+    fun get(id: Long): ProductView =
+        cacheReader.getOrNull(id) ?: throw NotFoundProductException("by id($id)")
 
     fun getAllByIds(ids: List<Long>): ProductsView {
-        val products = repository.findAllByIds(ids)
-        return ProductsView(products.map { ProductView.from(it) })
+        val products = ids.mapNotNull { id -> cacheReader.getOrNull(id) }
+        return ProductsView(products)
     }
 }
-

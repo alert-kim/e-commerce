@@ -3,14 +3,29 @@ package kr.hhplus.be.server.interfaces.product
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.localDate
 import io.kotest.property.arbitrary.next
+import kr.hhplus.be.server.common.cache.CacheNames
 import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.interfaces.ApiTest
 import org.hamcrest.Matchers.hasSize
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.get
 import java.time.LocalDate
 
-class GetPopularProductsApiTest : ApiTest() {
+@Isolated
+class GetPopularProductsApiTest: ApiTest() {
+
+    @Autowired
+    private lateinit var cacheManager: CacheManager
+
+    @BeforeEach
+    fun setup() {
+        clearProductDailySaleStat()
+        cacheManager.getCache(CacheNames.POPULAR_PRODUCTS)?.clear()
+    }
 
     @Test
     fun `인기 상품 조회 - 200 - 최대 5개만 조회`() {
