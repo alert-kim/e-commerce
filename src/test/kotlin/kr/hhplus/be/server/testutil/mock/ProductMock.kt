@@ -14,6 +14,8 @@ object ProductMock {
 
     fun saleStatId() = ProductSaleStatId(IdMock.value())
 
+    fun dailySaleStatId() = ProductDailySaleStatId(IdMock.value())
+
     fun product(
         id: ProductId? = id(),
         status: ProductStatus = ProductStatus.ON_SALE,
@@ -71,13 +73,16 @@ object ProductMock {
     )
 
     fun dailySale(
+        id: ProductDailySaleStatId? = dailySaleStatId(),
         date: LocalDate = LocalDate.now(),
         productId: ProductId = id(),
         quantity: Int = 10,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = ProductDailySaleStat(
-        id = ProductDailySaleStatId(date, productId),
+        id = id?.value,
+        date = date,
+        productId = productId,
         createdAt = createdAt,
         quantity = quantity,
         updatedAt = updatedAt,

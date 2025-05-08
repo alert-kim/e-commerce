@@ -119,6 +119,7 @@ class DatabaseTestHelper(
     ): ProductDailySaleStat =
         testProductDailySaleStatRepository.save(
             ProductMock.dailySale(
+                id = null,
                 productId = productId,
                 date = date,
                 quantity = quantity,

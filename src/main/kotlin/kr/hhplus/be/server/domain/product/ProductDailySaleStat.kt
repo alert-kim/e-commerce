@@ -1,16 +1,18 @@
 package kr.hhplus.be.server.domain.product
 
-import jakarta.persistence.EmbeddedId
-import jakarta.persistence.Entity
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.time.Instant
 import java.time.LocalDate
 
 @Entity
 @Table(name = "product_daily_sale_stats")
 class ProductDailySaleStat(
-    @EmbeddedId
-    val id: ProductDailySaleStatId,
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+
+    val productId: ProductId,
+    val date: LocalDate,
     val createdAt: Instant,
     quantity: Int,
     updatedAt: Instant,
@@ -20,10 +22,4 @@ class ProductDailySaleStat(
 
     var updatedAt: Instant = updatedAt
         private set
-
-    val productId: ProductId
-        get() = id.productId
-
-    val date: LocalDate
-        get() = id.date
 }

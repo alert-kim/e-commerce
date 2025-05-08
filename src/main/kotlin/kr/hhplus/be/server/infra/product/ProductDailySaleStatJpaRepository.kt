@@ -14,7 +14,7 @@ interface ProductDailySaleStatJpaRepository : JpaRepository<ProductDailySaleStat
         """
         SELECT p 
         FROM ProductDailySaleStat p
-        WHERE p.id.date BETWEEN :startDate AND :endDate
+        WHERE p.date BETWEEN :startDate AND :endDate
         ORDER BY p.quantity DESC
     """
     )

@@ -65,7 +65,9 @@ class ProductDailySaleStatRepositoryTest {
         val today = LocalDate.now()
         val productId = ProductMock.id()
         val stat = ProductDailySaleStat(
-            id = ProductDailySaleStatId(today, productId),
+            id = null,
+            date = today,
+            productId = productId,
             quantity = 1,
             createdAt = Instant.now(),
             updatedAt = Instant.now(),
@@ -113,7 +115,7 @@ class ProductDailySaleStatRepositoryTest {
         val startDate = LocalDate.now().minusDays(3)
         val endDate = LocalDate.now()
         val productsInOrderBySale = List(limit + 1) {
-            testRepository.save(ProductMock.dailySale(date = startDate, quantity = 10 - it))
+            testRepository.save(ProductMock.dailySale(id = null, date = startDate, quantity = 10 - it))
         }
 
         val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
@@ -132,7 +134,7 @@ class ProductDailySaleStatRepositoryTest {
         val startDate = LocalDate.now().minusDays(3)
         val endDate = LocalDate.now()
         val productsInOrderBySale = List(limit - 1) {
-            testRepository.save(ProductMock.dailySale(date = startDate, quantity = 10 - it))
+            testRepository.save(ProductMock.dailySale(id = null, date = startDate, quantity = 10 - it))
         }
 
         val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
@@ -145,8 +147,8 @@ class ProductDailySaleStatRepositoryTest {
         val limit = 4
         val startDate = LocalDate.now().minusDays(3)
         val endDate = LocalDate.now()
-        testRepository.save(ProductMock.dailySale(date = startDate.minusDays(1), quantity = 10))
-        testRepository.save(ProductMock.dailySale(date = endDate.plusDays(1), quantity = 10))
+        testRepository.save(ProductMock.dailySale(id = null, date = startDate.minusDays(1), quantity = 10))
+        testRepository.save(ProductMock.dailySale(id = null, date = endDate.plusDays(1), quantity = 10))
 
         val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
 
