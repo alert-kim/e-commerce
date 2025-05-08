@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.order
 
+import jakarta.persistence.AttributeOverride
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Embedded
@@ -58,6 +59,7 @@ class Order(
         private set
 
     @Embedded
+    @AttributeOverride(name = "value", column = Column(name = "coupon_id"))
     var couponId: CouponId? = couponId
         private set
 
