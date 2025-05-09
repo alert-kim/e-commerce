@@ -10,6 +10,8 @@ class BalanceRecord(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
     val balanceId: BalanceId,
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20)")
     val type: BalanceTransactionType,
     val amount: BalanceAmount,
     val createdAt: Instant

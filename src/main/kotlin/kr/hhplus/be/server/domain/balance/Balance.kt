@@ -21,7 +21,7 @@ class Balance (
     amount: BalanceAmount,
     updatedAt: Instant,
 ) {
-
+    @AttributeOverride(name = "value", column = Column(name = "amount"))
     var amount: BalanceAmount = amount
         private set
 

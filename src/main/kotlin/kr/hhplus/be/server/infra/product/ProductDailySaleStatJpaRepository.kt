@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.infra.product
 
 import kr.hhplus.be.server.domain.product.ProductDailySaleStat
-import kr.hhplus.be.server.domain.product.ProductDailySaleStatId
+import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStatId
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
