@@ -1,13 +1,25 @@
 package kr.hhplus.be.server.interfaces.balance
 
+import kr.hhplus.be.server.common.cache.CacheNames
 import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.testutil.mock.IdMock
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.get
 import java.math.BigDecimal
 
 class GetBalanceApiTest : ApiTest() {
+
+    @Autowired
+    private lateinit var cacheManager: CacheManager
+
+    @BeforeEach
+    fun setup() {
+        cacheManager.getCache(CacheNames.USER)?.clear()
+    }
 
     @Test
     fun `잔고 조회 - 200`() {
