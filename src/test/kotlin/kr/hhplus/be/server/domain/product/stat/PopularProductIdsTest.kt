@@ -5,8 +5,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.next
+import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.testutil.mock.ProductMock
-import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

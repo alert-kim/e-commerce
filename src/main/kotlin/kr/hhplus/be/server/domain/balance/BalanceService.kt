@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.balance
 
+import kr.hhplus.be.server.domain.balance.command.CancelBalanceUseCommand
 import kr.hhplus.be.server.domain.balance.command.ChargeBalanceCommand
 import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
 import kr.hhplus.be.server.domain.balance.exception.NotFoundBalanceException
@@ -23,11 +24,13 @@ class BalanceService(
 
         balance.charge(BalanceAmount.of(command.amount))
 
-        recordRepository.save(BalanceRecord.new(
-            balanceId = balance.id(),
-            type = BalanceTransactionType.CHARGE,
-            amount = BalanceAmount.of(command.amount),
-        ))
+        recordRepository.save(
+            BalanceRecord.new(
+                balanceId = balance.id(),
+                type = BalanceTransactionType.CHARGE,
+                amount = BalanceAmount.of(command.amount),
+            )
+        )
         return balance.id()
     }
 
@@ -35,16 +38,36 @@ class BalanceService(
     fun use(command: UseBalanceCommand): UsedBalanceAmount {
         val balance = repository.findByUserId(command.userId)
             ?: throw NotFoundBalanceException("by userId: ${command.userId}")
+        val amount = BalanceAmount.of(command.amount)
 
-        val usedAmount = balance.use(BalanceAmount.of(command.amount))
+        val usedAmount = balance.use(amount)
 
-        recordRepository.save(BalanceRecord.new(
-            balanceId = balance.id(),
-            type = BalanceTransactionType.USE,
-            amount = BalanceAmount.of(command.amount),
-        ))
+        recordRepository.save(
+            BalanceRecord.new(
+                balanceId = balance.id(),
+                type = BalanceTransactionType.USE,
+                amount = amount,
+            )
+        )
 
         return usedAmount
+    }
+    
+    @Transactional
+    fun cancelUse(command: CancelBalanceUseCommand) {
+        val balance = repository.findByUserId(command.userId)
+            ?: throw NotFoundBalanceException("by userId: ${command.userId}")
+        val amount = BalanceAmount.of(command.amount)
+
+        balance.cancelUse(amount)
+
+        recordRepository.save(
+            BalanceRecord.new(
+                balanceId = balance.id(),
+                type = BalanceTransactionType.CANCEL_USE,
+                amount = amount,
+            )
+        )
     }
 
     fun get(id: Long): BalanceView =

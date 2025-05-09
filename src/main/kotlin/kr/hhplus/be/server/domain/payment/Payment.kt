@@ -20,9 +20,33 @@ class Payment(
     @Column(precision = 20, scale = 2)
     val amount: BigDecimal,
     val createdAt: Instant,
+    status: PaymentStatus,
+    canceledAt: Instant?,
+    updatedAt: Instant,
 ) {
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20)")
+    var status: PaymentStatus = status
+        private set
+
+    var canceledAt: Instant? = canceledAt
+        private set
+
+    var updatedAt: Instant = updatedAt
+        private set
+
     fun id(): PaymentId =
-        id ?.let { PaymentId(id) }?: throw RequiredPaymentIdException()
+        id?.let { PaymentId(id) } ?: throw RequiredPaymentIdException()
+
+    fun cancel(): Payment {
+        if (status == PaymentStatus.CANCELED) {
+            return this
+        }
+        status = PaymentStatus.CANCELED
+        canceledAt = Instant.now()
+        updatedAt = Instant.now()
+        return this
+    }
 
     companion object {
         fun new(
@@ -33,8 +57,11 @@ class Payment(
             Payment(
                 userId = userId,
                 orderId = orderId,
+                status = PaymentStatus.COMPLETED,
                 amount = amount.value.setScale(2, RoundingMode.HALF_UP),
+                canceledAt = null,
                 createdAt = Instant.now(),
+                updatedAt = Instant.now(),
             )
     }
 }

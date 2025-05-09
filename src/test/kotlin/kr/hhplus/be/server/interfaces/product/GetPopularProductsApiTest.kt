@@ -3,8 +3,8 @@ package kr.hhplus.be.server.interfaces.product
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.localDate
 import io.kotest.property.arbitrary.next
+import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.interfaces.ApiTest
-import kr.hhplus.be.server.util.TimeZone
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.get

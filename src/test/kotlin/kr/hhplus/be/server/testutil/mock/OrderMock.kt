@@ -3,6 +3,7 @@ package kr.hhplus.be.server.testutil.mock
 import kr.hhplus.be.server.domain.coupon.CouponId
 import kr.hhplus.be.server.domain.order.*
 import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
+import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
@@ -16,7 +17,7 @@ object OrderMock {
     fun product(
         id: OrderProductId? = productId(),
         order: Order? = null,
-        productId: Long = IdMock.value(),
+        productId: ProductId = ProductMock.id(),
         quantity: Int = 1,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
         totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
@@ -24,7 +25,7 @@ object OrderMock {
     ): OrderProduct = OrderProduct(
         id = id?.value,
         order = order,
-        productId = ProductId(productId),
+        productId = productId,
         quantity = quantity,
         unitPrice = unitPrice,
         totalPrice = totalPrice,
@@ -56,7 +57,6 @@ object OrderMock {
     )
 
     fun productView(
-        orderId: OrderId = id(),
         productId: Long = IdMock.value(),
         quantity: Int = 1,
         unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
@@ -96,9 +96,19 @@ object OrderMock {
 
     fun completedEvent(
         orderId: OrderId = id(),
-        snapshot: OrderSnapshot = OrderSnapshot.from(order()),
+        snapshot: OrderSnapshot = OrderSnapshot.from(order(status = OrderStatus.COMPLETED)),
         createdAt: Instant = Instant.now(),
     ): OrderCompletedEvent = OrderCompletedEvent(
+        orderId = orderId,
+        snapshot = snapshot,
+        createdAt = createdAt,
+    )
+
+    fun failedEvent(
+        orderId: OrderId = id(),
+        snapshot: OrderSnapshot = OrderSnapshot.from(order(status = OrderStatus.FAILED)),
+        createdAt: Instant = Instant.now(),
+    ): OrderFailedEvent = OrderFailedEvent(
         orderId = orderId,
         snapshot = snapshot,
         createdAt = createdAt,

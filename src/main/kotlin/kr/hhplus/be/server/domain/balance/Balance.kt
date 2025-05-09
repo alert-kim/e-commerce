@@ -41,6 +41,11 @@ class Balance (
             amount = amount,
         )
     }
+    
+    fun cancelUse(amount: BalanceAmount) {
+        this.amount = this.amount.plus(amount)
+        this.updatedAt = Instant.now()
+    }
 
     fun id(): BalanceId =
         id?.let { BalanceId(id) } ?: throw RequiredBalanceIdException()

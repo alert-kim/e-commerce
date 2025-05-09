@@ -50,6 +50,8 @@ class PaymentTest {
             { assertThat(payment.userId).isEqualTo(userId) },
             { assertThat(payment.orderId).isEqualTo(orderId) },
             { assertThat(payment.amount).isEqualByComparingTo(amount.value) },
+            { assertThat(payment.status).isEqualTo(PaymentStatus.COMPLETED) },
+            { assertThat(payment.canceledAt).isNull() },
         )
     }
 }

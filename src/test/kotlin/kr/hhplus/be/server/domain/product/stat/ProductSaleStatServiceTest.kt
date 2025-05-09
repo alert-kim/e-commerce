@@ -6,6 +6,7 @@ import io.kotest.property.arbitrary.next
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
@@ -13,7 +14,6 @@ import kr.hhplus.be.server.domain.product.stat.command.CreateProductSaleStatsCom
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.ProductMock
-import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested

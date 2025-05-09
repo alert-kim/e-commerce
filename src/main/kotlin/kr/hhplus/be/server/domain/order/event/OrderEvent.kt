@@ -18,3 +18,11 @@ data class OrderCompletedEvent(
 ): OrderEvent {
     override val type: OrderEventType = OrderEventType.COMPLETED
 }
+
+data class OrderFailedEvent(
+    override val orderId: OrderId,
+    override val snapshot: OrderSnapshot,
+    override val createdAt: Instant
+): OrderEvent {
+    override val type: OrderEventType = OrderEventType.FAILED
+}

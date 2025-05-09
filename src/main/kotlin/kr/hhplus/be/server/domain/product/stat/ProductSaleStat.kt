@@ -1,9 +1,9 @@
 package kr.hhplus.be.server.domain.product.stat
 
 import jakarta.persistence.*
+import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.excpetion.RequiredProductStatIdException
-import kr.hhplus.be.server.util.TimeZone
 import java.time.Instant
 import java.time.LocalDate
 

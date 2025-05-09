@@ -13,10 +13,6 @@ data class OrderFacadeCommand(
     val discountAmount: BigDecimal,
     val totalAmount: BigDecimal,
 ) {
-    fun orderProductIds() = productsToOrder.map { it.productId }
-
-    fun quantityOfProduct(productId: ProductId): Int =
-        productsToOrder.first { it.productId == productId.value }.quantity
 
     fun validate() {
         if (productsToOrder.isEmpty()) throw InvalidOrderProductQuantityException("주문 상품 없이 주문 할 수 없습니다.")

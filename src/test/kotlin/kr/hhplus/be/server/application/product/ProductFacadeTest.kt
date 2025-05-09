@@ -3,6 +3,7 @@ package kr.hhplus.be.server.application.product
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.*
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
+import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.common.InvalidPageRequestArgumentException
 import kr.hhplus.be.server.domain.product.stat.PopularProductsIds
 import kr.hhplus.be.server.domain.product.ProductService
@@ -14,7 +15,6 @@ import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleSta
 import kr.hhplus.be.server.domain.stock.StockService
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.testutil.mock.StockMock
-import kr.hhplus.be.server.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
