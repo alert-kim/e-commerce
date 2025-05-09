@@ -2,6 +2,7 @@ package kr.hhplus.be.server.testutil.mock
 
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
+import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStatId
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStat
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStatId
 import java.math.BigDecimal
