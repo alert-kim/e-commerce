@@ -19,7 +19,8 @@ class Stock(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
-
+    @Embedded
+    @AttributeOverride(name = "value", column = Column(name = "product_id"))
     val productId: ProductId,
     val createdAt: Instant = Instant.now(),
     quantity: Int,
