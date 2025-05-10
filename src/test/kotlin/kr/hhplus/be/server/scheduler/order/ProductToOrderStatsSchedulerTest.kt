@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
+import kr.hhplus.be.server.common.util.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,7 +25,7 @@ class ProductToOrderStatsSchedulerTest {
 
     @Test
     fun `일일 집계 - 오늘 날짜로 상품 판매 집계를 수행하고 캐시에 넣어주기 위해 인기 상품을 조회한다`() {
-        val today = LocalDate.now()
+        val today = LocalDate.now(TimeZone.KSTId)
 
         orderProductStatsScheduler.aggregateDaily()
 

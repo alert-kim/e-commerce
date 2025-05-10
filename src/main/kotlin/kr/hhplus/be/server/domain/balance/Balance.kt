@@ -9,22 +9,26 @@ import java.time.Instant
 
 @Entity
 @Table(name = "balances",
-    uniqueConstraints = [
-        UniqueConstraint(name = "balance_unq_user", columnNames = ["user_id"]),
+    indexes = [
+        Index(name = "balance_unq_user", columnList = "user_id", unique = true),
     ]
 )
 class Balance (
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
+    @Column(nullable = false)
     val userId: UserId,
+    @Column(nullable = false)
     val createdAt: Instant,
     amount: BalanceAmount,
     updatedAt: Instant,
 ) {
+    @Embedded
     @AttributeOverride(name = "value", column = Column(name = "amount"))
     var amount: BalanceAmount = amount
         private set
 
+    @Column(nullable = false)
     var updatedAt: Instant = updatedAt
         private set
 

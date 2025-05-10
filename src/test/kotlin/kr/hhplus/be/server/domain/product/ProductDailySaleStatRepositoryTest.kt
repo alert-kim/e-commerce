@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.product
 
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
+import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStat
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
 import kr.hhplus.be.server.testutil.mock.ProductMock

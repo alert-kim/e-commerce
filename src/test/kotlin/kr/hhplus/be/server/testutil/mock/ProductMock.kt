@@ -2,7 +2,7 @@ package kr.hhplus.be.server.testutil.mock
 
 import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.product.result.PurchasableProduct
-import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStatId
+import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStat
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStatId
 import java.math.BigDecimal
@@ -14,8 +14,6 @@ object ProductMock {
     fun id() = ProductId(IdMock.value())
 
     fun saleStatId() = ProductSaleStatId(IdMock.value())
-
-    fun dailySaleStatId() = ProductDailySaleStatId(IdMock.value())
 
     fun product(
         id: ProductId? = id(),
@@ -74,14 +72,14 @@ object ProductMock {
     )
 
     fun dailySale(
-        id: ProductDailySaleStatId? = dailySaleStatId(),
+        id: Long? = IdMock.value(),
         date: LocalDate = LocalDate.now(),
         productId: ProductId = id(),
         quantity: Int = 10,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now(),
     ) = ProductDailySaleStat(
-        id = id?.value,
+        id = id,
         date = date,
         productId = productId,
         createdAt = createdAt,

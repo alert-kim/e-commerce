@@ -11,7 +11,7 @@ import java.time.LocalDate
 @Table(
     name = "product_sale_stats",
     indexes = [
-        Index(name = "product_sale_stats_idx_date_product", columnList = "date, productId")
+        Index(name = "product_sale_stat_idx_date_product", columnList = "date, productId")
     ]
 )
 class ProductSaleStat(
@@ -20,11 +20,13 @@ class ProductSaleStat(
     @Embedded
     @AttributeOverride(name = "value", column = Column(name = "product_id"))
     val productId: ProductId,
+    @Column(nullable = false)
     val quantity: Int,
+    @Column(nullable = false)
     val date: LocalDate,
+    @Column(nullable = false)
     val createdAt: Instant,
 ) {
-
     fun id(): ProductSaleStatId = id?.let { ProductSaleStatId(it) }
         ?: throw RequiredProductStatIdException()
 

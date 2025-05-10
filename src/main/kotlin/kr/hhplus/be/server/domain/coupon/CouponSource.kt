@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.Table
 import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponSourceIdException
@@ -16,14 +17,20 @@ import java.math.RoundingMode
 import java.time.Instant
 
 @Entity
-@Table(name = "coupon_sources")
+@Table(
+    name = "coupon_sources",
+    indexes = [Index(name = "coupon_source_idx_type", columnList = "status")]
+    )
 class CouponSource(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
+    @Column(nullable = false)
     val name: String,
     @Column(precision = 20, scale = 2)
     val discountAmount: BigDecimal,
+    @Column(nullable = false)
     val initialQuantity: Int,
+    @Column(nullable = false)
     val createdAt: Instant,
     status: CouponSourceStatus,
     quantity: Int,
@@ -34,13 +41,15 @@ class CouponSource(
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(20)")
+    @Column(columnDefinition = "varchar(20)", nullable = false)
     var status: CouponSourceStatus = status
         private set
 
+    @Column(nullable = false)
     var quantity: Int = quantity
         private set
 
+    @Column(nullable = false)
     var updatedAt: Instant = updatedAt
         private set
 

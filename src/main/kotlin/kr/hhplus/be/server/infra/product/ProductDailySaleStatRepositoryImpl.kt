@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.infra.product
 
-import kr.hhplus.be.server.domain.product.ProductDailySaleStat
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
+import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
 

@@ -13,6 +13,7 @@ import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.payment.PaymentStatus
 import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
 import kr.hhplus.be.server.domain.product.*
+import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
 import kr.hhplus.be.server.domain.stock.Stock
 import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
