@@ -28,9 +28,9 @@ class Product(
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(20)")
     var status: ProductStatus,
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(100)")
     val name: String,
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     val description: String,
     @Column(nullable = false)
     val price: BigDecimal,

@@ -62,7 +62,6 @@ class OrderController(
                     is InvalidOrderPriceException -> ErrorSpec.badRequest(ErrorCode.INVALID_ORDER_PRICE)
                     is InvalidOrderProductQuantityException,
                     is InvalidStockQuantityToAllocateException -> ErrorSpec.badRequest(ErrorCode.INVALID_ORDER_QUANTITY)
-
                     is AlreadyUsedCouponException -> ErrorSpec.badRequest(ErrorCode.ALREADY_USED_COUPON)
                     is ExpiredCouponException -> ErrorSpec.badRequest(ErrorCode.EXPIRED_COUPON)
                     is BelowMinBalanceAmountException -> ErrorSpec.badRequest(ErrorCode.INSUFFICIENT_BALANCE)

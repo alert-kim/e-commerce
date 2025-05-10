@@ -32,6 +32,7 @@ erDiagram
         timestamp updated_at
     }
     ORDER_PRODUCTS {
+        int id PK
         int order_id FK
         int product_id
         int quantity
@@ -39,30 +40,32 @@ erDiagram
         decimal total_price
         timestamp created_at
     }
-    ORDER_EVENTS {
-        int id PK
-        int order_id
-        varchar(25) type
-        text snapshot
-        timestamp created_at
-    }
 
     PRODUCTS {
         int id PK
-        varchar status(15)
+        varchar status(20)
         varchar(100) name
         text description
         decimal price
         timestamp created_at
         timestamp updated_at
     }
-    PRODUCT_STOCKS {
+    STOCKS {
+        int id PK
         int product_id PK
         int quantity
         timestamp created_at
         timestamp updated_at
     }
+    PRODUCT_SALE_STATS {
+        int id PK
+        int product_id FK
+        int quantity
+        date date
+        timestamp created_at
+    }
     PRODUCT_DAILY_SALES {
+        int id PK
         int product_id
         date date
         int quantity
@@ -75,39 +78,34 @@ erDiagram
         int user_id
         int order_id
         decimal amount
+        varchar(20) status
         timestamp created_at
+        timestamp updated_at
     }
-    
+
     COUPONS {
         int id PK
         int user_id
-        int coupon_source_id FK
+        int coupon_source_id
+        varchar(20) name
+        decimal discount_amount
         timestamp used_at "(nullable)"
-        varchar(15) name
-        deciaml discount_amount
         timestamp created_at
         timestamp updated_at
     }
     COUPON_SOURCES {
         int id PK
-        varchar(15) name
-        deciaml discount_amount
+        varchar(20) name
+        decimal discount_amount
         int quantity
         int initial_quantity
+        varchar(20) status
         timestamp created_at
         timestamp updated_at
     }
 
-    PRODUCT_DAILY_SALES {
-        int product_id FK
-        int quantity
-        date date
-        timestamp created_at
-        timestamp updated_at
-    }
-    
     USERS one to one or zero BALANCES: has
-    USERS one to many ORDERS: has
+    USERS one to zero or more ORDERS: places
     USERS one to many PAYMENTS: has
     USERS one to many COUPONS: has
     
@@ -115,13 +113,12 @@ erDiagram
     
     ORDERS one to many ORDER_PRODUCTS: includes
     ORDER_PRODUCTS many to one PRODUCTS: references
-    ORDERS one to many ORDER_EVENTS: has
 
-    PRODUCTS one to one PRODUCT_STOCKS: has_stock
-    PRODUCTS one to many PRODUCT_DAILY_SALES: has
+    PRODUCTS one to one STOCKS: has_stock
+    PRODUCTS one to zero or more PRODUCT_SALE_STATS : has
+    PRODUCTS one to zero or more PRODUCT_DAILY_SALES: has
 
     ORDERS one to many PAYMENTS: has
-    COUPONS many to one COUPON_SOURCES: is_associated_with
-
-    PRODUCT_DAILY_SALES many to one PRODUCTS: is_associated_with
+    ORDERS one to zero or one COUPONS : uses
+    COUPONS zero or more to one COUPON_SOURCES: issued_from
 ```

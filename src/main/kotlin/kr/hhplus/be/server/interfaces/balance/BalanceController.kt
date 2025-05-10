@@ -53,8 +53,6 @@ class BalanceController(
         errorSpec = {
             when (it) {
                 is NotFoundUserException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_USER)
-                is NotFoundProductException -> ErrorSpec.notFound(ErrorCode.NOT_FOUND_PRODUCT)
-
                 is ExceedMaxBalanceAmountException -> ErrorSpec.badRequest(ErrorCode.EXCEED_MAX_BALANCE)
                 is BelowMinBalanceAmountException -> ErrorSpec.badRequest(ErrorCode.BELOW_MIN_BALANCE)
                 else -> ErrorSpec.serverError(ErrorCode.INTERNAL_SERVER_ERROR)

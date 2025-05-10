@@ -22,7 +22,7 @@ class Coupon(
     private val id: Long? = null,
     @Column(nullable = false)
     val userId: UserId,
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(20)")
     val name: String,
     @Column(nullable = false)
     val couponSourceId: CouponSourceId,
