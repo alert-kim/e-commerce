@@ -54,7 +54,7 @@ class PopularProductsCacheTest {
         Mockito.verify(
             dailyStatRepository,
             times(1)
-        ).findTopNProductsByQuantity(
+        ).findTopNProductIdsByQuantity(
             startDate = PopularProductsIds.getStartDay(),
             endDate = PopularProductsIds.getEndDay(),
             limit = PopularProductsIds.MAX_SIZE
@@ -72,7 +72,7 @@ class PopularProductsCacheTest {
         Mockito.verify(
             dailyStatRepository,
             times(2)
-        ).findTopNProductsByQuantity(
+        ).findTopNProductIdsByQuantity(
             startDate = PopularProductsIds.getStartDay(),
             endDate = PopularProductsIds.getEndDay(),
             limit = PopularProductsIds.MAX_SIZE
@@ -93,7 +93,7 @@ class PopularProductsCacheTest {
         Mockito.verify(
             dailyStatRepository,
             times(2)
-        ).findTopNProductsByQuantity(
+        ).findTopNProductIdsByQuantity(
             startDate = PopularProductsIds.getStartDay(),
             endDate = PopularProductsIds.getEndDay(),
             limit = PopularProductsIds.MAX_SIZE

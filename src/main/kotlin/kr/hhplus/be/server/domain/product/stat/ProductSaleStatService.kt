@@ -37,9 +37,9 @@ class ProductSaleStatService(
 
     @Cacheable(CacheNames.POPULAR_PRODUCTS, key = "'popular_products'", unless = "#result.value.isEmpty()")
     fun getPopularProductIds(): PopularProductsIds =
-        dailyStatRepository.findTopNProductsByQuantity(
+        dailyStatRepository.findTopNProductIdsByQuantity(
             startDate = PopularProductsIds.getStartDay(),
             endDate = PopularProductsIds.getEndDay(),
             limit = PopularProductsIds.MAX_SIZE,
-        ).map { it.productId }.let { PopularProductsIds(it) }
+        ).let { PopularProductsIds(it) }
 }
