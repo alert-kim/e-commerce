@@ -44,9 +44,18 @@ class PopularProductIdsTest {
     }
 
     @Test
-    fun `인기 상품 조회의 종료 날짜는 KST기준 1dlf wjs이다`() {
+    fun `인기 상품 조회의 종료 날짜는 KST기준 1일 전이다`() {
         val result = PopularProductsIds.getEndDay()
 
         Assertions.assertThat(result).isEqualTo(LocalDate.now(TimeZone.KSTId).minusDays(1))
+    }
+
+    @Test
+    fun `인기 상품 조회의 시작 날짜는 기준 날짜의 2일 전이다`() {
+        val date = LocalDate.now(TimeZone.KSTId)
+
+        val result = PopularProductsIds.getStartDateFromBaseDate(date)
+
+        Assertions.assertThat(result).isEqualTo(date.minusDays(2))
     }
 }

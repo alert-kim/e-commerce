@@ -37,7 +37,6 @@ class ProductToOrderStatsSchedulerTest {
                     assertThat(it.date).isEqualTo(today)
                 }
             )
-            productFacade.getPopularProducts()
         }
     }
 }

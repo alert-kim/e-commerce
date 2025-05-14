@@ -1,12 +1,19 @@
 package kr.hhplus.be.server.domain.product.ranking
 
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.next
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.product.ranking.repository.ProductSaleRankingRepository
 import kr.hhplus.be.server.domain.product.ranking.repository.UpdateProductSaleRankingCommand
+import kr.hhplus.be.server.domain.product.stat.PopularProductsIds
 import kr.hhplus.be.server.testutil.mock.OrderMock
+import kr.hhplus.be.server.testutil.mock.ProductMock
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -43,6 +50,31 @@ class ProductSaleRankingServiceTest {
                     )
                 }
             }
+        }
+    }
+
+    @Nested
+    inner class GetPopularProductIds {
+
+        @Test
+        @DisplayName("기준 일자의 인기 상품 ID 목록을 조회")
+        fun getTodayPopularProductIds() {
+            val productIds = List(Arb.int(1..PopularProductsIds.MAX_SIZE).next()) {
+                ProductMock.id()
+            }
+            val baseDate = LocalDate.now(TimeZone.KSTId)
+            val startDate = PopularProductsIds.getStartDateFromBaseDate(baseDate)
+            every {
+                repository.findTopNProductIds(
+                    startDate = startDate,
+                    endDate = baseDate,
+                    limit = PopularProductsIds.MAX_SIZE,
+                )
+            } returns productIds
+
+            val result = service.getPopularProductIds()
+
+            assertThat(result.value).isEqualTo(productIds)
         }
     }
 }

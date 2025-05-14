@@ -1,9 +1,12 @@
 package kr.hhplus.be.server.domain.product.ranking
 
+import kr.hhplus.be.server.common.cache.CacheNames
 import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.product.ranking.repository.ProductSaleRankingRepository
 import kr.hhplus.be.server.domain.product.ranking.repository.UpdateProductSaleRankingCommand
 import kr.hhplus.be.server.domain.product.stat.PopularProductsIds
+import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -13,6 +16,8 @@ import java.time.LocalDate
 class ProductSaleRankingService(
     private val repository: ProductSaleRankingRepository,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun updateRanking(command: UpdateProductSaleRankingCommand) {
         val soldAt = command.event.completedAt
         val date = LocalDate.ofInstant(soldAt, TimeZone.KSTId)
@@ -24,6 +29,17 @@ class ProductSaleRankingService(
                 orderCount = 1,
             ))
         }
+    }
+
+    fun getPopularProductIds(): PopularProductsIds {
+        val baseDate = LocalDate.now(TimeZone.KSTId)
+        val popularProductsIds = repository.findTopNProductIds(
+            startDate = PopularProductsIds.getStartDateFromBaseDate(baseDate),
+            endDate = baseDate,
+            limit = PopularProductsIds.MAX_SIZE,
+        ).let { PopularProductsIds(it) }
+
+        return popularProductsIds
     }
 }
 

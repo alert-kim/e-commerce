@@ -19,6 +19,5 @@ class OrderProductStatsScheduler(
                 date = today,
             )
         )
-        productFacade.getPopularProducts()
     }
 }
