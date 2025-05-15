@@ -11,6 +11,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import kr.hhplus.be.server.domain.coupon.CouponId
@@ -25,13 +26,16 @@ import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
-@Table(name = "orders")
+@Table(
+    name = "orders",
+)
 class Order(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
-
+    @Column(nullable = false)
     val userId: UserId,
+    @Column(nullable = false)
     val createdAt: Instant,
     status: OrderStatus,
     originalAmount: BigDecimal,
@@ -42,19 +46,19 @@ class Order(
     updatedAt: Instant,
 ) {
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(20)")
+    @Column(columnDefinition = "varchar(20)", nullable = false)
     var status: OrderStatus = status
         private set
 
-    @Column(precision = 20, scale = 2)
+    @Column(precision = 20, scale = 2, nullable = false)
     var originalAmount: BigDecimal = originalAmount
         private set
 
-    @Column(precision = 20, scale = 2)
+    @Column(precision = 20, scale = 2, nullable = false)
     var discountAmount: BigDecimal = discountAmount
         private set
 
-    @Column(precision = 20, scale = 2)
+    @Column(precision = 20, scale = 2, nullable = false)
     var totalAmount: BigDecimal = totalAmount
         private set
 
@@ -63,6 +67,7 @@ class Order(
     var couponId: CouponId? = couponId
         private set
 
+    @Column(nullable = false)
     var updatedAt: Instant = updatedAt
         private set
 
@@ -73,7 +78,7 @@ class Order(
         mappedBy = "order",
         cascade = [CascadeType.ALL],
         orphanRemoval = true,
-        fetch = FetchType.EAGER,
+        fetch = FetchType.LAZY,
     )
     private val _products: MutableList<OrderProduct> = orderProducts.toMutableList()
 

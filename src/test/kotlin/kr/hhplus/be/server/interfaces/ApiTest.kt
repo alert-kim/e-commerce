@@ -20,7 +20,6 @@ import java.time.LocalDate
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 abstract class ApiTest {
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -56,6 +55,8 @@ abstract class ApiTest {
         status = status
     )
 
+    fun clearCouponSource() = databaseTestHelper.clearCouponSource()
+
     fun savedProduct(
         status: ProductStatus = ProductStatus.ON_SALE,
         stock: Int = 100,
@@ -67,15 +68,19 @@ abstract class ApiTest {
             price = price,
         )
 
-    fun savedProductDailySale(
+    fun clearProducts() = databaseTestHelper.clearProducts()
+
+    fun savedProductDailySaleStat(
         productId: ProductId = ProductMock.id(),
         date: LocalDate = LocalDate.now(),
         quantity: Int = 100,
     ) =
-        databaseTestHelper.savedProductDailySale(
+        databaseTestHelper.savedProductDailySaleStat(
             productId = productId,
             date = date,
             quantity = quantity
         )
+
+    fun clearProductDailySaleStat() = databaseTestHelper.clearProductDailySaleStat()
 
 }

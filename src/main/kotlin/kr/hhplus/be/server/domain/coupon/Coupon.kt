@@ -1,11 +1,6 @@
 package kr.hhplus.be.server.domain.coupon
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import kr.hhplus.be.server.domain.coupon.exception.AlreadyUsedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.NotOwnedCouponException
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponIdException
@@ -16,22 +11,33 @@ import java.math.RoundingMode
 import java.time.Instant
 
 @Entity
-@Table(name = "coupons")
+@Table(
+    name = "coupons",
+    indexes = [
+        Index(name = "coupon_idx_user", columnList = "user_id"),
+    ]
+)
 class Coupon(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
+    @Column(nullable = false)
     val userId: UserId,
+    @Column(nullable = false, columnDefinition = "varchar(20)")
     val name: String,
+    @Column(nullable = false)
     val couponSourceId: CouponSourceId,
     @Column(precision = 20, scale = 2)
     val discountAmount: BigDecimal,
+    @Column(nullable = false)
     val createdAt: Instant,
     usedAt: Instant?,
     updatedAt: Instant,
 ) {
+    @Column
     var usedAt: Instant? = usedAt
         private set
 
+    @Column(nullable = false)
     var updatedAt: Instant = updatedAt
         private set
 

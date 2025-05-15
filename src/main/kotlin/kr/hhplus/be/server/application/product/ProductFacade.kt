@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.product
 
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
 import kr.hhplus.be.server.application.product.result.GetProductsFacadeResult
+import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.product.ProductService
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.product.stat.ProductSaleStatService
@@ -30,9 +31,9 @@ class ProductFacade(
     }
 
     fun getPopularProducts(): GetProductsFacadeResult.Listed {
-        val popularProductIds = productSaleStatService.getPopularProductIds().value
-        val products = productService.getAllByIds(popularProductIds.map { it.value })
-        val stocks = stockService.getStocks(popularProductIds)
+        val popularProductIds = productSaleStatService.getPopularProductIds()
+        val products = productService.getAllByIds(popularProductIds.value.map { it.value })
+        val stocks = stockService.getStocks(popularProductIds.value)
 
         return GetProductsFacadeResult.Listed.from(products.value, stocks)
     }

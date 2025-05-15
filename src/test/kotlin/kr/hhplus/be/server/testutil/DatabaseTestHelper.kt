@@ -1,17 +1,10 @@
 package kr.hhplus.be.server.testutil
 
+import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
 import kr.hhplus.be.server.domain.coupon.*
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
-import kr.hhplus.be.server.domain.product.Product
-import kr.hhplus.be.server.domain.product.ProductDailySaleStat
-import kr.hhplus.be.server.domain.product.ProductDailySaleStatRepositoryTestConfig
-import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductRepositoryTestConfig
-import kr.hhplus.be.server.domain.product.ProductStatus
-import kr.hhplus.be.server.domain.product.TestProductDailySaleStatRepository
-import kr.hhplus.be.server.domain.product.TestProductRepository
 import kr.hhplus.be.server.domain.order.Order
 import kr.hhplus.be.server.domain.order.OrderId
 import kr.hhplus.be.server.domain.order.OrderProduct
@@ -20,6 +13,8 @@ import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.payment.PaymentStatus
 import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
 import kr.hhplus.be.server.domain.product.*
+import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
+import kr.hhplus.be.server.domain.stock.Stock
 import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
 import kr.hhplus.be.server.domain.user.UserId
@@ -32,8 +27,14 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Component
-@Import(UserRepositoryTestConfig::class, ProductRepositoryTestConfig::class, ProductDailySaleStatRepositoryTestConfig::class)
+@Import(
+    UserRepositoryTestConfig::class,
+    ProductRepositoryTestConfig::class,
+    ProductDailySaleStatRepositoryTestConfig::class,
+    CouponSourceRepositoryTestConfig::class,
+)
 class DatabaseTestHelper(
+    private val testCouponSourceRepository: TestCouponSourceRepository,
     private val testUserRepository: TestUserRepository,
     private val testProductRepository: TestProductRepository,
     private val testProductDailySaleStatRepository: TestProductDailySaleStatRepository,
@@ -77,6 +78,10 @@ class DatabaseTestHelper(
         return couponSourceRepository.save(source)
     }
 
+    fun clearCouponSource() {
+        testCouponSourceRepository.clear()
+    }
+
     fun savedCoupon(
         userId: UserId = UserMock.id(),
         couponSourceId: CouponSourceId = CouponMock.sourceId(),
@@ -102,8 +107,7 @@ class DatabaseTestHelper(
         id: CouponSourceId,
     ): CouponSource? = couponSourceRepository.findById(id.value)
 
-    fun findCoupon(id: CouponId)
-        = couponRepository.findById(id.value)
+    fun findCoupon(id: CouponId) = couponRepository.findById(id.value)
 
     // order
     fun savedOrder(
@@ -167,20 +171,34 @@ class DatabaseTestHelper(
             status = status,
         )
         val saved = testProductRepository.save(product)
-        stockRepository.save(
-            StockMock.stock(
-                id = null,
-                productId = saved.id(),
-                quantity = stock,
-            )
+        savedStock(
+            productId = saved.id(),
+            quantity = stock,
         )
         return saved
     }
 
-    fun savedProductDailySale(
+    fun clearProducts() {
+        testProductRepository.deleteAll()
+    }
+
+    fun findProduct(
+        id: ProductId,
+    ) = productRepository.findById(id.value)
+
+    fun findStock(
         productId: ProductId,
-        date: LocalDate,
-        quantity: Int,
+    ) = stockRepository.findByProductId(productId)
+
+    // product-stat
+    fun clearProductDailySaleStat() {
+        testProductDailySaleStatRepository.deleteAll()
+    }
+
+    fun savedProductDailySaleStat(
+        productId: ProductId = ProductMock.id(),
+        date: LocalDate = LocalDate.now(TimeZone.KSTId).minusDays(1),
+        quantity: Int = 10,
     ): ProductDailySaleStat =
         testProductDailySaleStatRepository.save(
             ProductMock.dailySale(
@@ -191,13 +209,15 @@ class DatabaseTestHelper(
             )
         )
 
-    fun findProduct(
-        id: ProductId,
-    ) = productRepository.findById(id.value)
-
-    fun findStock(
-        productId: ProductId,
-    ) = stockRepository.findByProductId(productId)
-
-
+    // stock
+    fun savedStock(
+        productId: ProductId = ProductMock.id(),
+        quantity: Int = 10,
+    ): Stock = stockRepository.save(
+        StockMock.stock(
+            id = null,
+            productId = productId,
+            quantity = quantity,
+        )
+    )
 }

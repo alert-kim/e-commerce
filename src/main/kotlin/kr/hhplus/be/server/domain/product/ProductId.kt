@@ -1,4 +1,6 @@
 package kr.hhplus.be.server.domain.product
 
-@JvmInline
-value class ProductId(val value: Long)
+import jakarta.persistence.Embeddable
+
+@Embeddable
+data class ProductId(val value: Long)

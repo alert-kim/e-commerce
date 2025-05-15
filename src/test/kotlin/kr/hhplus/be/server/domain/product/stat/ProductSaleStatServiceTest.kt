@@ -26,7 +26,6 @@ class ProductSaleStatServiceTest {
     val service = ProductSaleStatService(statRepository, dailyStatRepository)
 
     @Nested
-    @DisplayName("createStat")
     inner class CreateStats {
 
         @Test
@@ -54,7 +53,6 @@ class ProductSaleStatServiceTest {
     }
 
     @Nested
-    @DisplayName("createDailyStat")
     inner class CreateDailyStats {
 
         @Test
@@ -72,21 +70,21 @@ class ProductSaleStatServiceTest {
     }
 
     @Nested
-    @DisplayName("getPopularProductIds")
     inner class GetPopularProductIds {
+
         @Test
-        fun `getPopularProducts - 인기 상품 조회`() {
+        @DisplayName("인기 상품 ID 조회")
+        fun getPopularProducts() {
             val productIds = List(Arb.int(1..PopularProductsIds.MAX_SIZE).next()) {
                 ProductMock.id()
             }
-            val sales = productIds.map { ProductMock.dailySale(productId = it) }
             every {
-                dailyStatRepository.findTopNProductsByQuantity(
+                dailyStatRepository.findTopNProductIdsByQuantity(
                     startDate = PopularProductsIds.getStartDay(),
                     endDate = PopularProductsIds.getEndDay(),
                     limit = PopularProductsIds.MAX_SIZE,
                 )
-            } returns sales
+            } returns productIds
 
             val result = service.getPopularProductIds()
 

@@ -10,7 +10,9 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
+    @Column(nullable = false)
     val name: String,
+    @Column(nullable = false)
     val createdAt: Instant = Instant.now(),
 ) {
     fun id(): UserId {

@@ -11,23 +11,28 @@ import java.time.Instant
 @Entity
 @Table(
     name = "stocks",
-    uniqueConstraints = [
-        UniqueConstraint(name = "stock_product_unq_product", columnNames = ["productId"])
+    indexes = [
+        Index(name = "stock_unq_product", columnList = "product_id", unique = true),
     ]
 )
 class Stock(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null,
-
+    @Embedded
+    @AttributeOverride(name = "value", column = Column(name = "product_id"))
+    @Column(nullable = false)
     val productId: ProductId,
+    @Column(nullable = false)
     val createdAt: Instant = Instant.now(),
     quantity: Int,
     updatedAt: Instant = Instant.now(),
 ) {
+    @Column(nullable = false)
     var quantity: Int = quantity
         private set
 
+    @Column(nullable = false)
     var updatedAt: Instant = updatedAt
         private set
 

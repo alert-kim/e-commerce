@@ -1,19 +1,18 @@
 package kr.hhplus.be.server.domain.stock
 
-
 import io.kotest.assertions.throwables.shouldThrow
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.domain.stock.command.AllocateStockCommand
 import kr.hhplus.be.server.domain.stock.command.RestoreStockCommand
 import kr.hhplus.be.server.domain.stock.exception.NotFoundStockException
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
+import kr.hhplus.be.server.testutil.assertion.StockViewListAssert.Companion.assertStockViews
 import kr.hhplus.be.server.testutil.mock.ProductMock
 import kr.hhplus.be.server.testutil.mock.StockMock
 import org.assertj.core.api.Assertions.assertThat
@@ -29,12 +28,15 @@ class StockServiceTest {
     @InjectMockKs
     private lateinit var service: StockService
 
+    @MockK
+    private lateinit var cacheReader: StockCacheReader
+
     @MockK(relaxed = true)
     private lateinit var repository: StockRepository
 
     @BeforeEach
     fun setUp() {
-        clearMocks(repository)
+        clearAllMocks()
     }
 
     @Nested
@@ -44,18 +46,41 @@ class StockServiceTest {
         @Test
         @DisplayName("여러 상품 id에 대한 재고 조회")
         fun getStocks() {
-            val productId1 = ProductId(100L)
-            val productId2 = ProductId(200L)
-            val stock1 = StockMock.stock()
-            val stock2 = StockMock.stock()
-            every { repository.findAllByProductIds(any()) } returns listOf(stock1, stock2)
+            val stocks = List(3) { StockMock.view() }
+            stocks.forEach { stock ->
+                every { cacheReader.getOrNullByProductId(stock.productId) } returns stock
+            }
+            val productIds = stocks.map { it.productId }
 
-            val result = service.getStocks(listOf(productId1, productId2))
+            val result = service.getStocks(productIds)
 
-            assertThat(result).hasSize(2)
-            assertThat(result[0].id).isEqualTo(stock1.id())
-            assertThat(result[1].id).isEqualTo(stock2.id())
-            verify { repository.findAllByProductIds(listOf(productId1, productId2)) }
+            assertStockViews(result).isEqualTo(stocks)
+            verify {
+                productIds.forEach { productId ->
+                    cacheReader.getOrNullByProductId(productId)
+                }
+            }
+        }
+        
+        @Test
+        @DisplayName("일부 상품이 존재하지 않는 경우 존재하는 상품만 반환")
+        fun getSomeStocks() {
+            val notExistsProductId = ProductMock.id()
+            val existsStocks = List(3) { StockMock.view() }
+            val allProductIds = existsStocks.map { it.productId } + notExistsProductId
+            existsStocks.forEach { stock ->
+                every { cacheReader.getOrNullByProductId(stock.productId) } returns stock
+            }
+            every { cacheReader.getOrNullByProductId(notExistsProductId) } returns null
+
+            val result = service.getStocks(allProductIds)
+
+            assertStockViews(result).isEqualTo(existsStocks)
+            verify {
+                allProductIds.forEach { productId ->
+                    cacheReader.getOrNullByProductId(productId)
+                }
+            }
         }
     }
 

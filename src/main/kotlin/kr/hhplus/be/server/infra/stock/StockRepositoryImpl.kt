@@ -10,12 +10,10 @@ class StockRepositoryImpl(
     private val stockJpaRepository: StockJpaRepository
 ) : StockRepository {
     override fun findByProductId(productId: ProductId): Stock? =
-        stockJpaRepository.findByProductId(productId.value)
+        stockJpaRepository.findByProductId(productId)
 
-    override fun findAllByProductIds(productIds: Collection<ProductId>): List<Stock> {
-        val productIdValues = productIds.map { it.value }
-        return stockJpaRepository.findAllByProductIdIn(productIdValues)
-    }
+    override fun findAllByProductIds(productIds: Collection<ProductId>): List<Stock> =
+        stockJpaRepository.findAllByProductIdIn(productIds)
 
     override fun save(stock: Stock): Stock =
         stockJpaRepository.save(stock)

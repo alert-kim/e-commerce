@@ -21,13 +21,13 @@ class UserServiceTest {
     private lateinit var service: UserService
 
     @MockK(relaxed = true)
-    private lateinit var repository: UserRepository
+    private lateinit var cacheReader: UserCacheReader
 
     @Test
     fun `유저 Id로 유저를 조회해 반환한다`() {
         val userId = UserMock.id()
         val user = UserMock.user(id = userId)
-        every { repository.findById(userId.value) } returns user
+        every { cacheReader.getOrNull(userId.value) } returns user
 
         val result = service.get(userId.value)
 
@@ -36,18 +36,18 @@ class UserServiceTest {
             { assertThat(result.name).isEqualTo(user.name) },
             { assertThat(result.createdAt).isEqualTo(user.createdAt) },
         )
-        verify { repository.findById(userId.value) }
+        verify { cacheReader.getOrNull(userId.value) }
     }
 
     @Test
     fun `해당 유저가 없는 경우, NotFoundUserException이 발생한다`() {
         val userId = IdMock.value()
-        every { repository.findById(userId) } returns null
+        every { cacheReader.getOrNull(userId) } returns null
 
         assertThrows<NotFoundUserException> {
             service.get(userId)
         }
 
-        verify { repository.findById(userId) }
+        verify { cacheReader.getOrNull(userId) }
     }
 }

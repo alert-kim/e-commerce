@@ -16,7 +16,6 @@ import org.springframework.web.reactive.function.client.WebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OrderSnapshotClientImplTest {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val mapper = jacksonObjectMapper().registerModules(JavaTimeModule())
 
     private val server by lazy {
         WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort()).apply {

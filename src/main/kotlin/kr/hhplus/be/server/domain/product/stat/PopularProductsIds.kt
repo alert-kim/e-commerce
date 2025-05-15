@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.product.stat
 
-import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.common.util.TimeZone
+import kr.hhplus.be.server.domain.product.ProductId
 import java.time.LocalDate
 
 data class PopularProductsIds(
