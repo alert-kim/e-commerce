@@ -20,7 +20,7 @@ class ProductSaleRankingRepositoryTest {
     lateinit var repository: ProductSaleRankingRepository
 
     @Autowired
-    lateinit var testRepository: TestProductSaleRankingRedisRepository
+    lateinit var testRepository: TestSaleRankingRedisRepository
 
     @BeforeEach
     fun setup() {

@@ -13,6 +13,10 @@ import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.domain.payment.PaymentStatus
 import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
 import kr.hhplus.be.server.domain.product.*
+import kr.hhplus.be.server.domain.product.ranking.ProductSaleRankingEntry
+import kr.hhplus.be.server.domain.product.ranking.ProductSaleRankingRepositoryTestConfig
+import kr.hhplus.be.server.domain.product.ranking.TestSaleRankingRedisRepository
+import kr.hhplus.be.server.domain.product.ranking.repository.ProductSaleRankingRepository
 import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
 import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStatRepositoryTestConfig
 import kr.hhplus.be.server.domain.product.stat.TestProductDailySaleStatRepository
@@ -33,6 +37,7 @@ import java.time.LocalDate
     UserRepositoryTestConfig::class,
     ProductRepositoryTestConfig::class,
     ProductDailySaleStatRepositoryTestConfig::class,
+    ProductSaleRankingRepositoryTestConfig::class,
     CouponSourceRepositoryTestConfig::class,
 )
 class DatabaseTestHelper(
@@ -40,12 +45,14 @@ class DatabaseTestHelper(
     private val testUserRepository: TestUserRepository,
     private val testProductRepository: TestProductRepository,
     private val testProductDailySaleStatRepository: TestProductDailySaleStatRepository,
+    private val testProductSaleRankingRepository: TestSaleRankingRedisRepository,
     private val balanceRepository: BalanceRepository,
     private val couponRepository: CouponRepository,
     private val couponSourceRepository: CouponSourceRepository,
     private val orderRepository: OrderRepository,
     private val paymentRepository: PaymentRepository,
     private val productRepository: ProductRepository,
+    private val productSaleRankingRepository: ProductSaleRankingRepository,
     private val stockRepository: StockRepository,
 ) {
     // user
@@ -188,28 +195,32 @@ class DatabaseTestHelper(
         id: ProductId,
     ) = productRepository.findById(id.value)
 
-    fun findStock(
-        productId: ProductId,
-    ) = stockRepository.findByProductId(productId)
-
-    // product-stat
-    fun clearProductDailySaleStat() {
-        testProductDailySaleStatRepository.deleteAll()
-    }
-
-    fun savedProductDailySaleStat(
+    // product-ranking
+    fun updateProductSaleRanking(
         productId: ProductId = ProductMock.id(),
-        date: LocalDate = LocalDate.now(TimeZone.KSTId).minusDays(1),
+        date: LocalDate = LocalDate.now(TimeZone.KSTId),
+        rankingStartDate: LocalDate = LocalDate.now(TimeZone.KSTId).minusDays(2),
+        rankingEndDate: LocalDate = LocalDate.now(TimeZone.KSTId),
         quantity: Int = 10,
-    ): ProductDailySaleStat =
-        testProductDailySaleStatRepository.save(
-            ProductMock.dailySale(
-                id = null,
+    ) {
+        productSaleRankingRepository.updateRanking(
+            ProductSaleRankingEntry(
                 productId = productId,
                 date = date,
                 quantity = quantity,
+                orderCount = 1,
             )
         )
+        productSaleRankingRepository.renewRanking(
+            startDate = rankingStartDate,
+            endDate = rankingEndDate,
+            limit = 10
+        )
+    }
+
+    fun deleteAllProductSaleRanking() {
+        testProductSaleRankingRepository.deleteAll()
+    }
 
     // stock
     fun savedStock(
@@ -222,4 +233,9 @@ class DatabaseTestHelper(
             quantity = quantity,
         )
     )
+
+    fun findStock(
+        productId: ProductId,
+    ) = stockRepository.findByProductId(productId)
+
 }

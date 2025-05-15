@@ -16,14 +16,14 @@ import org.springframework.test.web.servlet.get
 import java.time.LocalDate
 
 @Isolated
-class GetPopularProductsApiTest: ApiTest() {
+class GetPopularProductsApiTest : ApiTest() {
 
     @Autowired
     private lateinit var cacheManager: CacheManager
 
     @BeforeEach
     fun setup() {
-        clearProductDailySaleStat()
+        deleteAllProductSaleRanking()
         cacheManager.getCache(CacheNames.POPULAR_PRODUCTS)?.clear()
     }
 
@@ -33,9 +33,8 @@ class GetPopularProductsApiTest: ApiTest() {
         val popularProductsSize = 5
         val products = List(productsSize) { index ->
             val product = savedProduct()
-            savedProductDailySaleStat(
+            updateProductSaleRanking(
                 productId = product.id(),
-                date = LocalDate.now(TimeZone.KSTId).minusDays(1),
                 quantity = 100 - index * 10,
             )
             product
@@ -58,24 +57,24 @@ class GetPopularProductsApiTest: ApiTest() {
 
     @Test
     fun `인기 상품 조회 - 200 - 1일 전부터 3일 전까지에 대한 인기 상품 조회`() {
-        val startDate = LocalDate.now(TimeZone.KSTId).minusDays(3)
-        val endDate = LocalDate.now(TimeZone.KSTId).minusDays(1)
+        val startDate = LocalDate.now(TimeZone.KSTId).minusDays(2)
+        val endDate = LocalDate.now(TimeZone.KSTId)
         val popularProducts = List(5) { index ->
             val product = savedProduct()
             val date = Arb.localDate(minDate = startDate, maxDate = endDate).next()
-            savedProductDailySaleStat(
+            updateProductSaleRanking(
                 productId = product.id(),
                 date = date,
                 quantity = 100 - index * 10,
             )
             product
         }
-        savedProductDailySaleStat(
+        updateProductSaleRanking(
             productId = savedProduct().id(),
             date = startDate.minusDays(1),
             quantity = 1000,
         )
-        savedProductDailySaleStat(
+        updateProductSaleRanking(
             productId = savedProduct().id(),
             date = endDate.plusDays(1),
             quantity = 1000,
