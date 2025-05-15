@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.product
 
 import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
 import kr.hhplus.be.server.infra.product.ProductDailySaleStatJpaRepository
+import kr.hhplus.be.server.infra.product.stat.ProductSaleStatJpaRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 
@@ -9,18 +10,23 @@ import org.springframework.context.annotation.Bean
 class ProductDailySaleStatRepositoryTestConfig {
 
     @Bean
-    fun testProductDailySaleStatRepository(japRepository: ProductDailySaleStatJpaRepository): TestProductDailySaleStatRepository =
-        TestProductDailySaleStatRepository(japRepository)
+    fun testProductDailySaleStatRepository(
+        statJpaRepository: ProductSaleStatJpaRepository,
+        dailyStatJpaRepository: ProductDailySaleStatJpaRepository,
+        ): TestProductDailySaleStatRepository =
+        TestProductDailySaleStatRepository(dailyStatJpaRepository, statJpaRepository)
 }
 
 class TestProductDailySaleStatRepository(
-    private val jpaRepository: ProductDailySaleStatJpaRepository
+    private val dailyStatJpaRepository: ProductDailySaleStatJpaRepository,
+    private val statJpaRepository: ProductSaleStatJpaRepository,
 ) {
     fun save(sale: ProductDailySaleStat): ProductDailySaleStat {
-        return jpaRepository.save(sale)
+        return dailyStatJpaRepository.save(sale)
     }
 
     fun deleteAll() {
-        jpaRepository.deleteAll()
+        dailyStatJpaRepository.deleteAll()
+        statJpaRepository.deleteAll()
     }
 }

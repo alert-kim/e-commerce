@@ -195,7 +195,6 @@ class ProductDailySaleStatRepositoryTest {
             val productsInOrderBySale = List(3) {
                 testRepository.save(ProductMock.dailySale(id = null, date = startDate.plusDays(it.toLong()), quantity = 20 - it * 2))
             }
-            testRepository.save(ProductMock.dailySale(id = null, date = startDate, quantity = 1))
             testRepository.save(ProductMock.dailySale(id = null, date = startDate.minusDays(1), quantity = 30))
             testRepository.save(ProductMock.dailySale(id = null, date = endDate.plusDays(1), quantity = 30))
 

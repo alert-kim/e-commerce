@@ -11,7 +11,7 @@ import java.time.LocalDate
 @Table(
     name = "product_daily_sale_stats",
     indexes = [
-        Index(name = "product_daily_sale_stat_idx_date", columnList = "date"),
+        Index(name = "product_daily_sale_stat_idx_product_id", columnList = "date, product_id", unique = true),
     ]
 )
 class ProductDailySaleStat(
