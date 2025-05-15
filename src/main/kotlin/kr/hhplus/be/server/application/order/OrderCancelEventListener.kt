@@ -11,6 +11,7 @@ import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionalEventListener
 
@@ -25,6 +26,7 @@ class OrderCancelEventListener(
     private val logger = LoggerFactory.getLogger(OrderCancelEventListener::class.java)
 
     @TransactionalEventListener
+    @Async
     fun handle(event: OrderFailedEvent) {
         val order = orderService.get(event.orderId.value)
 
