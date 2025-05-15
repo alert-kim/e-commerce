@@ -1,11 +1,9 @@
-package kr.hhplus.be.server.domain.product
+package kr.hhplus.be.server.domain.product.stat
 
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
-import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
-import kr.hhplus.be.server.domain.product.stat.ProductSaleStat
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
 import kr.hhplus.be.server.testutil.mock.ProductMock
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -38,7 +36,7 @@ class ProductDailySaleStatRepositoryTest {
     @Nested
     @DisplayName("일별 판매 통계 집계")
     inner class AggregateDailyStatsByDate {
-        
+
         @Test
         @DisplayName("특정 날짜의 판매 통계를 집계하여 일별 통계 테이블에 저장한다")
         fun aggregateDailyStatsByDate() {
@@ -56,13 +54,13 @@ class ProductDailySaleStatRepositoryTest {
 
             val result = repository.findTopNProductsByQuantity(today, today, 10)
             val dailySale1 = result.firstOrNull { it.productId == productId1 }
-            assertThat(dailySale1).isNotNull
-            assertThat(dailySale1?.date).isEqualTo(today)
-            assertThat(dailySale1?.quantity).isEqualTo(5)
+            Assertions.assertThat(dailySale1).isNotNull
+            Assertions.assertThat(dailySale1?.date).isEqualTo(today)
+            Assertions.assertThat(dailySale1?.quantity).isEqualTo(5)
             val dailySale2 = result.firstOrNull { it.productId == productId2 }
-            assertThat(dailySale2).isNotNull
-            assertThat(dailySale2?.date).isEqualTo(today)
-            assertThat(dailySale2?.quantity).isEqualTo(4)
+            Assertions.assertThat(dailySale2).isNotNull
+            Assertions.assertThat(dailySale2?.date).isEqualTo(today)
+            Assertions.assertThat(dailySale2?.quantity).isEqualTo(4)
         }
 
         @Test
@@ -91,9 +89,9 @@ class ProductDailySaleStatRepositoryTest {
 
             val result = repository.findTopNProductsByQuantity(today, today, 10)
                 .firstOrNull { it.productId == productId }
-            assertThat(result).isNotNull
-            assertThat(result?.date).isEqualTo(today)
-            assertThat(result?.quantity).isEqualTo(10)
+            Assertions.assertThat(result).isNotNull
+            Assertions.assertThat(result?.date).isEqualTo(today)
+            Assertions.assertThat(result?.quantity).isEqualTo(10)
         }
 
         @Test
@@ -110,9 +108,9 @@ class ProductDailySaleStatRepositoryTest {
 
             val result = repository.findTopNProductsByQuantity(today, today, 10)
                 .firstOrNull { it.productId == productId }
-            assertThat(result).isNotNull
-            assertThat(result?.date).isEqualTo(today)
-            assertThat(result?.quantity).isEqualTo(3)
+            Assertions.assertThat(result).isNotNull
+            Assertions.assertThat(result?.date).isEqualTo(today)
+            Assertions.assertThat(result?.quantity).isEqualTo(3)
         }
     }
 
@@ -132,11 +130,11 @@ class ProductDailySaleStatRepositoryTest {
 
             val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
 
-            assertThat(result).hasSize(limit)
+            Assertions.assertThat(result).hasSize(limit)
             result.forEachIndexed { index, productDailySale ->
-                assertThat(productDailySale.productId).isEqualTo(productsInOrderBySale[index].productId)
-                assertThat(productDailySale.date).isEqualTo(productsInOrderBySale[index].date)
-                assertThat(productDailySale.quantity).isEqualTo(productsInOrderBySale[index].quantity)
+                Assertions.assertThat(productDailySale.productId).isEqualTo(productsInOrderBySale[index].productId)
+                Assertions.assertThat(productDailySale.date).isEqualTo(productsInOrderBySale[index].date)
+                Assertions.assertThat(productDailySale.quantity).isEqualTo(productsInOrderBySale[index].quantity)
             }
         }
 
@@ -152,7 +150,7 @@ class ProductDailySaleStatRepositoryTest {
 
             val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
 
-            assertThat(result).hasSize(productsInOrderBySale.size)
+            Assertions.assertThat(result).hasSize(productsInOrderBySale.size)
         }
 
         @Test
@@ -166,7 +164,7 @@ class ProductDailySaleStatRepositoryTest {
 
             val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
 
-            assertThat(result).isEmpty()
+            Assertions.assertThat(result).isEmpty()
         }
 
         @Test
@@ -178,14 +176,14 @@ class ProductDailySaleStatRepositoryTest {
 
             val result = repository.findTopNProductsByQuantity(startDate, endDate, limit)
 
-            assertThat(result).isEmpty()
+            Assertions.assertThat(result).isEmpty()
         }
     }
-    
+
     @Nested
     @DisplayName("판매량 상위 N개 상품 ID 조회")
     inner class FindTopNProductIdsByQuantity {
-        
+
         @Test
         @DisplayName("판매량 기준으로 상위 N개 상품 ID를 조회")
         fun topNProductIds() {
@@ -199,12 +197,12 @@ class ProductDailySaleStatRepositoryTest {
             testRepository.save(ProductMock.dailySale(id = null, date = endDate.plusDays(1), quantity = 30))
 
             val result = repository.findTopNProductIdsByQuantity(startDate, endDate, limit)
-            
-            assertThat(result).hasSize(limit)
+
+            Assertions.assertThat(result).hasSize(limit)
             val expectedIds = productsInOrderBySale.take(limit).map { it.productId }
-            assertThat(result).isEqualTo(expectedIds)
+            Assertions.assertThat(result).isEqualTo(expectedIds)
         }
-        
+
         @Test
         @DisplayName("해당 기간에 판매된 상품이 없으면 빈 목록을 반환한다")
         fun shouldReturnEmptyListWhenNoSales() {
@@ -213,10 +211,10 @@ class ProductDailySaleStatRepositoryTest {
             val endDate = LocalDate.now()
             testRepository.save(ProductMock.dailySale(id = null, date = startDate.minusDays(1), quantity = 10))
             testRepository.save(ProductMock.dailySale(id = null, date = endDate.plusDays(1), quantity = 15))
-            
+
             val result = repository.findTopNProductIdsByQuantity(startDate, endDate, limit)
-            
-            assertThat(result).isEmpty()
+
+            Assertions.assertThat(result).isEmpty()
         }
     }
 }
