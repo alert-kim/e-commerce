@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository
 class StockRepositoryImpl(
     private val stockJpaRepository: StockJpaRepository
 ) : StockRepository {
+    override fun findByProductId(productId: ProductId): Stock? =
+        stockJpaRepository.findByProductId(productId.value)
 
     override fun findAllByProductIds(productIds: Collection<ProductId>): List<Stock> {
         val productIdValues = productIds.map { it.value }

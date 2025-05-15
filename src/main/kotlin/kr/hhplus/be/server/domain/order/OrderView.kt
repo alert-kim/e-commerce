@@ -17,6 +17,8 @@ data class OrderView(
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {
+    fun isFailed(): Boolean = status == OrderStatus.FAILED
+
     companion object {
         fun from(order: Order): OrderView =
             OrderView(

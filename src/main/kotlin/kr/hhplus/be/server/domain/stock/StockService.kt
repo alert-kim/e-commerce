@@ -1,7 +1,8 @@
 package kr.hhplus.be.server.domain.stock
 
 import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
+import kr.hhplus.be.server.domain.stock.command.AllocateStockCommand
+import kr.hhplus.be.server.domain.stock.command.RestoreStockCommand
 import kr.hhplus.be.server.domain.stock.exception.NotFoundStockException
 import kr.hhplus.be.server.domain.stock.result.AllocatedStock
 import org.springframework.stereotype.Service
@@ -10,20 +11,26 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 @Service
 class StockService(
-    private val stockRepository: StockRepository
+    private val repository: StockRepository
 ) {
     @Transactional
-    fun allocate(command: AllocateStocksCommand): List<AllocatedStock> {
-        val stocksByProductId = stockRepository.findAllByProductIds(command.productIds).associateBy { it.productId }
+    fun allocate(command: AllocateStockCommand): AllocatedStock {
+        val stock = repository.findByProductId(command.productId)
+            ?: throw NotFoundStockException(command.productId)
 
-        return command.needStocks.map { (productId, quantity) ->
-            val stock = stocksByProductId[productId] ?: throw NotFoundStockException(productId)
-            stock.allocate(quantity)
-        }
+        return stock.allocate(command.quantity)
+    }
+
+    @Transactional
+    fun restore(command: RestoreStockCommand) {
+        val stock = repository.findByProductId(command.productId)
+            ?: throw NotFoundStockException(command.productId)
+
+        stock.restore(command.quantity)
     }
 
     fun getStocks(productIds: List<ProductId>): List<StockView> {
-        val stocks = stockRepository.findAllByProductIds(productIds)
+        val stocks = repository.findAllByProductIds(productIds)
         return stocks.map { StockView.from(it) }
     }
 

@@ -37,7 +37,7 @@ class Stock(
 
     fun allocate(quantity: Int): AllocatedStock {
         when {
-            quantity <= 0 -> throw InvalidStockQuantityToAllocateException("${quantity}가 0이하 입니다.")
+            quantity <= 0 -> throw InvalidStockQuantityToAllocateException("할당할 ${quantity}가 0이하 입니다.")
             this.quantity < quantity -> throw OutOfStockException(productId, quantity, this.quantity)
         }
 
@@ -48,5 +48,12 @@ class Stock(
             productId = productId,
             quantity = quantity,
         )
+    }
+
+    fun restore(quantity: Int) {
+        if (quantity <= 0) throw InvalidStockQuantityToAllocateException("복구할 ${quantity}가 0이하 입니다.")
+
+        this.quantity += quantity
+        this.updatedAt = Instant.now()
     }
 }

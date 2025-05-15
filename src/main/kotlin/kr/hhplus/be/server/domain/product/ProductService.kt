@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.product
 
 import kr.hhplus.be.server.domain.common.createPageRequest
+import kr.hhplus.be.server.domain.product.excpetion.NotFoundProductException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -18,8 +19,14 @@ class ProductService(
             .map { ProductView.from(it) }
     }
 
-    fun getAllByIds(ids: List<Long>): ProductsView =
-        repository.findAllByIds(ids).map { ProductView.from(it) }.let { ProductsView(it) }
+    fun get(id: Long): ProductView {
+        val product = repository.findById(id) ?: throw NotFoundProductException("by id : $id")
+        return ProductView.from(product)
+    }
 
+    fun getAllByIds(ids: List<Long>): ProductsView {
+        val products = repository.findAllByIds(ids)
+        return ProductsView(products.map { ProductView.from(it) })
+    }
 }
 

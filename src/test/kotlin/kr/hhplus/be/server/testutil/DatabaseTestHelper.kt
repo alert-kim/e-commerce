@@ -1,10 +1,7 @@
 package kr.hhplus.be.server.testutil
 
 import kr.hhplus.be.server.domain.balance.repository.BalanceRepository
-import kr.hhplus.be.server.domain.coupon.Coupon
-import kr.hhplus.be.server.domain.coupon.CouponSource
-import kr.hhplus.be.server.domain.coupon.CouponSourceId
-import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
+import kr.hhplus.be.server.domain.coupon.*
 import kr.hhplus.be.server.domain.coupon.repository.CouponRepository
 import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.domain.product.Product
@@ -15,15 +12,19 @@ import kr.hhplus.be.server.domain.product.ProductRepositoryTestConfig
 import kr.hhplus.be.server.domain.product.ProductStatus
 import kr.hhplus.be.server.domain.product.TestProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.TestProductRepository
+import kr.hhplus.be.server.domain.order.Order
+import kr.hhplus.be.server.domain.order.OrderId
+import kr.hhplus.be.server.domain.order.OrderProduct
+import kr.hhplus.be.server.domain.order.OrderStatus
+import kr.hhplus.be.server.domain.order.repository.OrderRepository
+import kr.hhplus.be.server.domain.payment.PaymentStatus
+import kr.hhplus.be.server.domain.payment.repository.PaymentRepository
+import kr.hhplus.be.server.domain.product.*
 import kr.hhplus.be.server.domain.stock.StockRepository
 import kr.hhplus.be.server.domain.user.TestUserRepository
 import kr.hhplus.be.server.domain.user.UserId
 import kr.hhplus.be.server.domain.user.UserRepositoryTestConfig
-import kr.hhplus.be.server.testutil.mock.BalanceMock
-import kr.hhplus.be.server.testutil.mock.CouponMock
-import kr.hhplus.be.server.testutil.mock.ProductMock
-import kr.hhplus.be.server.testutil.mock.StockMock
-import kr.hhplus.be.server.testutil.mock.UserMock
+import kr.hhplus.be.server.testutil.mock.*
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -39,15 +40,25 @@ class DatabaseTestHelper(
     private val balanceRepository: BalanceRepository,
     private val couponRepository: CouponRepository,
     private val couponSourceRepository: CouponSourceRepository,
+    private val orderRepository: OrderRepository,
+    private val paymentRepository: PaymentRepository,
+    private val productRepository: ProductRepository,
     private val stockRepository: StockRepository,
 ) {
+    // user
     fun savedUser() = testUserRepository.save(UserMock.user(id = null))
 
+    // balance
     fun savedBalance(
         userId: UserId,
         amount: BigDecimal = BalanceMock.amount().value,
     ) = balanceRepository.save(BalanceMock.balance(id = null, userId = userId, amount = amount))
 
+    fun findBalance(
+        userId: UserId,
+    ) = balanceRepository.findByUserId(userId)
+
+    // coupon
     fun savedCouponSource(
         name: String = "테스트 쿠폰",
         discountAmount: BigDecimal = BigDecimal.valueOf(1000),
@@ -87,6 +98,60 @@ class DatabaseTestHelper(
         return couponRepository.save(coupon)
     }
 
+    fun findCouponSource(
+        id: CouponSourceId,
+    ): CouponSource? = couponSourceRepository.findById(id.value)
+
+    fun findCoupon(id: CouponId)
+        = couponRepository.findById(id.value)
+
+    // order
+    fun savedOrder(
+        userId: UserId = UserMock.id(),
+        status: OrderStatus = OrderStatus.READY,
+        couponId: CouponId? = null,
+        originalAmount: BigDecimal = BigDecimal.valueOf(2000),
+        discountAmount: BigDecimal = BigDecimal.ZERO,
+        totalAmount: BigDecimal = BigDecimal.valueOf(2000),
+        products: List<OrderProduct> = emptyList(),
+    ): Order =
+        orderRepository.save(
+            OrderMock.order(
+                id = null,
+                userId = UserMock.id(),
+                status = status,
+                couponId = couponId,
+                originalAmount = originalAmount,
+                discountAmount = discountAmount,
+                totalAmount = totalAmount,
+                products = products,
+            )
+        )
+
+    // payment
+    fun savedPayment(
+        userId: UserId = UserMock.id(),
+        status: PaymentStatus = PaymentStatus.COMPLETED,
+        orderId: OrderId = OrderMock.id(),
+        amount: BigDecimal = 2000.toBigDecimal(),
+        canceledAt: Instant? = null,
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now(),
+    ) {
+        val payment = PaymentMock.payment(
+            id = null,
+            userId = userId,
+            status = status,
+            orderId = orderId,
+            amount = amount,
+            canceledAt = canceledAt,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+        )
+        paymentRepository.save(payment)
+    }
+
+    // product
     fun savedProduct(
         status: ProductStatus = ProductStatus.ON_SALE,
         name: String = "테스트 상품",
@@ -125,4 +190,14 @@ class DatabaseTestHelper(
                 quantity = quantity,
             )
         )
+
+    fun findProduct(
+        id: ProductId,
+    ) = productRepository.findById(id.value)
+
+    fun findStock(
+        productId: ProductId,
+    ) = stockRepository.findByProductId(productId)
+
+
 }

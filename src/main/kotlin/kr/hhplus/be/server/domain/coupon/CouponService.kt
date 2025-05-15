@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.coupon
 
+import kr.hhplus.be.server.domain.coupon.command.CancelCouponUseCommand
 import kr.hhplus.be.server.domain.coupon.command.CreateCouponCommand
 import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponException
@@ -36,6 +37,14 @@ class CouponService(
         val usedCoupon = coupon.use(command.userId)
 
         return usedCoupon
+    }
+
+    @Transactional
+    fun cancelUse(command: CancelCouponUseCommand) {
+        val coupon = repository.findById(command.couponId)
+            ?: throw NotFoundCouponException("by id: ${command.couponId}")
+
+        coupon.cancelUse()
     }
 
     fun getAllUnused(userId: UserId): List<CouponView> =

@@ -1,38 +1,26 @@
 package kr.hhplus.be.server.application.order
 
-import io.mockk.every
+import io.kotest.assertions.throwables.shouldThrow
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.spyk
-import io.mockk.verify
-import io.mockk.verifyOrder
-import kr.hhplus.be.server.domain.balance.BalanceAmount
-import kr.hhplus.be.server.domain.balance.BalanceService
-import kr.hhplus.be.server.domain.balance.command.UseBalanceCommand
-import kr.hhplus.be.server.domain.balance.result.UsedBalanceAmount
-import kr.hhplus.be.server.domain.coupon.CouponService
-import kr.hhplus.be.server.domain.coupon.command.UseCouponCommand
+import kr.hhplus.be.server.application.order.command.*
+import kr.hhplus.be.server.application.order.processor.OrderCouponProcessor
+import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
+import kr.hhplus.be.server.application.order.processor.OrderPaymentProcessor
+import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
+import kr.hhplus.be.server.application.order.result.OrderCreationProcessorResult
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.command.ApplyCouponCommand
 import kr.hhplus.be.server.domain.order.command.CreateOrderCommand
-import kr.hhplus.be.server.domain.order.command.PayOrderCommand
-import kr.hhplus.be.server.domain.order.command.PlaceStockCommand
-import kr.hhplus.be.server.domain.payment.PaymentService
-import kr.hhplus.be.server.domain.payment.command.PayCommand
-import kr.hhplus.be.server.domain.product.ProductId
-import kr.hhplus.be.server.domain.product.ProductService
-import kr.hhplus.be.server.domain.product.ProductsView
-import kr.hhplus.be.server.domain.stock.StockService
-import kr.hhplus.be.server.domain.stock.command.AllocateStocksCommand
-import kr.hhplus.be.server.domain.stock.result.AllocatedStock
-import kr.hhplus.be.server.domain.user.UserId
-import kr.hhplus.be.server.domain.user.UserService
-import kr.hhplus.be.server.testutil.mock.*
+import kr.hhplus.be.server.testutil.mock.CouponMock
+import kr.hhplus.be.server.testutil.mock.OrderCommandMock
+import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 class OrderFacadeTest {
@@ -41,222 +29,164 @@ class OrderFacadeTest {
     private lateinit var orderFacade: OrderFacade
 
     @MockK(relaxed = true)
-    private lateinit var balanceService: BalanceService
-
-    @MockK(relaxed = true)
-    private lateinit var couponService: CouponService
-
-    @MockK(relaxed = true)
     private lateinit var orderService: OrderService
 
     @MockK(relaxed = true)
-    private lateinit var paymentService: PaymentService
+    private lateinit var orderLifecycleProcessor: OrderLifecycleProcessor
 
     @MockK(relaxed = true)
-    private lateinit var productService: ProductService
+    private lateinit var orderProductProcessor: OrderProductProcessor
 
     @MockK(relaxed = true)
-    private lateinit var stockService: StockService
+    private lateinit var orderCouponProcessor: OrderCouponProcessor
 
     @MockK(relaxed = true)
-    private lateinit var userService: UserService
+    private lateinit var orderPaymentProcessor: OrderPaymentProcessor
 
-    @Test
-    fun `order - 쿠폰이 있는 경우`() {
-        val couponId = CouponMock.id()
-        val usedCoupon = CouponMock.usedCoupon(id = couponId)
-        val command = OrderCommandMock.facade(couponId = couponId).also { spyk(it) }
-        val userId = UserId(command.userId)
-        val user = UserMock.view(id = userId)
-        val orderId = OrderMock.id()
-        val products = command.productsToOrder.map {
-            ProductMock.view(
-                id = ProductId(it.productId),
-                price = it.unitPrice,
-            )
-        }
-        val purchasableProduct = products.map {
-            ProductMock.purchasableProduct(
-                id = it.id,
-                price = it.price.value,
-            )
-        }
-        val stocks = command.productsToOrder.map {
-            AllocatedStock(
-                productId = ProductId(it.productId),
-                quantity = it.quantity,
-            )
-        }
-        val usedAmount = UsedBalanceAmount(
-            balanceId = BalanceMock.id(),
-            amount = BalanceAmount.of(command.totalAmount),
-        )
-        val payment = PaymentMock.view(
-            orderId = orderId,
-            userId = userId,
-            amount = command.totalAmount,
-            createdAt = Instant.now()
-        )
-        val order = OrderMock.view(id = orderId, userId = userId, couponId = couponId)
-        every { userService.get(command.userId) } returns user
-        every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
-        every { productService.getAllByIds(any()) } returns ProductsView(products)
-        every { stockService.allocate(any<AllocateStocksCommand>()) } returns stocks
-        every { couponService.use(UseCouponCommand(couponId.value, userId)) } returns usedCoupon
-        every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
-        every { paymentService.pay(any<PayCommand>()) } returns payment
-        every { orderService.get(orderId.value) } returns order
+    @Nested
+    @DisplayName("주문")
+    inner class Order {
+        @Test
+        @DisplayName("쿠폰이 있는 주문 처리")
+        fun withCoupon() {
+            val couponId = CouponMock.id()
+            val command = OrderCommandMock.facade(couponId = couponId).also { spyk(it) }
+            val orderId = OrderMock.id()
+            val order = OrderMock.view(id = orderId, couponId = couponId)
+            every { orderLifecycleProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
+            every { orderService.get(orderId.value) } returns order
 
-        val result = orderFacade.order(command)
+            val result = orderFacade.order(command)
 
-        assertThat(result.order).isEqualTo(order)
-        verifyOrder {
-            command.validate()
-            userService.get(command.userId)
-            orderService.createOrder(
-                CreateOrderCommand(
-                    userId = userId,
+            assertThat(result.order).isEqualTo(order)
+            verifyOrder {
+                command.validate()
+                orderLifecycleProcessor.createOrder(
+                    CreateOrderProcessorCommand(command.userId)
                 )
-            )
-            stockService.allocate(
-                AllocateStocksCommand(
-                    command.productsToOrder.associate {
-                        ProductId(it.productId) to it.quantity
-                    }
+                command.productsToOrder.forEach {
+                    orderProductProcessor.placeOrderProduct(
+                        PlaceOrderProductProcessorCommand(
+                            orderId = orderId,
+                            productId = it.productId,
+                            unitPrice = it.unitPrice,
+                            quantity = it.quantity,
+                        )
+                    )
+                }
+                orderService.get(orderId.value)
+                orderCouponProcessor.applyCouponToOrder(
+                    ApplyCouponProcessorCommand(
+                        orderId = orderId,
+                        userId = order.userId,
+                        couponId = couponId.value
+                    )
                 )
-            )
-            orderService.placeStock(
-                PlaceStockCommand.of(
-                    orderId = orderId,
-                    products = purchasableProduct,
-                    stocks = stocks,
+                orderService.get(orderId.value)
+                orderPaymentProcessor.processPayment(
+                    PayOrderProcessorCommand(
+                        orderId = orderId,
+                        userId = order.userId,
+                        totalAmount = order.totalAmount
+                    )
                 )
-            )
-            couponService.use(
-                UseCouponCommand(
-                    couponId = couponId.value,
-                    userId = userId
-                )
-            )
-            orderService.applyCoupon(
-                ApplyCouponCommand(
-                    orderId = orderId,
-                    usedCoupon = usedCoupon,
-                )
-            )
-            orderService.get(orderId.value)
-            balanceService.use(
-                UseBalanceCommand(
-                    userId = userId,
-                    amount = order.totalAmount
-                )
-            )
-            paymentService.pay(
-                PayCommand(
-                    userId = userId,
-                    orderId = orderId,
-                    amount = usedAmount,
-                )
-            )
-            orderService.pay(
-                PayOrderCommand(
-                    payment = payment
-                )
-            )
-            orderService.get(orderId.value)
+                orderService.get(orderId.value)
+            }
         }
-    }
 
-    @Test
-    fun `order - 쿠폰이 없는 경우`() {
-        val command = OrderCommandMock.facade(couponId = null).also { spyk(it) }
-        val userId = UserId(command.userId)
-        val user = UserMock.view(id = userId)
-        val orderId = OrderMock.id()
-        val products = command.productsToOrder.map {
-            ProductMock.view(
-                id = ProductId(it.productId),
-                price = it.unitPrice,
-            )
-        }
-        val purchasableProduct = products.map {
-            ProductMock.purchasableProduct(
-                id = it.id,
-                price = it.price.value,
-            )
-        }
-        val stocks = command.productsToOrder.map {
-            AllocatedStock(
-                productId = ProductId(it.productId),
-                quantity = it.quantity,
-            )
-        }
-        val usedAmount = UsedBalanceAmount(
-            balanceId = BalanceMock.id(),
-            amount = BalanceAmount.of(command.totalAmount),
-        )
-        val payment = PaymentMock.view(
-            orderId = orderId,
-            userId = userId,
-            amount = command.totalAmount,
-        )
-        val order = OrderMock.view(id = orderId, userId = userId, couponId = null)
-        every { userService.get(command.userId) } returns user
-        every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
-        every { productService.getAllByIds(any()) } returns ProductsView(products)
-        every { stockService.allocate(any<AllocateStocksCommand>()) } returns stocks
-        every { balanceService.use(any<UseBalanceCommand>()) } returns usedAmount
-        every { paymentService.pay(any<PayCommand>()) } returns payment
-        every { orderService.get(orderId.value) } returns order
+        @Test
+        @DisplayName("쿠폰이 없는 주문 처리")
+        fun withoutCoupon() {
+            val command = OrderCommandMock.facade(couponId = null).also { spyk(it) }
+            val orderId = OrderMock.id()
+            val order = OrderMock.view(id = orderId, couponId = null)
+            every { orderLifecycleProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
+            every { orderService.get(orderId.value) } returns order
 
-        val result = orderFacade.order(command)
+            val result = orderFacade.order(command)
 
-        assertThat(result.order).isEqualTo(order)
-        verifyOrder {
-            command.validate()
-            userService.get(command.userId)
-            orderService.createOrder(
-                CreateOrderCommand(
-                    userId = userId,
+            assertThat(result.order).isEqualTo(order)
+            verifyOrder {
+                command.validate()
+                orderLifecycleProcessor.createOrder(
+                    CreateOrderProcessorCommand(command.userId)
                 )
-            )
-            stockService.allocate(
-                AllocateStocksCommand(
-                    command.productsToOrder.associate {
-                        ProductId(it.productId) to it.quantity
-                    }
+                command.productsToOrder.forEach {
+                    orderProductProcessor.placeOrderProduct(
+                        PlaceOrderProductProcessorCommand(
+                            orderId = orderId,
+                            productId = it.productId,
+                            unitPrice = it.unitPrice,
+                            quantity = it.quantity,
+                        )
+                    )
+                }
+                orderService.get(orderId.value)
+                orderPaymentProcessor.processPayment(
+                    PayOrderProcessorCommand(
+                        orderId = orderId,
+                        userId = order.userId,
+                        totalAmount = order.totalAmount
+                    )
                 )
-            )
-            orderService.placeStock(
-                PlaceStockCommand.of(
-                    orderId = orderId,
-                    products = purchasableProduct,
-                    stocks = stocks,
-                )
-            )
-            balanceService.use(
-                UseBalanceCommand(
-                    userId = userId,
-                    amount = order.totalAmount
-                )
-            )
-            paymentService.pay(
-                PayCommand(
-                    userId = userId,
-                    orderId = orderId,
-                    amount = usedAmount,
-                )
-            )
-            orderService.pay(
-                PayOrderCommand(
-                    payment = payment
-                )
-            )
-            orderService.get(orderId.value)
+                orderService.get(orderId.value)
+            }
+            verify(exactly = 0) {
+                orderCouponProcessor.applyCouponToOrder(any())
+            }
         }
-        verify(exactly = 0) {
-            couponService.use(any<UseCouponCommand>())
-            orderService.applyCoupon(any<ApplyCouponCommand>())
+
+        @Test
+        @DisplayName("주문 상품 확보는 productId 기준으로 정렬되어 처리")
+        fun processOrderProductsInOrder() {
+            val command = mockk<OrderFacadeCommand>(relaxed = true)
+            every { command.productsToOrder } returns listOf(
+                OrderCommandMock.productToOrder(productId = 3L, unitPrice = 10_000.toBigDecimal(), quantity = 2),
+                OrderCommandMock.productToOrder(productId = 1L, unitPrice = 15_000.toBigDecimal(), quantity = 1),
+                OrderCommandMock.productToOrder(productId = 2L, unitPrice = 10_000.toBigDecimal(), quantity = 3)
+            )
+            val orderId = OrderMock.id()
+            val order = OrderMock.view(id = orderId)
+
+            every { orderService.createOrder(any<CreateOrderCommand>()) } returns orderId
+            every { orderService.get(orderId.value) } returns order
+
+            orderFacade.order(command)
+
+            verifyOrder {
+                orderProductProcessor.placeOrderProduct(withArg<PlaceOrderProductProcessorCommand> {
+                    assertThat(it.productId).isEqualTo(1L)
+                })
+                orderProductProcessor.placeOrderProduct(withArg<PlaceOrderProductProcessorCommand> {
+                    assertThat(it.productId).isEqualTo(2L)
+                })
+                orderProductProcessor.placeOrderProduct(withArg<PlaceOrderProductProcessorCommand> {
+                    assertThat(it.productId).isEqualTo(3L)
+                })
+            }
+        }
+
+        @Test
+        @DisplayName("주문 중 예외 발생 시 실패 처리")
+        fun handleFailure() {
+            val command = OrderCommandMock.facade().also { spyk(it) }
+            val orderId = OrderMock.id()
+            val failedException = RuntimeException("테스트 예외")
+            every { orderLifecycleProcessor.createOrder(any()) } returns OrderCreationProcessorResult(orderId)
+            every { orderProductProcessor.placeOrderProduct(any()) } throws failedException
+
+            shouldThrow<RuntimeException> {
+                orderFacade.order(command)
+            }
+
+            verify {
+                orderLifecycleProcessor.failOrder(
+                    FailOrderProcessorCommand(
+                        orderId = orderId,
+                        reason = "테스트 예외"
+                    )
+                )
+            }
         }
     }
 }
