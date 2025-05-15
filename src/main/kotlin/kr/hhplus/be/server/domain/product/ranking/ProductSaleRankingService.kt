@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import kotlin.math.truncate
 
 @Service
 @Transactional(readOnly = true)
@@ -45,12 +46,19 @@ class ProductSaleRankingService(
 
     fun getPopularProductIds(): PopularProductsIds {
         val baseDate = LocalDate.now(TimeZone.KSTId)
-        val popularProductsIds = repository.findTopNProductIds(
+        val todayPopularProductsIds = repository.findTopNProductIds(
             startDate = PopularProductsIds.getStartDateFromBaseDate(baseDate),
             endDate = baseDate,
             limit = PopularProductsIds.MAX_SIZE,
-        ).let { PopularProductsIds(it) }
-
+        )
+        val popularProductsIds = when(todayPopularProductsIds.isEmpty()) {
+            true -> repository.findTopNProductIds(
+                startDate = PopularProductsIds.getStartDateFromBaseDate(baseDate.minusDays(1)),
+                endDate = baseDate.minusDays(1),
+                limit = PopularProductsIds.MAX_SIZE,
+            )
+            false -> todayPopularProductsIds
+        }.let { PopularProductsIds(it) }
         return popularProductsIds
     }
 }

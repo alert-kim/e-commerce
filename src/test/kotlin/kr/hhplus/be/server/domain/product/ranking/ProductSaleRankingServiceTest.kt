@@ -112,5 +112,33 @@ class ProductSaleRankingServiceTest {
 
             assertThat(result.value).isEqualTo(productIds)
         }
+
+        @Test
+        @DisplayName("오늘 인기 상품 ID 목록이 비어있을 경우, 어제 인기 상품 ID 목록을 조회")
+        fun getYesterdayPopularProductIds() {
+            val productIds = List(PopularProductsIds.MAX_SIZE) {
+                ProductMock.id()
+            }
+            val today = LocalDate.now(TimeZone.KSTId)
+            val yesterday = today.minusDays(1)
+            every {
+                repository.findTopNProductIds(
+                    startDate = PopularProductsIds.getStartDateFromBaseDate(today),
+                    endDate = today,
+                    limit = PopularProductsIds.MAX_SIZE,
+                )
+            } returns emptyList()
+            every {
+                repository.findTopNProductIds(
+                    startDate = PopularProductsIds.getStartDateFromBaseDate(yesterday),
+                    endDate = yesterday,
+                    limit = PopularProductsIds.MAX_SIZE,
+                )
+            } returns productIds
+
+            val result = service.getPopularProductIds()
+
+            assertThat(result.value).isEqualTo(productIds)
+        }
     }
 }
