@@ -24,6 +24,10 @@ class TestProductDailySaleStatRepository(
         return dailyStatJpaRepository.save(sale)
     }
 
+    fun findAll(): List<ProductDailySaleStat> {
+        return dailyStatJpaRepository.findAll()
+    }
+
     fun deleteAll() {
         dailyStatJpaRepository.deleteAll()
         statJpaRepository.deleteAll()
