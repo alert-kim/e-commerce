@@ -13,7 +13,6 @@ import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceExcepti
 import kr.hhplus.be.server.domain.coupon.exception.RequiredCouponSourceIdException
 import kr.hhplus.be.server.domain.coupon.result.IssuedCoupon
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.Instant
 
 @Entity

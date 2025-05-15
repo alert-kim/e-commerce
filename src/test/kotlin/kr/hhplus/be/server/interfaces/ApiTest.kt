@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -70,17 +69,15 @@ abstract class ApiTest {
 
     fun clearProducts() = databaseTestHelper.clearProducts()
 
-    fun savedProductDailySaleStat(
+    fun updateProductSaleRanking(
         productId: ProductId = ProductMock.id(),
         date: LocalDate = LocalDate.now(),
         quantity: Int = 100,
-    ) =
-        databaseTestHelper.savedProductDailySaleStat(
+    ) = databaseTestHelper.updateProductSaleRanking(
             productId = productId,
             date = date,
             quantity = quantity
         )
 
-    fun clearProductDailySaleStat() = databaseTestHelper.clearProductDailySaleStat()
-
+    fun deleteAllProductSaleRanking() = databaseTestHelper.deleteAllProductSaleRanking()
 }

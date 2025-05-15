@@ -14,5 +14,5 @@
 - [잔액 충전/조회](charge.md)
 - [주문/결제](order-pay.md)
 - [상품/인기상품 조회](product.md)
-- [상품 판매 통계](product-stat.md)
+- [상품 판매 통계](popular-products.md)
 - [선착순 쿠폰](coupon.md)

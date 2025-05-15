@@ -1,6 +1,5 @@
-package kr.hhplus.be.server.domain.product
+package kr.hhplus.be.server.domain.product.stat
 
-import kr.hhplus.be.server.domain.product.stat.ProductDailySaleStat
 import kr.hhplus.be.server.infra.product.ProductDailySaleStatJpaRepository
 import kr.hhplus.be.server.infra.product.stat.ProductSaleStatJpaRepository
 import org.springframework.boot.test.context.TestConfiguration
@@ -23,6 +22,10 @@ class TestProductDailySaleStatRepository(
 ) {
     fun save(sale: ProductDailySaleStat): ProductDailySaleStat {
         return dailyStatJpaRepository.save(sale)
+    }
+
+    fun findAll(): List<ProductDailySaleStat> {
+        return dailyStatJpaRepository.findAll()
     }
 
     fun deleteAll() {

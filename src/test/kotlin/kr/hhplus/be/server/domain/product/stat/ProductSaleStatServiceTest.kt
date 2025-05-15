@@ -1,9 +1,5 @@
 package kr.hhplus.be.server.domain.product.stat
 
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.int
-import io.kotest.property.arbitrary.next
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.common.util.TimeZone
@@ -13,7 +9,6 @@ import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleSta
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductSaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.repository.ProductSaleStatRepository
 import kr.hhplus.be.server.testutil.mock.OrderMock
-import kr.hhplus.be.server.testutil.mock.ProductMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -66,29 +61,6 @@ class ProductSaleStatServiceTest {
             verify {
                 dailyStatRepository.aggregateDailyStatsByDate(today)
             }
-        }
-    }
-
-    @Nested
-    inner class GetPopularProductIds {
-
-        @Test
-        @DisplayName("인기 상품 ID 조회")
-        fun getPopularProducts() {
-            val productIds = List(Arb.int(1..PopularProductsIds.MAX_SIZE).next()) {
-                ProductMock.id()
-            }
-            every {
-                dailyStatRepository.findTopNProductIdsByQuantity(
-                    startDate = PopularProductsIds.getStartDay(),
-                    endDate = PopularProductsIds.getEndDay(),
-                    limit = PopularProductsIds.MAX_SIZE,
-                )
-            } returns productIds
-
-            val result = service.getPopularProductIds()
-
-            assertThat(result.value).isEqualTo(productIds)
         }
     }
 }
