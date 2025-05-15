@@ -9,6 +9,7 @@ import io.mockk.verify
 import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.product.ranking.repository.ProductSaleRankingRepository
+import kr.hhplus.be.server.domain.product.ranking.repository.RenewProductSaleRankingCommand
 import kr.hhplus.be.server.domain.product.ranking.repository.UpdateProductSaleRankingCommand
 import kr.hhplus.be.server.domain.product.stat.PopularProductsIds
 import kr.hhplus.be.server.testutil.mock.OrderMock
@@ -24,6 +25,7 @@ class ProductSaleRankingServiceTest {
     val service = ProductSaleRankingService(repository)
 
     @Nested
+    @DisplayName("판매 랭킹 업데이트")
     inner class UpdateRanking {
 
         @Test
@@ -54,6 +56,40 @@ class ProductSaleRankingServiceTest {
     }
 
     @Nested
+    @DisplayName("인기 상품 랭킹 갱신")
+    inner class RenewRanking {
+
+        @Test
+        @DisplayName("기준 일자의 인기 상품 랭킹을 갱신")
+        fun renew() {
+            val baseDate = LocalDate.now(TimeZone.KSTId)
+            val command = RenewProductSaleRankingCommand(baseDate)
+            val productIds = List(Arb.int(1..PopularProductsIds.MAX_SIZE).next()) {
+                ProductMock.id()
+            }
+            every {
+                repository.renewRanking(
+                    startDate = PopularProductsIds.getStartDateFromBaseDate(baseDate),
+                    endDate = baseDate,
+                    limit = PopularProductsIds.MAX_SIZE,
+                )
+            } returns productIds
+
+            val result = service.renewRanking(command)
+
+            assertThat(result.value).isEqualTo(productIds)
+            verify {
+                repository.renewRanking(
+                    startDate = PopularProductsIds.getStartDateFromBaseDate(baseDate),
+                    endDate = baseDate,
+                    limit = PopularProductsIds.MAX_SIZE,
+                )
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("인기 상품 ID 목록 조회")
     inner class GetPopularProductIds {
 
         @Test

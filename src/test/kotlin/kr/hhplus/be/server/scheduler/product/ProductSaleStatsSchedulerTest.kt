@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.scheduler.order
+package kr.hhplus.be.server.scheduler.product
 
 import io.mockk.clearMocks
 import io.mockk.mockk
@@ -6,16 +6,16 @@ import io.mockk.verify
 import kr.hhplus.be.server.application.product.ProductFacade
 import kr.hhplus.be.server.application.product.command.AggregateProductDailySalesFacadeCommand
 import kr.hhplus.be.server.common.util.TimeZone
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class ProductToOrderStatsSchedulerTest {
+class ProductSaleStatsSchedulerTest {
 
     private val productFacade = mockk<ProductFacade>(relaxed = true)
-    private val orderProductStatsScheduler = OrderProductStatsScheduler(
+    private val orderProductStatsScheduler = ProductSaleStatsScheduler(
         productFacade = productFacade,
     )
 
@@ -34,7 +34,7 @@ class ProductToOrderStatsSchedulerTest {
         verify {
             productFacade.aggregate(
                 withArg<AggregateProductDailySalesFacadeCommand> {
-                    assertThat(it.date).isEqualTo(today)
+                    Assertions.assertThat(it.date).isEqualTo(today)
                 }
             )
         }

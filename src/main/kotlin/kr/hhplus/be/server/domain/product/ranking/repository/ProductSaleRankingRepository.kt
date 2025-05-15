@@ -6,5 +6,6 @@ import java.time.LocalDate
 
 interface ProductSaleRankingRepository {
     fun updateRanking(entry: ProductSaleRankingEntry)
+    fun renewRanking(startDate: LocalDate, endDate: LocalDate, limit: Int): List<ProductId>
     fun findTopNProductIds(startDate: LocalDate, endDate: LocalDate, limit: Int): List<ProductId>
 }

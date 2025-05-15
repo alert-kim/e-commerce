@@ -61,6 +61,25 @@ class ProductFacadeTest {
     }
 
     @Nested
+    @DisplayName("인기 상품 갱신")
+    inner class RenewPopularProduct {
+
+        @Test
+        @DisplayName("해당 일자로 인기 상품을 갱신한다")
+        fun aggregate() {
+            val command = AggregateProductDailySalesFacadeCommand(
+                date = LocalDate.now(TimeZone.KSTId),
+            )
+
+            facade.aggregate(command)
+
+            verify(exactly = 1) {
+                productSaleStatService.createDailyStats(CreateProductDailySaleStatsCommand(command.date))
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("판매 중인 상품 목록 페이징 조회")
     inner class GetAllOnSalePaged {
         
