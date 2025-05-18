@@ -35,7 +35,7 @@ class ProductSaleRankingServiceTest {
             val event = OrderMock.completedEvent(
                 snapshot = OrderSnapshot.from(OrderMock.order(products = orderProducts))
             )
-            val date = LocalDate.ofInstant(event.completedAt, TimeZone.KSTId)
+            val date = LocalDate.ofInstant(event.snapshot.completedAt, TimeZone.KSTId)
 
             val command = UpdateProductSaleRankingCommand(event)
             service.updateRanking(command)

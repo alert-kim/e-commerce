@@ -19,9 +19,9 @@ class ProductSaleRankingService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun updateRanking(command: UpdateProductSaleRankingCommand) {
-        val soldAt = command.event.completedAt
-        val date = LocalDate.ofInstant(soldAt, TimeZone.KSTId)
-        command.event.orderProducts.forEach {
+        val order = command.event.snapshot
+        val date = LocalDate.ofInstant(order.completedAt, TimeZone.KSTId)
+        order.orderProducts.forEach {
             repository.updateRanking(
                 ProductSaleRankingEntry(
                     date = date,
