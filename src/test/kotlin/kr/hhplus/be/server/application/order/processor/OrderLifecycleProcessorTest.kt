@@ -1,9 +1,8 @@
 package kr.hhplus.be.server.application.order.processor
 
+import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.order.command.CreateOrderProcessorCommand
 import kr.hhplus.be.server.application.order.command.FailOrderProcessorCommand
@@ -15,29 +14,27 @@ import kr.hhplus.be.server.domain.order.command.MarkOrderFailHandledCommand
 import kr.hhplus.be.server.domain.user.UserService
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import kr.hhplus.be.server.testutil.mock.UserMock
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 class OrderLifecycleProcessorTest {
+    private val userService = mockk<UserService>(relaxed = true)
+    private val orderService = mockk<OrderService>(relaxed = true)
+    private val processor = OrderLifecycleProcessor(userService, orderService)
 
-    @InjectMockKs
-    private lateinit var processor: OrderLifecycleProcessor
-
-    @MockK(relaxed = true)
-    private lateinit var userService: UserService
-
-    @MockK(relaxed = true)
-    private lateinit var orderService: OrderService
+    @BeforeEach
+    fun setup() {
+        clearMocks(userService, orderService)
+    }
 
     @Nested
     @DisplayName("주문 생성 처리")
     inner class CreateOrder {
         @Test
-        @DisplayName("사용자 검증 후 주문 생성")
+        @DisplayName("사용자 검증 후 주문을 생성한다")
         fun createOrder() {
             val userId = UserMock.id()
             val user = UserMock.view(id = userId)
@@ -48,7 +45,7 @@ class OrderLifecycleProcessorTest {
             val command = CreateOrderProcessorCommand(userId.value)
             val result = processor.createOrder(command)
 
-            Assertions.assertThat(result.orderId).isEqualTo(orderId)
+            assertThat(result.orderId).isEqualTo(orderId)
             verify {
                 userService.get(userId.value)
                 orderService.createOrder(
@@ -64,7 +61,7 @@ class OrderLifecycleProcessorTest {
     @DisplayName("주문 실패 처리")
     inner class FailOrder {
         @Test
-        @DisplayName("주문 실패 처리")
+        @DisplayName("주문 실패 내역을 기록한다")
         fun failOrder() {
             val orderId = OrderMock.id()
             val reason = "테스트 실패 사유"
@@ -86,8 +83,8 @@ class OrderLifecycleProcessorTest {
     @DisplayName("실패 처리 완료 표시")
     inner class MarkFailHandled {
         @Test
-        @DisplayName("실패한 주문을 처리됨으로 표시")
-        fun mark() {
+        @DisplayName("실패한 주문의 후속 처리가 완료됨을 표시한다")
+        fun markFailHandled() {
             val orderId = OrderMock.id()
 
             processor.markFailHandled(MarkOrderFailHandledProcessorCommand(orderId))

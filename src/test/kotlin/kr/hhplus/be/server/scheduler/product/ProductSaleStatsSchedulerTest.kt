@@ -9,6 +9,7 @@ import kr.hhplus.be.server.common.util.TimeZone
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -24,19 +25,23 @@ class ProductSaleStatsSchedulerTest {
         clearMocks(productFacade)
     }
 
-    @Test
-    @DisplayName("오늘 날짜로 상품 판매 집계를 수행한다")
-    fun aggregate() {
-        val today = LocalDate.now(TimeZone.KSTId)
+    @Nested
+    @DisplayName("일일 상품 판매 집계")
+    inner class AggregateDaily {
+        @Test
+        @DisplayName("오늘 날짜로 상품 판매 집계를 수행한다")
+        fun success() {
+            val today = LocalDate.now(TimeZone.KSTId)
 
-        orderProductStatsScheduler.aggregateDaily()
+            orderProductStatsScheduler.aggregateDaily()
 
-        verify {
-            productFacade.aggregate(
-                withArg<AggregateProductDailySalesFacadeCommand> {
-                    Assertions.assertThat(it.date).isEqualTo(today)
-                }
-            )
+            verify {
+                productFacade.aggregate(
+                    withArg<AggregateProductDailySalesFacadeCommand> {
+                        Assertions.assertThat(it.date).isEqualTo(today)
+                    }
+                )
+            }
         }
     }
 }

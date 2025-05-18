@@ -3,26 +3,35 @@ package kr.hhplus.be.server.domain.user
 import kr.hhplus.be.server.domain.user.exception.RequiredUserIdException
 import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class UserTest {
 
-    @Test
-    fun `requireId - id가 null이 아닌 경우 id 반환`() {
-        val user = UserMock.user(id = UserMock.id())
+    @Nested
+    @DisplayName("ID 확인")
+    inner class RequireId {
 
-        val result = user.id()
+        @Test
+        @DisplayName("ID가 null이 아닌 경우 ID 반환")
+        fun returnId() {
+            val user = UserMock.user(id = UserMock.id())
 
-        assertThat(result).isEqualTo(user.id())
-    }
+            val result = user.id()
 
-    @Test
-    fun `requireId - id가 null이면 RequiredUserIdException 발생`() {
-        val user = UserMock.user(id = null)
+            assertThat(result).isEqualTo(user.id())
+        }
 
-        assertThrows(RequiredUserIdException::class.java) {
-            user.id()
+        @Test
+        @DisplayName("ID가 null이면 RequiredUserIdException 발생")
+        fun throwException() {
+            val user = UserMock.user(id = null)
+
+            assertThrows<RequiredUserIdException> {
+                user.id()
+            }
         }
     }
 }

@@ -18,15 +18,11 @@ import java.time.LocalDate
 @Isolated
 @Import(ProductDailySaleStatRepositoryTestConfig::class)
 @SpringBootTest
-class ProductDailySaleStatRepositoryTest {
-    @Autowired
-    lateinit var repository: ProductDailySaleStatRepository
-
-    @Autowired
-    lateinit var testRepository: TestProductDailySaleStatRepository
-
-    @Autowired
-    lateinit var productSaleStatRepository: ProductSaleStatRepository
+class ProductDailySaleStatRepositoryTest @Autowired constructor(
+    private val repository: ProductDailySaleStatRepository,
+    private val testRepository: TestProductDailySaleStatRepository,
+    private val productSaleStatRepository: ProductSaleStatRepository
+) {
 
     @BeforeEach
     fun setup() {

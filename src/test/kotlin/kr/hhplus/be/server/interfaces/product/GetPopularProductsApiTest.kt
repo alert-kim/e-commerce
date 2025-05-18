@@ -8,6 +8,7 @@ import kr.hhplus.be.server.common.util.TimeZone
 import kr.hhplus.be.server.interfaces.ApiTest
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,10 +17,9 @@ import org.springframework.test.web.servlet.get
 import java.time.LocalDate
 
 @Isolated
-class GetPopularProductsApiTest : ApiTest() {
-
-    @Autowired
-    private lateinit var cacheManager: CacheManager
+class GetPopularProductsApiTest @Autowired constructor(
+    private val cacheManager: CacheManager
+) : ApiTest() {
 
     @BeforeEach
     fun setup() {
@@ -28,7 +28,8 @@ class GetPopularProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `인기 상품 조회 - 200 - 최대 5개만 조회`() {
+    @DisplayName("최대 5개의 인기 상품만 조회된다")
+    fun maxFivePopularProducts() {
         val productsSize = 20
         val popularProductsSize = 5
         val products = List(productsSize) { index ->
@@ -56,7 +57,8 @@ class GetPopularProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `인기 상품 조회 - 200 - 1일 전부터 3일 전까지에 대한 인기 상품 조회`() {
+    @DisplayName("최근 1-3일 사이의 인기 상품만 조회된다")
+    fun recentPopularProducts() {
         val startDate = LocalDate.now(TimeZone.KSTId).minusDays(2)
         val endDate = LocalDate.now(TimeZone.KSTId)
         val popularProducts = List(5) { index ->
@@ -96,7 +98,8 @@ class GetPopularProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `인기 상품 조회 - 200 - 인기 상품 없음`() {
+    @DisplayName("인기 상품이 없으면 빈 목록이 반환된다")
+    fun noPopularProducts() {
         savedProduct()
 
         mockMvc.get("/products/popular").andExpect {

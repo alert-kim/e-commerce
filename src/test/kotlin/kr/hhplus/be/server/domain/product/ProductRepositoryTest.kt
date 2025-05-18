@@ -16,13 +16,10 @@ import java.time.Instant
 
 @Import(ProductRepositoryTestConfig::class)
 @Isolated
-class ProductRepositoryTest : RepositoryTest() {
-
-    @Autowired
-    private lateinit var productRepository: ProductRepository
-
-    @Autowired
-    private lateinit var testProductRepository: TestProductRepository
+class ProductRepositoryTest @Autowired constructor(
+    private val productRepository: ProductRepository,
+    private val testProductRepository: TestProductRepository
+) : RepositoryTest() {
 
     @BeforeEach
     fun setup() {
@@ -48,7 +45,7 @@ class ProductRepositoryTest : RepositoryTest() {
 
         @Test
         @DisplayName("존재하지 않는 ID로 조회 시 null 반환")
-        fun returnNullForNonExistingId() {
+        fun findNonExisting() {
             val nonExistingId = ProductMock.id().value
 
             val result = productRepository.findById(nonExistingId)
@@ -56,7 +53,6 @@ class ProductRepositoryTest : RepositoryTest() {
             assertThat(result).isNull()
         }
     }
-
 
     @Nested
     @DisplayName("ID 목록으로 상품 조회")

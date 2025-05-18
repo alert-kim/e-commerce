@@ -3,9 +3,6 @@ package kr.hhplus.be.server.domain.coupon
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
@@ -14,75 +11,86 @@ import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.testutil.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 class CouponSourceServiceTest {
-    @InjectMockKs
+    
+    private val repository = mockk<CouponSourceRepository>(relaxed = true)
     private lateinit var service: CouponSourceService
-
-    @MockK(relaxed = true)
-    private lateinit var repository: CouponSourceRepository
 
     @BeforeEach
     fun setUp() {
         clearMocks(repository)
+        service = CouponSourceService(repository)
     }
 
-    @Test
-    fun `issue - 쿠폰 발급`() {
-        val couponSourceId = CouponSourceId(1L)
-        val couponSource = mockk<CouponSource>()
-        val issuedCoupon = CouponMock.issuedCoupon()
-        every { repository.findById(couponSourceId.value) } returns couponSource
-        every { couponSource.issue() } returns issuedCoupon
+    @Nested
+    @DisplayName("쿠폰 발급")
+    inner class Issue {
+        @Test
+        @DisplayName("발급 성공")
+        fun success() {
+            val couponSourceId = CouponSourceId(1L)
+            val couponSource = mockk<CouponSource>()
+            val issuedCoupon = CouponMock.issuedCoupon()
+            every { repository.findById(couponSourceId.value) } returns couponSource
+            every { couponSource.issue() } returns issuedCoupon
 
-        val result = service.issue(IssueCouponCommand(couponSourceId.value))
+            val result = service.issue(IssueCouponCommand(couponSourceId.value))
 
-        assertThat(result).isEqualTo(issuedCoupon)
-        verify {
-            repository.findById(couponSourceId.value)
-        }
-    }
-
-    @Test
-    fun `issue - 찾을 수 없는 쿠폰 소스`() {
-        val couponSourceId = CouponSourceId(1L)
-        every { repository.findById(couponSourceId.value) } returns null
-
-        shouldThrow<NotFoundCouponSourceException> {
-            service.issue(IssueCouponCommand(couponSourceId.value))
+            assertThat(result).isEqualTo(issuedCoupon)
+            verify {
+                repository.findById(couponSourceId.value)
+            }
         }
 
-        verify(exactly = 0) {
-            repository.save(any())
-        }
-    }
+        @Test
+        @DisplayName("쿠폰 소스 없음")
+        fun notFound() {
+            val couponSourceId = CouponSourceId(1L)
+            every { repository.findById(couponSourceId.value) } returns null
 
-    @Test
-    fun `getAllIssuable - ACTIVE 상태의 쿠폰 소스를 조회`() {
-        val couponSources = List(3) { CouponMock.source() }
-        every { repository.findAllByStatus(CouponSourceStatus.ACTIVE) } returns couponSources
+            shouldThrow<NotFoundCouponSourceException> {
+                service.issue(IssueCouponCommand(couponSourceId.value))
+            }
 
-        val result = service.getAllIssuable()
-
-        result.forEachIndexed { index, source ->
-            assertThat(source.id).isEqualTo(couponSources[index].id())
-        }
-        verify {
-            repository.findAllByStatus(withArg {
-                assertThat(it).isEqualTo(CouponSourceStatus.ACTIVE)
-            })
+            verify(exactly = 0) {
+                repository.save(any())
+            }
         }
     }
 
-    @Test
-    fun `getAllIssuable - 발급 가능한 쿠폰 소스가 없는 경우 빈 리스트 반환`() {
-        every { repository.findAllByStatus(CouponSourceStatus.ACTIVE) } returns emptyList<CouponSource>()
+    @Nested
+    @DisplayName("발급 가능 쿠폰 조회")
+    inner class GetAllIssuable {
+        @Test
+        @DisplayName("ACTIVE 상태 쿠폰 소스 조회")
+        fun active() {
+            val couponSources = List(3) { CouponMock.source() }
+            every { repository.findAllByStatus(CouponSourceStatus.ACTIVE) } returns couponSources
 
-        val result = service.getAllIssuable()
+            val result = service.getAllIssuable()
 
-        assertThat(result).isEmpty()
+            result.forEachIndexed { index, source ->
+                assertThat(source.id).isEqualTo(couponSources[index].id())
+            }
+            verify {
+                repository.findAllByStatus(withArg {
+                    assertThat(it).isEqualTo(CouponSourceStatus.ACTIVE)
+                })
+            }
+        }
+
+        @Test
+        @DisplayName("발급 가능 쿠폰 없음")
+        fun empty() {
+            every { repository.findAllByStatus(CouponSourceStatus.ACTIVE) } returns emptyList<CouponSource>()
+
+            val result = service.getAllIssuable()
+
+            assertThat(result).isEmpty()
+        }
     }
 }

@@ -4,6 +4,7 @@ import kr.hhplus.be.server.domain.coupon.CouponSourceStatus
 import kr.hhplus.be.server.interfaces.ApiTest
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.test.web.servlet.get
@@ -17,7 +18,8 @@ class GetCouponSourcesApiTest : ApiTest() {
     }
 
     @Test
-    fun `발급 가능 쿠폰 목록 조회 - 200`() {
+    @DisplayName("발급 가능 쿠폰 목록 조회 - 200")
+    fun getIssuableCouponSources() {
         val issuableSources = List(3) {
             savedCouponSource(
                 status = CouponSourceStatus.ACTIVE,
@@ -43,7 +45,8 @@ class GetCouponSourcesApiTest : ApiTest() {
     }
 
     @Test
-    fun `발급 가능 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
+    @DisplayName("발급 가능 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록")
+    fun getEmptyCouponSources() {
         mockMvc.get("/couponSources")
             .andExpect {
                 status { isOk() }

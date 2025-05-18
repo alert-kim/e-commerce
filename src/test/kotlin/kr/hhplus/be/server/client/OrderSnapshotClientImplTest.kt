@@ -1,13 +1,12 @@
 package kr.hhplus.be.server.client
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.spyk
 import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.testutil.mock.OrderMock
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -36,7 +35,8 @@ class OrderSnapshotClientImplTest {
     )
 
     @Test
-    fun `주문 스냅샷이 정상적으로 전송된다`() {
+    @DisplayName("주문 스냅샷을 전송한다")
+    fun send() {
         server.stubFor(
             post(OrderSnapshotClientImpl.PATH)
                 .willReturn(ok()),

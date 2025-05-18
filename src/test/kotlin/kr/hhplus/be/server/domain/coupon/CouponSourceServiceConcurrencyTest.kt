@@ -5,11 +5,9 @@ import kr.hhplus.be.server.domain.common.LockAcquisitionFailException
 import kr.hhplus.be.server.domain.coupon.command.IssueCouponCommand
 import kr.hhplus.be.server.domain.coupon.exception.NotFoundCouponSourceException
 import kr.hhplus.be.server.domain.coupon.exception.OutOfStockCouponSourceException
-import kr.hhplus.be.server.domain.coupon.repository.CouponSourceRepository
 import kr.hhplus.be.server.testutil.DatabaseTestHelper
 import kr.hhplus.be.server.testutil.mock.CouponMock
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,20 +18,15 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
 @SpringBootTest
-class CouponSourceServiceConcurrencyTest {
-
-    @Autowired
-    private lateinit var couponSourceService: CouponSourceService
-
-    @Autowired
-    private lateinit var databaseTestHelper: DatabaseTestHelper
+class CouponSourceServiceConcurrencyTest @Autowired constructor(
+    private val couponSourceService: CouponSourceService,
+    private val databaseTestHelper: DatabaseTestHelper
+) {
 
     @Nested
-    @DisplayName("쿠폰 발급 동시성 테스트")
     inner class Issue {
         @Test
-        @DisplayName("쿠폰 수량이 충분한 경우, 발급 요청 만큼 차감")
-        fun issueConcurrently() {
+        fun sufficientStock() {
             val initialQuantity = 30
             val couponSource = databaseTestHelper.savedCouponSource(
                 quantity = initialQuantity,
@@ -79,8 +72,7 @@ class CouponSourceServiceConcurrencyTest {
         }
 
         @Test
-        @DisplayName("쿠폰이 부족한 경우, 쿠폰 수량만큼만 발급하고 나머지 요청에 대해선, OutOfStockCouponSourceException을 발생")
-        fun issueUntilOutOfStock() {
+        fun insufficientStock() {
             val initialQuantity = 10
             val couponSource = databaseTestHelper.savedCouponSource(
                 quantity = initialQuantity,
@@ -126,8 +118,7 @@ class CouponSourceServiceConcurrencyTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 쿠폰 소스에ㅣ 대한 동시 요청은 모두 NotFoundCouponSourceException을 발생")
-        fun concurrentAllocateNonExistingProduct() {
+        fun nonExistingSource() {
             val nonExistingCouponSourceId = CouponMock.sourceId()
             val threadCount = 5
             val executor = Executors.newFixedThreadPool(threadCount)

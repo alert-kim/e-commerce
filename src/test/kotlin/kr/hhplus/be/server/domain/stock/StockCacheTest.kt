@@ -5,14 +5,13 @@ import kr.hhplus.be.server.domain.stock.command.AllocateStockCommand
 import kr.hhplus.be.server.domain.stock.command.RestoreStockCommand
 import kr.hhplus.be.server.testutil.DatabaseTestHelper
 import kr.hhplus.be.server.testutil.mock.ProductMock
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.mockito.Mockito
-import org.mockito.Mockito.times
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.CacheManager
@@ -20,22 +19,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest
 @Isolated
-class StockCacheTest {
-
-    @Autowired
-    private lateinit var reader: StockCacheReader
-
-    @Autowired
-    private lateinit var service: StockService
-
+class StockCacheTest @Autowired constructor(
+    private val reader: StockCacheReader,
+    private val service: StockService,
+    private val cacheManager: CacheManager,
+    private val databaseTestHelper: DatabaseTestHelper,
+) {
     @MockitoSpyBean
     private lateinit var repository: StockRepository
-
-    @Autowired
-    private lateinit var cacheManager: CacheManager
-
-    @Autowired
-    private lateinit var databaseTestHelper: DatabaseTestHelper
 
     @BeforeEach
     fun setup() {
@@ -56,7 +47,7 @@ class StockCacheTest {
 
             Mockito.verify(
                 repository,
-                times(1)
+                Mockito.times(1)
             ).findByProductId(
                 productId
             )
@@ -70,11 +61,11 @@ class StockCacheTest {
             val firstCall = reader.getOrNullByProductId(productId)
             val secondCall = reader.getOrNullByProductId(productId)
 
-            assertThat(firstCall).isNull()
-            assertThat(secondCall).isNull()
+            Assertions.assertThat(firstCall).isNull()
+            Assertions.assertThat(secondCall).isNull()
             Mockito.verify(
                 repository,
-                times(2)
+                Mockito.times(2)
             ).findByProductId(
                 productId
             )
@@ -96,7 +87,7 @@ class StockCacheTest {
 
             Mockito.verify(
                 repository,
-                times(2)
+                Mockito.times(2)
             ).findByProductId(
                 productId
             )
@@ -114,7 +105,7 @@ class StockCacheTest {
 
             Mockito.verify(
                 repository,
-                times(2)
+                Mockito.times(2)
             ).findByProductId(
                 productId
             )

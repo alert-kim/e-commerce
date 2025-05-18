@@ -2,9 +2,6 @@ package kr.hhplus.be.server.domain.coupon
 
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.coupon.command.CancelCouponUseCommand
@@ -21,27 +18,24 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 
-@ExtendWith(MockKExtension::class)
 class CouponServiceTest {
-    @InjectMockKs
+    
+    private val repository = mockk<CouponRepository>(relaxed = true)
     private lateinit var service: CouponService
-
-    @MockK(relaxed = true)
-    private lateinit var repository: CouponRepository
 
     @BeforeEach
     fun setUp() {
         clearMocks(repository)
+        service = CouponService(repository)
     }
 
     @Nested
     @DisplayName("쿠폰 생성")
     inner class CreateCoupon {
         @Test
-        @DisplayName("쿠폰을 생성한다")
+        @DisplayName("쿠폰 생성 성공")
         fun create() {
             val userId = UserMock.id()
             val issuedCoupon = CouponMock.issuedCoupon()
@@ -67,7 +61,7 @@ class CouponServiceTest {
     @DisplayName("쿠폰 사용")
     inner class UseCoupon {
         @Test
-        @DisplayName("쿠폰을 사용한다")
+        @DisplayName("사용 성공")
         fun use() {
             val couponId = CouponMock.id()
             val coupon = mockk<Coupon>()
@@ -91,8 +85,8 @@ class CouponServiceTest {
         }
 
         @Test
-        @DisplayName("쿠폰을 찾을 수 없으면 NotFoundCouponException 예외가 발생한다")
-        fun notFoundCoupon() {
+        @DisplayName("쿠폰 없음")
+        fun notFound() {
             val couponId = CouponMock.id()
             val userId = UserMock.id()
             every { repository.findById(couponId.value) } returns null
@@ -107,8 +101,8 @@ class CouponServiceTest {
     @DisplayName("쿠폰 사용 취소")
     inner class CancelCouponUse {
         @Test
-        @DisplayName("쿠폰 사용을 취소한다")
-        fun cancelUse() {
+        @DisplayName("취소 성공")
+        fun cancel() {
             val couponId = CouponMock.id()
             val coupon = mockk<Coupon>(relaxed = true)
             every { repository.findById(couponId.value) } returns coupon
@@ -122,8 +116,8 @@ class CouponServiceTest {
         }
 
         @Test
-        @DisplayName("쿠폰을 찾을 수 없으면 NotFoundCouponException 예외가 발생한다")
-        fun notFoundCoupon() {
+        @DisplayName("쿠폰 없음")
+        fun notFound() {
             val couponId = CouponMock.id()
             every { repository.findById(couponId.value) } returns null
             
@@ -137,7 +131,7 @@ class CouponServiceTest {
     @DisplayName("미사용 쿠폰 조회")
     inner class GetUnusedCoupons {
         @Test
-        @DisplayName("사용자의 미사용 쿠폰 목록을 조회한다")
+        @DisplayName("미사용 쿠폰 목록 조회")
         fun getUnused() {
             val userId = UserMock.id()
             val coupons = List(3) { CouponMock.coupon(id = CouponMock.id(), userId = userId) }
@@ -152,8 +146,8 @@ class CouponServiceTest {
         }
         
         @Test
-        @DisplayName("미사용 쿠폰이 없으면 빈 목록을 반환한다")
-        fun emptyList() {
+        @DisplayName("미사용 쿠폰 없음")
+        fun empty() {
             val userId = UserMock.id()
             every { repository.findAllByUserIdAndUsedAtIsNull(userId) } returns emptyList<Coupon>()
 

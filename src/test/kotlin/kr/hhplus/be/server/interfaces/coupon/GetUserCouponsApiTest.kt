@@ -4,6 +4,7 @@ import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.testutil.mock.IdMock
 import org.hamcrest.Matchers.hasSize
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.get
 import java.time.Instant
@@ -11,7 +12,8 @@ import java.time.Instant
 class GetUserCouponsApiTest : ApiTest() {
 
     @Test
-    fun `내 쿠폰 목록 조회 - 200`() {
+    @DisplayName("미사용 쿠폰 목록을 정상적으로 조회한다 - 200")
+    fun success() {
         val user = savedUser()
         val coupons = List(3) {
             savedCoupon(userId = user.id(), usedAt = null)
@@ -35,7 +37,8 @@ class GetUserCouponsApiTest : ApiTest() {
     }
 
     @Test
-    fun `내 쿠폰 목록 조회 - 200 - 빈 쿠폰 목록`() {
+    @DisplayName("쿠폰이 없는 경우 빈 목록을 반환한다 - 200")
+    fun empty() {
         val user = savedUser()
 
         mockMvc.get("/users/${user.id().value}/coupons")
@@ -46,7 +49,8 @@ class GetUserCouponsApiTest : ApiTest() {
     }
 
     @Test
-    fun `내 쿠폰 목록 조회 - 404 - 찾을 수 없는 유저`() {
+    @DisplayName("존재하지 않는 사용자는 404 오류를 반환한다")
+    fun notFound() {
         val userId = IdMock.value()
 
         mockMvc.get("/users/${userId}/coupons")

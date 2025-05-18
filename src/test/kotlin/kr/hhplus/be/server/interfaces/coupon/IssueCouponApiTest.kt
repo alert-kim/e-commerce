@@ -5,6 +5,8 @@ import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.coupon.request.IssueCouponRequest
 import kr.hhplus.be.server.testutil.mock.IdMock
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.post
@@ -12,7 +14,8 @@ import org.springframework.test.web.servlet.post
 class IssueCouponApiTest : ApiTest() {
 
     @Test
-    fun `쿠폰 발급 - 200`() {
+    @DisplayName("쿠폰 발급 - 200")
+    fun issueCoupon() {
         val user = savedUser()
         val couponSource = savedCouponSource(
             status = CouponSourceStatus.ACTIVE
@@ -38,7 +41,8 @@ class IssueCouponApiTest : ApiTest() {
     }
 
     @Test
-    fun `쿠폰 발급 - 400 - 쿠폰 재고 부족`() {
+    @DisplayName("쿠폰 발급 - 400 - 쿠폰 재고 부족")
+    fun issueCouponOutOfStock() {
         val user = savedUser()
         val couponSource = savedCouponSource(
             quantity = 0,
@@ -59,7 +63,8 @@ class IssueCouponApiTest : ApiTest() {
     }
 
     @Test
-    fun `쿠폰 발급 - 404 - 찾을 수 없는 유저`() {
+    @DisplayName("쿠폰 발급 - 404 - 찾을 수 없는 유저")
+    fun issueCouponUserNotFound() {
         val userId = IdMock.value()
         val couponSource = savedCouponSource()
         val request = IssueCouponRequest(
@@ -77,7 +82,8 @@ class IssueCouponApiTest : ApiTest() {
     }
 
     @Test
-    fun `쿠폰 발급 - 404 - 찾을 수 없는 쿠폰 소스`() {
+    @DisplayName("쿠폰 발급 - 404 - 찾을 수 없는 쿠폰 소스")
+    fun issueCouponSourceNotFound() {
         val user = savedUser()
         val couponSourceId = IdMock.value()
         val request = IssueCouponRequest(

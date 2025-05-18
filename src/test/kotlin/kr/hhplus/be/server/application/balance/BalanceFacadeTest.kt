@@ -2,9 +2,7 @@ package kr.hhplus.be.server.application.balance
 
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
 import kr.hhplus.be.server.application.balance.result.BalanceChargeFacadeResult
@@ -21,19 +19,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 
-@ExtendWith(MockKExtension::class)
 class BalanceFacadeTest {
-    @InjectMockKs
-    private lateinit var facade: BalanceFacade
-
-    @MockK(relaxed = true)
-    private lateinit var balanceService: BalanceService
-
-    @MockK(relaxed = true)
-    private lateinit var userService: UserService
+    private val balanceService = mockk<BalanceService>(relaxed = true)
+    private val userService = mockk<UserService>(relaxed = true)
+    private val facade = BalanceFacade(balanceService, userService)
 
     @BeforeEach
     fun setup() {

@@ -5,34 +5,40 @@ import kr.hhplus.be.server.domain.user.repository.UserRepository
 import kr.hhplus.be.server.testutil.mock.IdMock
 import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 
 @Import(UserRepositoryTestConfig::class)
-class UserRepositoryTest : RepositoryTest() {
-    @Autowired
-    lateinit var repository: UserRepository
+class UserRepositoryTest @Autowired constructor(
+    private val repository: UserRepository,
+    private val testUserRepository: TestUserRepository
+) : RepositoryTest() {
 
-    @Autowired
-    lateinit var testUserRepository: TestUserRepository
+    @Nested
+    @DisplayName("ID로 유저 조회")
+    inner class FindById {
 
-    @Test
-    fun `findById - 해당 유저 반환`() {
-        val user = UserMock.user(id = null)
-        val saved = testUserRepository.save(user)
+        @Test
+        @DisplayName("해당 유저 반환")
+        fun returnUser() {
+            val user = UserMock.user(id = null)
+            val saved = testUserRepository.save(user)
 
-        val result = repository.findById(saved.id().value)
+            val result = repository.findById(saved.id().value)
 
-        assertThat(result).isNotNull()
-        assertThat(result?.id()).isEqualTo(saved.id())
-    }
+            assertThat(result).isNotNull()
+            assertThat(result?.id()).isEqualTo(saved.id())
+        }
 
-    @Test
-    fun `findById - 해당 유저가 없을 경우 null반환`() {
+        @Test
+        @DisplayName("해당 유저가 없을 경우 null 반환")
+        fun returnNull() {
+            val result = repository.findById(IdMock.value())
 
-        val result = repository.findById(IdMock.value())
-
-        assertThat(result).isNull()
+            assertThat(result).isNull()
+        }
     }
 }

@@ -18,19 +18,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest
 @Isolated
-class ProductCacheTest {
-
-    @Autowired
-    private lateinit var reader: ProductCacheReader
+class ProductCacheTest @Autowired constructor(
+    private val reader: ProductCacheReader,
+    private val cacheManager: CacheManager,
+    private val databaseTestHelper: DatabaseTestHelper,
+) {
 
     @MockitoSpyBean
     private lateinit var repository: ProductRepository
-
-    @Autowired
-    private lateinit var cacheManager: CacheManager
-
-    @Autowired
-    private lateinit var databaseTestHelper: DatabaseTestHelper
 
     @BeforeEach
     fun setUp() {
@@ -38,11 +33,11 @@ class ProductCacheTest {
     }
 
     @Nested
-    @DisplayName("단일 상품 조회에 대한 캐시 적용")
-    inner class Cache {
+    @DisplayName("캐시 저장")
+    inner class Save {
 
         @Test
-        @DisplayName("상품 조회 결과가 캐시에 저장되어야 한다")
+        @DisplayName("상품 조회 결과를 캐시에 저장")
         fun saveCache() {
             val product = databaseTestHelper.savedProduct()
             val productId = product.id().value
@@ -53,14 +48,11 @@ class ProductCacheTest {
             Mockito.verify(
                 repository,
                 times(1)
-            ).findById(
-                productId
-            )
+            ).findById(productId)
         }
 
-
         @Test
-        @DisplayName("존재하지 않는 상품 조회 시 null이 반환되고 캐시에 저장되지 않는다")
+        @DisplayName("상품이 존재하지 않으면 캐싱하지 않음")
         fun doNotCacheNullResult() {
             val productId = ProductMock.id()
 
@@ -72,9 +64,7 @@ class ProductCacheTest {
             Mockito.verify(
                 repository,
                 times(2)
-            ).findById(
-                productId.value
-            )
+            ).findById(productId.value)
         }
     }
 }

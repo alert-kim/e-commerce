@@ -4,65 +4,89 @@ import kr.hhplus.be.server.domain.balance.exception.RequiredBalanceIdException
 import kr.hhplus.be.server.testutil.mock.BalanceMock
 import kr.hhplus.be.server.testutil.mock.UserMock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 
 class BalanceTest {
-    @Test
-    fun `id - id가 null이 아닌 경우 id 반환`() {
-        val balance = BalanceMock.balance(id = BalanceMock.id())
 
-        val result = balance.id()
+    @Nested
+    @DisplayName("ID 조회")
+    inner class Id {
+        @Test
+        @DisplayName("ID가 존재하면 반환")
+        fun idExists() {
+            val balance = BalanceMock.balance(id = BalanceMock.id())
 
-        assertThat(result).isEqualTo(balance.id())
-    }
+            val result = balance.id()
 
-    @Test
-    fun `id - id가 null이면 RequiredBalanceIdException 발생`() {
-        val balance = BalanceMock.balance(id = null)
+            assertThat(result).isEqualTo(balance.id())
+        }
 
-        assertThrows<RequiredBalanceIdException> {
-            balance.id()
+        @Test
+        @DisplayName("ID가 없으면 예외 발생")
+        fun idNotExists() {
+            val balance = BalanceMock.balance(id = null)
+
+            assertThrows<RequiredBalanceIdException> {
+                balance.id()
+            }
         }
     }
 
-    @Test
-    fun `new - 해당 유저아이디를 가진, 0원으로 초기화된 잔고를 생성한다`() {
-        val userId = UserMock.id()
+    @Nested
+    @DisplayName("생성")
+    inner class Create {
+        @Test
+        @DisplayName("유저ID로 0원 잔고 생성")
+        fun new() {
+            val userId = UserMock.id()
 
-        val balance = Balance.new(userId)
+            val balance = Balance.new(userId)
 
-        assertAll(
-            { assertThat(balance.userId).isEqualTo(userId) },
-            { assertThat(balance.amount.value).isEqualByComparingTo(BigDecimal.ZERO) },
-        )
+            assertAll(
+                { assertThat(balance.userId).isEqualTo(userId) },
+                { assertThat(balance.amount.value).isEqualByComparingTo(BigDecimal.ZERO) },
+            )
+        }
     }
 
-    @Test
-    fun `charge - 잔고를 충전하고, updatedAt을 갱신한다`() {
-        val initialAmount = BigDecimal.valueOf(1_000)
-        val balance = BalanceMock.balance(amount = initialAmount)
-        val chargeAmount = BigDecimal.valueOf(2_000)
+    @Nested
+    @DisplayName("충전")
+    inner class Charge {
+        @Test
+        @DisplayName("금액을 충전하고 업데이트 시간 갱신")
+        fun charge() {
+            val initialAmount = BigDecimal.valueOf(1_000)
+            val balance = BalanceMock.balance(amount = initialAmount)
+            val chargeAmount = BigDecimal.valueOf(2_000)
 
-        balance.charge(BalanceAmount.of(chargeAmount))
+            balance.charge(BalanceAmount.of(chargeAmount))
 
-        assertThat(balance.amount.value).isEqualByComparingTo(initialAmount.add(chargeAmount))
-        assertThat(balance.updatedAt).isAfter(balance.createdAt)
+            assertThat(balance.amount.value).isEqualByComparingTo(initialAmount.add(chargeAmount))
+            assertThat(balance.updatedAt).isAfter(balance.createdAt)
+        }
     }
 
-    @Test
-    fun `user - 잔고를 사용하고, updatedAt을 갱신한다`() {
-        val initialAmount = BigDecimal.valueOf(1_000)
-        val balance = BalanceMock.balance(amount = initialAmount)
-        val useAmount = BigDecimal.valueOf(500)
+    @Nested
+    @DisplayName("사용")
+    inner class Use {
+        @Test
+        @DisplayName("금액을 사용하고 업데이트 시간 갱신")
+        fun use() {
+            val initialAmount = BigDecimal.valueOf(1_000)
+            val balance = BalanceMock.balance(amount = initialAmount)
+            val useAmount = BigDecimal.valueOf(500)
 
-        val result = balance.use(BalanceAmount.of(useAmount))
+            val result = balance.use(BalanceAmount.of(useAmount))
 
-        assertThat(result.balanceId).isEqualTo(balance.id())
-        assertThat(result.amount.value).isEqualByComparingTo(useAmount)
-        assertThat(balance.amount.value).isEqualByComparingTo(initialAmount.minus(useAmount))
-        assertThat(balance.updatedAt).isAfter(balance.createdAt)
+            assertThat(result.balanceId).isEqualTo(balance.id())
+            assertThat(result.amount.value).isEqualByComparingTo(useAmount)
+            assertThat(balance.amount.value).isEqualByComparingTo(initialAmount.minus(useAmount))
+            assertThat(balance.updatedAt).isAfter(balance.createdAt)
+        }
     }
 }

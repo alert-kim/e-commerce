@@ -15,12 +15,10 @@ import java.time.LocalDate
 @Isolated
 @Import(ProductSaleRankingRepositoryTestConfig::class)
 @SpringBootTest
-class ProductSaleRankingRepositoryTest {
-    @Autowired
-    lateinit var repository: ProductSaleRankingRepository
-
-    @Autowired
-    lateinit var testRepository: TestSaleRankingRedisRepository
+class ProductSaleRankingRepositoryTest @Autowired constructor(
+    private val repository: ProductSaleRankingRepository,
+    private val testRepository: TestSaleRankingRedisRepository
+) {
 
     @BeforeEach
     fun setup() {
@@ -28,12 +26,11 @@ class ProductSaleRankingRepositoryTest {
     }
 
     @Nested
-    @DisplayName("랭킹 점수 업데이트")
-    inner class UpdateRankingTest {
-
+    @DisplayName("랭킹 업데이트")
+    inner class UpdateRanking {
         @Test
-        @DisplayName("상품 판매 랭킹 정보가 저장된다(판매수량 + 주문수)")
-        fun updateRanking() {
+        @DisplayName("판매수량과 주문수로 랭킹 업데이트 성공")
+        fun success() {
             // given
             val date = LocalDate.now()
             val productId1 = ProductMock.id()
@@ -61,8 +58,8 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("동일한 날짜, 동일한 상품 ID에 대해 점수가 누적된다")
-        fun scoreIsAccumulated() {
+        @DisplayName("동일 날짜에 대한 점수는 누적")
+        fun accumulate() {
             // given
             val date = LocalDate.now()
             val productId1 = ProductId(1L)
@@ -108,12 +105,11 @@ class ProductSaleRankingRepositoryTest {
     }
 
     @Nested
-    @DisplayName("랭킹 집계")
-    inner class RenewRankingTest {
-
+    @DisplayName("랭킹 갱신")
+    inner class RenewRanking {
         @Test
-        @DisplayName("여러 날짜의 점수 합쳐서 통합 랭킹을 생성한다")
-        fun createRanking() {
+        @DisplayName("판매수량과 주문수로 랭킹 갱신 성공")
+        fun renew() {
             // given
             val startDate = LocalDate.now().minusDays(2)
             val middleDate = LocalDate.now().minusDays(1)
@@ -166,7 +162,7 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("판매 수량이 같으면 주문 수량이 많은 것이 랭킹이 더 높다")
+        @DisplayName("수량이 동일한 경우 주문 수로 랭킹 결정")
         fun sameQuantity() {
             val startDate = LocalDate.now().minusDays(2)
             val endDate = LocalDate.now()
@@ -194,8 +190,8 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("기존 랭킹이 있는 경우, 새로 추가된 점수를 합산한다")
-        fun renewRanking() {
+        @DisplayName("이전 갱신 후 추가된 점수를 반영하여 랭킹 변경")
+        fun renewConsideringAdded() {
             // given
             val startDate = LocalDate.now().minusDays(2)
             val endDate = LocalDate.now()
@@ -238,8 +234,8 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("랭킹 항목이 없으면 빈 리스트를 반환한다")
-        fun emptyRanking() {
+        @DisplayName("갱신된 랭킹이 없을 경우 빈 리스트 반환")
+        fun empty() {
             // given
             val startDate = LocalDate.now().minusDays(3)
             val endDate = LocalDate.now()
@@ -252,7 +248,7 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("제한된 개수만큼만 상위 항목을 반환한다")
+        @DisplayName("limit 만큼의 랭킹만 반환")
         fun limit() {
             // given
             val date = LocalDate.now()
@@ -276,7 +272,7 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("유효하지 않은 날짜 범위가 주어지면 예외를 발생시킨다")
+        @DisplayName("시작일이 종료일보다 늦을 경우 예외 발생")
         fun invalidDate() {
             // given
             val startDate = LocalDate.now()
@@ -290,11 +286,10 @@ class ProductSaleRankingRepositoryTest {
     }
 
     @Nested
-    @DisplayName("상위 N개 상품 ID 조회")
-    inner class FindTopNProductIdsTest {
-
+    @DisplayName("랭킹 조회")
+    inner class FindTopNProductIds {
         @Test
-        @DisplayName("생성된 통합 랭킹에서 상위 N개 상품 ID를 조회한다")
+        @DisplayName("랭킹 조회 성공")
         fun findFromCreatedRanking() {
             // given
             val startDate = LocalDate.now().minusDays(2)
@@ -337,7 +332,7 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("통합 랭킹이 없으면 빈 리스트를 반환한다")
+        @DisplayName("랭킹이 없는 경우 빈 리스트 반환")
         fun notExistsRanking() {
             // when
             val startDate = LocalDate.now().minusDays(2)
@@ -349,7 +344,7 @@ class ProductSaleRankingRepositoryTest {
         }
 
         @Test
-        @DisplayName("요청한 개수보다 적은 결과가 있으면 가능한 만큼 반환한다")
+        @DisplayName("요청보다 랭킹된 상품이 적은 경우에 정상 응답")
         fun lessThanRequest() {
             // given
             val date = LocalDate.now()

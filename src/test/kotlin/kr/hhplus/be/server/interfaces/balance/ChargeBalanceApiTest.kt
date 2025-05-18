@@ -6,6 +6,7 @@ import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.balance.request.ChargeApiRequest
 import kr.hhplus.be.server.testutil.mock.IdMock
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.CacheManager
@@ -14,9 +15,9 @@ import org.springframework.test.web.servlet.post
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-class ChargeBalanceApiTest : ApiTest() {
-    @Autowired
-    private lateinit var cacheManager: CacheManager
+class ChargeBalanceApiTest @Autowired constructor(
+    private val cacheManager: CacheManager
+) : ApiTest() {
 
     @BeforeEach
     fun setup() {
@@ -24,7 +25,8 @@ class ChargeBalanceApiTest : ApiTest() {
     }
 
     @Test
-    fun `잔고 충전 - 200`() {
+    @DisplayName("정상 처리 시 200 응답")
+    fun success() {
         val user = savedUser()
         val balance = savedBalance(user.id())
         val request = ChargeApiRequest(userId = user.id().value, amount = BigDecimal.valueOf(1_000))
@@ -41,7 +43,8 @@ class ChargeBalanceApiTest : ApiTest() {
     }
 
     @Test
-    fun `잔고 충전 - 400 - 최소 잔고 미만`() {
+    @DisplayName("최소 잔고 미만 시 400 응답")
+    fun belowMinimum() {
         val user = savedUser()
         val request = ChargeApiRequest(user.id().value, BigDecimal.valueOf(-1))
 
@@ -55,7 +58,8 @@ class ChargeBalanceApiTest : ApiTest() {
     }
 
     @Test
-    fun `잔고 충전 - 400 - 찾을 수 없는 유저`() {
+    @DisplayName("존재하지 않는 유저 시 404 응답")
+    fun userNotFound() {
         val userId = IdMock.value()
         val request = ChargeApiRequest(userId, BigDecimal.valueOf(1_000))
 

@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.user.repository.UserRepository
 import kr.hhplus.be.server.testutil.DatabaseTestHelper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.mockito.Mockito
@@ -16,37 +17,36 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest
 @Isolated
-class UserCacheTest {
-
-    @Autowired
-    private lateinit var cacheReader: UserCacheReader
-
+class UserCacheTest @Autowired constructor(
+    private val cacheReader: UserCacheReader,
+    private val cacheManager: CacheManager,
+    private val databaseTestHelper: DatabaseTestHelper
+) {
     @MockitoSpyBean
     private lateinit var repository: UserRepository
-
-    @Autowired
-    private lateinit var cacheManager: CacheManager
-
-    @Autowired
-    private lateinit var databaseTestHelper: DatabaseTestHelper
 
     @BeforeEach
     fun setup() {
         cacheManager.getCache(CacheNames.USER)?.clear()
     }
 
-    @Test
-    @DisplayName("유저 조회 결과를 캐시에 저장")
-    fun saveCache() {
-        val user = databaseTestHelper.savedUser()
-        val userId = user.id().value
+    @Nested
+    @DisplayName("캐시 저장")
+    inner class Save {
 
-        cacheReader.getOrNull(userId)
-        cacheReader.getOrNull(userId)
+        @Test
+        @DisplayName("유저 조회 결과를 캐시에 저장")
+        fun saveCache() {
+            val user = databaseTestHelper.savedUser()
+            val userId = user.id().value
 
-        Mockito.verify(
-            repository,
-            times(1)
-        ).findById(userId)
+            cacheReader.getOrNull(userId)
+            cacheReader.getOrNull(userId)
+
+            Mockito.verify(
+                repository,
+                times(1)
+            ).findById(userId)
+        }
     }
 }
