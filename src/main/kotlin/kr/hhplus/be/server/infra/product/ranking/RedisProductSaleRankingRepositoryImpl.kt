@@ -72,7 +72,7 @@ class RedisProductSaleRankingRepositoryImpl(
 
     private fun trimRankingToLimit(unionKey: String, count: Long, limit: Int) {
         if (count > limit) {
-            ops.removeRange(unionKey, 0, -limit - 1.toLong())
+            ops.removeRange(unionKey, limit.toLong() -1, 0)
         }
     }
 
