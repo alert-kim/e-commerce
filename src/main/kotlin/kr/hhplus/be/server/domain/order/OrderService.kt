@@ -60,7 +60,7 @@ class OrderService(
         publisher.publishEvent(
             OrderCompletedEvent(
                 orderId = order.id(),
-                snapshot = OrderSnapshot.from(order),
+                order = OrderView.from(order),
                 createdAt = Instant.now(),
             )
         )
@@ -76,7 +76,7 @@ class OrderService(
         order.fail()
         val event = OrderFailedEvent(
             orderId = order.id(),
-            snapshot = OrderSnapshot.from(order),
+            order = OrderView.from(order),
             createdAt = Instant.now(),
         )
         publisher.publishEvent(event)
@@ -95,8 +95,8 @@ class OrderService(
     fun sendOrderCompleted(
         command: SendOrderCompletedCommand,
     ) {
-        val snapshot = command.orderSnapshot.checkCompleted()
-        client.send(snapshot)
+        val order = command.order.checkCompleted()
+        client.send(order)
     }
 
     fun get(

@@ -286,13 +286,13 @@ class OrderServiceTest {
             val orderId = OrderMock.id()
             val order = OrderMock.order(id = orderId, status = OrderStatus.COMPLETED)
             val command = SendOrderCompletedCommand(
-                orderSnapshot = OrderSnapshot.from(order),
+                order = OrderView.from(order),
             )
 
             service.sendOrderCompleted(command)
 
             verify {
-                client.send(command.orderSnapshot)
+                client.send(command.order)
             }
         }
 
@@ -302,7 +302,7 @@ class OrderServiceTest {
             val orderId = OrderMock.id()
             val order = OrderMock.order(id = orderId, status = OrderStatus.READY)
             val command = SendOrderCompletedCommand(
-                orderSnapshot = OrderSnapshot.from(order),
+                order = OrderView.from(order),
             )
 
             assertThrows<InvalidOrderStatusException> {

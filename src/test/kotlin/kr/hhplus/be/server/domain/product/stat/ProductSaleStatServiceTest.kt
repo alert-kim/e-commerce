@@ -3,7 +3,7 @@ package kr.hhplus.be.server.domain.product.stat
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.common.util.TimeZone
-import kr.hhplus.be.server.domain.order.OrderSnapshot
+import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.product.repository.ProductDailySaleStatRepository
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductDailySaleStatsCommand
 import kr.hhplus.be.server.domain.product.stat.command.CreateProductSaleStatsCommand
@@ -28,7 +28,7 @@ class ProductSaleStatServiceTest {
         fun create() {
             val orderProducts = List(2) { OrderMock.product() }
             val event = OrderMock.completedEvent(
-                snapshot = OrderSnapshot.from(OrderMock.order(products = orderProducts))
+                order = OrderView.from(OrderMock.order(products = orderProducts))
             )
             val today = LocalDate.now(TimeZone.KSTId)
 

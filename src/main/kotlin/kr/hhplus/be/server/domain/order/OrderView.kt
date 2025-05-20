@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.coupon.CouponId
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.user.UserId
 import java.math.BigDecimal
 import java.time.Instant
@@ -18,6 +19,19 @@ data class OrderView(
     val updatedAt: Instant,
 ) {
     fun isFailed(): Boolean = status == OrderStatus.FAILED
+
+    fun getOrNullCompletedAt(): Instant? = if (status == OrderStatus.COMPLETED) updatedAt else null
+
+    fun checkCompleted(): OrderView {
+        if (status != OrderStatus.COMPLETED) {
+            throw InvalidOrderStatusException(
+                id = id,
+                expect = OrderStatus.COMPLETED,
+                status = status,
+            )
+        }
+        return this
+    }
 
     companion object {
         fun from(order: Order): OrderView =

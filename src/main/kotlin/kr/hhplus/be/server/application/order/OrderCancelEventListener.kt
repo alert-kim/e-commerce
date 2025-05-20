@@ -9,6 +9,7 @@ import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
 import kr.hhplus.be.server.application.order.processor.OrderPaymentProcessor
 import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
 import kr.hhplus.be.server.domain.order.OrderService
+import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Async
@@ -25,8 +26,8 @@ class OrderCancelEventListener(
 ) {
     private val logger = LoggerFactory.getLogger(OrderCancelEventListener::class.java)
 
-    @TransactionalEventListener
     @Async
+    @TransactionalEventListener
     fun handle(event: OrderFailedEvent) {
         val order = orderService.get(event.orderId.value)
 
@@ -40,32 +41,32 @@ class OrderCancelEventListener(
         }
 
         logger.info("주문 취소 처리 시작: orderId={}", order.id)
-        val snapshot = event.snapshot
-        val isSuccess = processCancellation(snapshot)
+        val orderView = event.order
+        val isSuccess = processCancellation(orderView)
 
         if (isSuccess) {
             orderLifecycleProcessor.markFailHandled(
-                MarkOrderFailHandledProcessorCommand(orderId = snapshot.id)
+                MarkOrderFailHandledProcessorCommand(orderId = orderView.id)
             )
         }
     }
 
     private fun processCancellation(
-        snapshot: kr.hhplus.be.server.domain.order.OrderSnapshot
+        order: OrderView,
     ): Boolean {
         var isSuccess = true
 
-        isSuccess = cancelCouponIfPresent(snapshot) && isSuccess
-        isSuccess = cancelOrderProducts(snapshot) && isSuccess
-        isSuccess = cancelPayment(snapshot) && isSuccess
+        isSuccess = cancelCouponIfPresent(order) && isSuccess
+        isSuccess = cancelOrderProducts(order) && isSuccess
+        isSuccess = cancelPayment(order) && isSuccess
 
         return isSuccess
     }
 
     private fun cancelCouponIfPresent(
-        snapshot: kr.hhplus.be.server.domain.order.OrderSnapshot
+        order: OrderView,
     ): Boolean {
-        val couponId = snapshot.couponId ?: return true
+        val couponId = order.couponId ?: return true
 
         return runCatching {
             orderCouponProcessor.cancelCoupon(CancelCouponUseProcessorCommand(couponId))
@@ -73,17 +74,17 @@ class OrderCancelEventListener(
         }.getOrElse { error ->
             logger.error(
                 "[OrderCancelEventListener] fail to cancel coupon: order={}, couponId={}",
-                snapshot.id, couponId, error
+                order.id, couponId, error
             )
             false
         }
     }
 
     private fun cancelOrderProducts(
-        snapshot: kr.hhplus.be.server.domain.order.OrderSnapshot
+        order: OrderView
     ): Boolean {
         var isAllSuccess = true
-        snapshot.orderProducts
+        order.products
             .sortedBy { it.productId.value }
             .forEach { orderProduct ->
             runCatching {
@@ -96,7 +97,7 @@ class OrderCancelEventListener(
             }.getOrElse { error ->
                 logger.error(
                     "[OrderCancelEventListener] fail to restore product stock: order={}, product={}",
-                    snapshot.id.value,
+                    order.id.value,
                     orderProduct.productId,
                     error
                 )
@@ -107,18 +108,18 @@ class OrderCancelEventListener(
     }
 
     private fun cancelPayment(
-        snapshot: kr.hhplus.be.server.domain.order.OrderSnapshot
+        order: OrderView,
     ): Boolean =
         runCatching {
             orderPaymentProcessor.cancelPayment(
                 CancelOrderPaymentProcessorCommand(
-                    orderId = snapshot.id,
-                    userId = snapshot.userId,
+                    orderId = order.id,
+                    userId = order.userId,
                 )
             )
             true
         }.getOrElse { error ->
-            logger.error("[OrderCancelEventListener] fail to cancel order: order={}", snapshot.id.value, error)
+            logger.error("[OrderCancelEventListener] fail to cancel order: order={}", order.id.value, error)
             false
         }
 }

@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.spyk
-import kr.hhplus.be.server.domain.order.OrderSnapshot
+import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -25,7 +25,7 @@ class OrderSenderClientImplTest {
         }
     }
 
-    private val orderSnapshotClient = spyk(
+    private val orderSenderClient = spyk(
         OrderSenderClientImpl(
             webClientBuilder = WebClient.builder(),
             property = OrderSenderClientProperty(
@@ -42,14 +42,14 @@ class OrderSenderClientImplTest {
                 .willReturn(WireMock.ok()),
         )
 
-        val orderSnapshot = OrderSnapshot.Companion.from(OrderMock.order())
-        orderSnapshotClient.send(orderSnapshot)
+        val order = OrderView.from(OrderMock.order())
+        orderSenderClient.send(order)
 
         Thread.sleep(1_000)
 
         server.verify(
             WireMock.postRequestedFor(WireMock.urlPathEqualTo(OrderSenderClientImpl.PATH))
-                .withRequestBody(WireMock.equalToJson("""{"id":${orderSnapshot.id.value}}"""))
+                .withRequestBody(WireMock.equalToJson("""{"id":${order.id.value}}"""))
         )
     }
 }

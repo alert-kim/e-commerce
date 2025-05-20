@@ -11,8 +11,8 @@ import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
 import kr.hhplus.be.server.application.order.processor.OrderPaymentProcessor
 import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
 import kr.hhplus.be.server.domain.order.OrderService
-import kr.hhplus.be.server.domain.order.OrderSnapshot
 import kr.hhplus.be.server.domain.order.OrderStatus
+import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.product.ProductId
 import kr.hhplus.be.server.testutil.mock.CouponMock
 import kr.hhplus.be.server.testutil.mock.OrderMock
@@ -91,7 +91,7 @@ class OrderCancelEventListenerTest {
             val order = OrderMock.view(status = OrderStatus.FAILED, couponId = couponId)
             val event = OrderMock.failedEvent(
                 orderId = order.id,
-                snapshot = OrderSnapshot.from(OrderMock.order(couponId = couponId))
+                order = OrderView.from(OrderMock.order(couponId = couponId))
             )
             every { orderService.get(order.id.value) } returns order
 
@@ -128,7 +128,7 @@ class OrderCancelEventListenerTest {
             val order = OrderMock.view(status = OrderStatus.FAILED)
             val event = OrderMock.failedEvent(
                 orderId = order.id,
-                snapshot = OrderSnapshot.from(OrderMock.order(products = orderProducts))
+                order = OrderView.from(OrderMock.order(products = orderProducts))
             )
             every { orderService.get(order.id.value) } returns order
 
@@ -157,7 +157,7 @@ class OrderCancelEventListenerTest {
             val order = OrderMock.view(status = OrderStatus.FAILED)
             val event = OrderMock.failedEvent(
                 orderId = order.id,
-                snapshot = OrderSnapshot.from(OrderMock.order(products = orderProducts))
+                order = OrderView.from(OrderMock.order(products = orderProducts))
             )
             every { orderService.get(order.id.value) } returns order
 
@@ -165,7 +165,7 @@ class OrderCancelEventListenerTest {
 
             verifyOrder {
                 orderProductProcessor.restoreOrderProductStock(withArg<RestoreStockOrderProductProcessorCommand> {
-                  it.productId.value shouldBe 1L
+                    it.productId.value shouldBe 1L
                 })
                 orderProductProcessor.restoreOrderProductStock(withArg<RestoreStockOrderProductProcessorCommand> {
                     it.productId.value shouldBe 2L
@@ -185,7 +185,7 @@ class OrderCancelEventListenerTest {
             val order = OrderMock.view(status = OrderStatus.FAILED)
             val event = OrderMock.failedEvent(
                 orderId = order.id,
-                snapshot = OrderSnapshot.from(OrderMock.order(products = orderProducts))
+                order = OrderView.from(OrderMock.order(products = orderProducts))
             )
             every { orderService.get(order.id.value) } returns order
             every {
@@ -233,7 +233,10 @@ class OrderCancelEventListenerTest {
         fun cancelPayment() {
             val order = OrderMock.view(status = OrderStatus.FAILED)
             val event =
-                OrderMock.failedEvent(orderId = order.id, snapshot = OrderSnapshot.from(OrderMock.order(id = order.id, userId = order.userId)))
+                OrderMock.failedEvent(
+                    orderId = order.id,
+                    order = OrderView.from(OrderMock.order(id = order.id, userId = order.userId))
+                )
             every { orderService.get(order.id.value) } returns order
 
             orderCancelEventListener.handle(event)
@@ -266,6 +269,5 @@ class OrderCancelEventListenerTest {
                 orderLifecycleProcessor.markFailHandled(ofType(MarkOrderFailHandledProcessorCommand::class))
             }
         }
-
     }
 }

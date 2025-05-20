@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import kotlin.math.truncate
 
 @Service
 @Transactional(readOnly = true)
@@ -19,9 +18,10 @@ class ProductSaleRankingService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun updateRanking(command: UpdateProductSaleRankingCommand) {
-        val order = command.event.snapshot
-        val date = LocalDate.ofInstant(order.completedAt, TimeZone.KSTId)
-        order.orderProducts.forEach {
+        val order = command.event.order
+        val orderCompletedAt = order.getOrNullCompletedAt() ?: return
+        val date = LocalDate.ofInstant(orderCompletedAt, TimeZone.KSTId)
+        order.products.forEach {
             repository.updateRanking(
                 ProductSaleRankingEntry(
                     date = date,

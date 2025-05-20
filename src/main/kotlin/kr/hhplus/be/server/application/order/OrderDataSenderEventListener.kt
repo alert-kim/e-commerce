@@ -11,9 +11,10 @@ import org.springframework.transaction.event.TransactionalEventListener
 class OrderDataSenderEventListener(
     private val orderService: OrderService,
 ) {
-    @TransactionalEventListener
+
     @Async
+    @TransactionalEventListener
     fun handle(event: OrderCompletedEvent) {
-        orderService.sendOrderCompleted(SendOrderCompletedCommand(event.snapshot))
+        orderService.sendOrderCompleted(SendOrderCompletedCommand(event.order))
     }
 }

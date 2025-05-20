@@ -25,7 +25,7 @@ class OrderDataSenderEventListenerTest {
 
             verify {
                 service.sendOrderCompleted(
-                    SendOrderCompletedCommand(event.snapshot)
+                    SendOrderCompletedCommand(event.order)
                 )
             }
         }
