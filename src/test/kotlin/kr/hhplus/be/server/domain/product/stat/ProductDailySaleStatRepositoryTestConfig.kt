@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.product.stat
 
-import kr.hhplus.be.server.infra.product.ProductDailySaleStatJpaRepository
-import kr.hhplus.be.server.infra.product.stat.ProductSaleStatJpaRepository
+import kr.hhplus.be.server.infra.product.persistence.ProductDailySaleStatJpaRepository
+import kr.hhplus.be.server.infra.product.persistence.stat.ProductSaleStatJpaRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 

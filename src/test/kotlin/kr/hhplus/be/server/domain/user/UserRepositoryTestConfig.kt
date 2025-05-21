@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.user
 
-import kr.hhplus.be.server.infra.user.UserJpaRepository
+import kr.hhplus.be.server.infra.user.persistence.UserJpaRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 
