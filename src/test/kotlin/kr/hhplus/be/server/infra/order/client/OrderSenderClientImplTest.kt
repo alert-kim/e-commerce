@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OrderSnapshotClientImplTest {
+class OrderSenderClientImplTest {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val server by lazy {
@@ -26,9 +26,9 @@ class OrderSnapshotClientImplTest {
     }
 
     private val orderSnapshotClient = spyk(
-        OrderSnapshotClientImpl(
+        OrderSenderClientImpl(
             webClientBuilder = WebClient.builder(),
-            property = OrderSnapshotClientProperty(
+            property = OrderSenderClientProperty(
                 baseUrl = server.baseUrl(),
             ),
         ),
@@ -38,7 +38,7 @@ class OrderSnapshotClientImplTest {
     @DisplayName("주문 스냅샷을 전송한다")
     fun send() {
         server.stubFor(
-            WireMock.post(OrderSnapshotClientImpl.PATH)
+            WireMock.post(OrderSenderClientImpl.PATH)
                 .willReturn(WireMock.ok()),
         )
 
@@ -48,7 +48,7 @@ class OrderSnapshotClientImplTest {
         Thread.sleep(1_000)
 
         server.verify(
-            WireMock.postRequestedFor(WireMock.urlPathEqualTo(OrderSnapshotClientImpl.PATH))
+            WireMock.postRequestedFor(WireMock.urlPathEqualTo(OrderSenderClientImpl.PATH))
                 .withRequestBody(WireMock.equalToJson("""{"id":${orderSnapshot.id.value}}"""))
         )
     }

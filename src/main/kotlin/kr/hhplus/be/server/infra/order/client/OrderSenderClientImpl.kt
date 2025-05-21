@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.infra.order.client
 
 import kr.hhplus.be.server.domain.order.OrderSnapshot
-import kr.hhplus.be.server.domain.order.OrderSnapshotClient
+import kr.hhplus.be.server.domain.order.OrderSender
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component
@@ -9,11 +9,11 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
 @Component
-@EnableConfigurationProperties(OrderSnapshotClientProperty::class)
-class OrderSnapshotClientImpl(
+@EnableConfigurationProperties(OrderSenderClientProperty::class)
+class OrderSenderClientImpl(
     private val webClientBuilder: WebClient.Builder,
-    private val property: OrderSnapshotClientProperty,
-) : OrderSnapshotClient {
+    private val property: OrderSenderClientProperty,
+) : OrderSender {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val webClient = webClientBuilder
         .baseUrl(property.baseUrl)
@@ -29,10 +29,10 @@ class OrderSnapshotClientImpl(
             .retrieve()
             .bodyToMono<Void>()
             .doOnSuccess {
-                logger.info("[OrderSnapshotClient] 주문 전송 성공 ${snapshot.id}")
+                logger.info("[OrderSenderClient] 주문 전송 성공 ${snapshot.id}")
             }
             .doOnError {
-                logger.error("[OrderSnapshotClient] 주문 전송 실패 ${it.message}", it)
+                logger.error("[OrderSenderClient] 주문 전송 실패 ${it.message}", it)
             }
             .subscribe()
     }

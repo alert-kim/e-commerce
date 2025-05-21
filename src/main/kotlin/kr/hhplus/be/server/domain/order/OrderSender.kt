@@ -1,5 +1,5 @@
 package kr.hhplus.be.server.domain.order
 
-interface OrderSnapshotClient {
+interface OrderSender {
     fun send(snapshot: OrderSnapshot)
 }

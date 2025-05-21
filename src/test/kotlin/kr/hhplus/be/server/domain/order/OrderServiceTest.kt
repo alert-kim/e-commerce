@@ -2,11 +2,7 @@ package kr.hhplus.be.server.domain.order
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.clearAllMocks
-import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
@@ -18,7 +14,6 @@ import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.testutil.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import java.math.BigDecimal
 
@@ -28,7 +23,7 @@ class OrderServiceTest {
 
     private val repository = mockk<OrderRepository>(relaxed = true)
     private val publisher = mockk<ApplicationEventPublisher>(relaxed = true)
-    private val client = mockk<OrderSnapshotClient>(relaxed = true)
+    private val client = mockk<OrderSender>(relaxed = true)
 
     @BeforeEach
     fun setUp() {
