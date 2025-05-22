@@ -27,12 +27,10 @@ class ProductSaleStatServiceTest {
         @DisplayName("주문 완료 이벤트의 상품 정보를 기반으로 판매 데이터를 저장")
         fun create() {
             val orderProducts = List(2) { OrderMock.product() }
-            val event = OrderMock.completedEvent(
-                order = OrderView.from(OrderMock.order(products = orderProducts))
-            )
+            val order = OrderView.from(OrderMock.order(products = orderProducts))
             val today = LocalDate.now(TimeZone.KSTId)
 
-            val command = CreateProductSaleStatsCommand(event)
+            val command = CreateProductSaleStatsCommand(order)
             service.createStats(command)
 
             verify {

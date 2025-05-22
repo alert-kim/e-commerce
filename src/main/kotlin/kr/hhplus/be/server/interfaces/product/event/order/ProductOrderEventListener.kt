@@ -35,7 +35,7 @@ class ProductOrderEventListener(
         }
 
         runCatching {
-            productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(event))
+            productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(event.order))
         }.onSuccess {
             logger.info("상품 판매 통계 생성 완료: orderId={}", event.orderId.value)
         }.onFailure { exception ->

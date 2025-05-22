@@ -12,7 +12,7 @@ class ProductSaleStatFacade(
     fun createStats(command: CreateProductSaleStatsFacadeCommand) {
         productSaleStatService.createStats(
             CreateProductSaleStatsCommand(
-                command.event
+                command.completedOrder,
             )
         )
     }

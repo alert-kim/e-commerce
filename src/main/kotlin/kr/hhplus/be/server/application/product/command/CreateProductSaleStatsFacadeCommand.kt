@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.application.product.command
 
-import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
+import kr.hhplus.be.server.domain.order.OrderView
 
 data class CreateProductSaleStatsFacadeCommand(
-    val event: OrderCompletedEvent,
+    val completedOrder: OrderView,
 )

@@ -15,7 +15,7 @@ class ProductSaleStatService(
 ) {
     @Transactional
     fun createStats(command: CreateProductSaleStatsCommand) {
-        val order = command.event.order
+        val order = command.completedOrder
 
         order.products.forEach {
             val stat = ProductSaleStat.new(

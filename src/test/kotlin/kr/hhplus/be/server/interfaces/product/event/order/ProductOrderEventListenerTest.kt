@@ -45,7 +45,7 @@ class ProductOrderEventListenerTest {
 
             verify(exactly = 1) {
                 productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(order))
-                productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(event))
+                productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(order))
             }
         }
 
@@ -66,7 +66,7 @@ class ProductOrderEventListenerTest {
 
             verify(exactly = 1) {
                 productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(order))
-                productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(event))
+                productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(order))
             }
         }
 
@@ -87,7 +87,7 @@ class ProductOrderEventListenerTest {
 
             verify(exactly = 1) {
                 productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(order))
-                productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(event))
+                productSaleStatFacade.createStats(CreateProductSaleStatsFacadeCommand(order))
             }
         }
     }
