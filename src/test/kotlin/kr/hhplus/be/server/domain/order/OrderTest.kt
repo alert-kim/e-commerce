@@ -86,8 +86,12 @@ class OrderTest {
             val totalAmount = unitPrice.value.multiply(BigDecimal.valueOf(quantity.toLong()))
 
 
-            order.placeStock(productId, quantity, unitPrice)
+            val resultOrderProduct = order.placeStock(productId, quantity, unitPrice)
 
+            assertThat(resultOrderProduct.orderId()).isEqualTo(order.id())
+            assertThat(resultOrderProduct.productId).isEqualTo(productId)
+            assertThat(resultOrderProduct.quantity).isEqualTo(quantity)
+            assertThat(resultOrderProduct.unitPrice).isEqualByComparingTo(unitPrice.value)
             assertAll(
                 { assertThat(order.products).hasSize(1) },
                 { assertThat(order.originalAmount).isEqualByComparingTo(totalAmount) },

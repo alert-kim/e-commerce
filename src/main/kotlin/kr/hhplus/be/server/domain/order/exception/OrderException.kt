@@ -59,7 +59,9 @@ class RequiredOrderProductIdException : OrderException() {
     override val message: String = "주문 상품 ID가 필요합니다."
 }
 
-// event
-class RequiredOrderEventIdException : OrderException() {
-    override val message: String = "주문 이벤트 ID가 필요합니다."
+class OrderCancelFailedException(
+    orderId: OrderId,
+    detail: String,
+): OrderException() {
+    override val message: String = "주문(${orderId.value}) 취소에 실패했습니다. $detail"
 }

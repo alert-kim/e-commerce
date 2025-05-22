@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.interfaces
 
-import kr.hhplus.be.server.interfaces.common.ServerApiResponse
+import kr.hhplus.be.server.interfaces.common.api.ServerApiResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 

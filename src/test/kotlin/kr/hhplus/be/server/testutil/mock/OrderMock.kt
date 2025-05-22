@@ -96,35 +96,21 @@ object OrderMock {
 
     fun completedEvent(
         orderId: OrderId = id(),
-        snapshot: OrderSnapshot = OrderSnapshot.from(order(status = OrderStatus.COMPLETED)),
+        order: OrderView = OrderView.from(order(status = OrderStatus.COMPLETED)),
         createdAt: Instant = Instant.now(),
     ): OrderCompletedEvent = OrderCompletedEvent(
         orderId = orderId,
-        snapshot = snapshot,
+        order = order,
         createdAt = createdAt,
     )
 
     fun failedEvent(
         orderId: OrderId = id(),
-        snapshot: OrderSnapshot = OrderSnapshot.from(order(status = OrderStatus.FAILED)),
+        order: OrderView = OrderView.from(order(status = OrderStatus.FAILED)),
         createdAt: Instant = Instant.now(),
     ): OrderFailedEvent = OrderFailedEvent(
         orderId = orderId,
-        snapshot = snapshot,
-        createdAt = createdAt,
-    )
-
-    fun orderProductSnapshot(
-        productId: ProductId = ProductMock.id(),
-        quantity: Int = 2,
-        unitPrice: BigDecimal = BigDecimal.valueOf(1_000),
-        totalPrice: BigDecimal = BigDecimal.valueOf(2_000),
-        createdAt: Instant = Instant.now(),
-    ): OrderSnapshot.OrderProductSnapshot = OrderSnapshot.OrderProductSnapshot(
-        productId = productId,
-        quantity = quantity,
-        unitPrice = unitPrice,
-        totalPrice = totalPrice,
+        order = order,
         createdAt = createdAt,
     )
 }
