@@ -10,6 +10,6 @@ class ProductRankingFacade(
     private val productSaleRankingService: ProductSaleRankingService
 ) {
     fun updateRanking(command: UpdateProductRankingFacadeCommand) {
-        productSaleRankingService.updateRanking(UpdateProductSaleRankingCommand(command.event))
+        productSaleRankingService.updateRanking(UpdateProductSaleRankingCommand(command.completedOrder))
     }
 }

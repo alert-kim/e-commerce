@@ -37,7 +37,7 @@ class ProductOrderEventListenerTest {
         orderEventListener.handle(event)
 
         verify(exactly = 1) {
-            productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(event))
+            productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(order))
         }
     }
 
@@ -59,7 +59,7 @@ class ProductOrderEventListenerTest {
         }
 
         verify(exactly = 1) {
-            productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(event))
+            productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(order))
         }
     }
 }

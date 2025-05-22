@@ -20,7 +20,7 @@ class ProductOrderEventListener(
     fun handle(event: OrderCompletedEvent) {
         logger.info("OrderCompletedEvent 수신: orderId={}", event.orderId.value)
         runCatching {
-            productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(event))
+            productRankingFacade.updateRanking(UpdateProductRankingFacadeCommand(event.order))
         }.onSuccess {
             logger.info("상품 랭킹 업데이트 완료: orderId={}", event.orderId.value)
         }.onFailure { exception ->

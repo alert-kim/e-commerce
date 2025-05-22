@@ -4,7 +4,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.product.command.UpdateProductRankingFacadeCommand
 import kr.hhplus.be.server.domain.order.OrderStatus
-import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
 import kr.hhplus.be.server.domain.product.ranking.ProductSaleRankingService
 import kr.hhplus.be.server.domain.product.ranking.repository.UpdateProductSaleRankingCommand
 import kr.hhplus.be.server.testutil.mock.OrderMock
@@ -31,19 +30,14 @@ class ProductRankingFacadeTest {
         fun updateProductRanking() {
             val orderId = OrderMock.id()
             val order = OrderMock.view(id = orderId, status = OrderStatus.COMPLETED)
-            val event = OrderCompletedEvent(
-                orderId = orderId,
-                order = order,
-                createdAt = order.updatedAt
-            )
-            val command = UpdateProductRankingFacadeCommand(event)
+            val command = UpdateProductRankingFacadeCommand(order)
 
             productRankingFacade.updateRanking(command)
 
             verify(exactly = 1) {
                 productSaleRankingService.updateRanking(
                     UpdateProductSaleRankingCommand(
-                        event = event
+                        completedOrder = order
                     )
                 )
             }

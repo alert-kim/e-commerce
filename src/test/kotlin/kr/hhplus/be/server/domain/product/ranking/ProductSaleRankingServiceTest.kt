@@ -33,12 +33,10 @@ class ProductSaleRankingServiceTest {
         @DisplayName("주문 완료 이벤트의 상품 정보를 기반으로 판매 랭킹 업데이트")
         fun update() {
             val orderProducts = List(2) { OrderMock.product() }
-            val event = OrderMock.completedEvent(
-                order = OrderView.from(OrderMock.order(products = orderProducts, status = OrderStatus.COMPLETED))
-            )
-            val date = LocalDate.ofInstant(event.order.getOrNullCompletedAt(), TimeZone.KSTId)
+            val order = OrderView.from(OrderMock.order(products = orderProducts, status = OrderStatus.COMPLETED))
+            val date = LocalDate.ofInstant(order.getOrNullCompletedAt(), TimeZone.KSTId)
 
-            val command = UpdateProductSaleRankingCommand(event)
+            val command = UpdateProductSaleRankingCommand(order)
             service.updateRanking(command)
 
             verify {
@@ -59,10 +57,8 @@ class ProductSaleRankingServiceTest {
         @DisplayName("주문이 완료되지 않았다면, 업데이트 하지 않음")
         fun notCompleted() {
             val orderProducts = List(2) { OrderMock.product() }
-            val event = OrderMock.completedEvent(
-                order = OrderView.from(OrderMock.order(products = orderProducts, status = OrderStatus.FAILED))
-            )
-            val command = UpdateProductSaleRankingCommand(event)
+            val order = OrderView.from(OrderMock.order(products = orderProducts, status = OrderStatus.FAILED))
+            val command = UpdateProductSaleRankingCommand(order)
             service.updateRanking(command)
 
             verify(exactly = 0) {
