@@ -1,66 +1,56 @@
 package kr.hhplus.be.server.application.order
 
-import kr.hhplus.be.server.application.order.command.CancelCouponUseProcessorCommand
-import kr.hhplus.be.server.application.order.command.CancelOrderPaymentProcessorCommand
-import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
-import kr.hhplus.be.server.application.order.command.RestoreStockOrderProductProcessorCommand
+import kr.hhplus.be.server.application.order.command.*
 import kr.hhplus.be.server.application.order.processor.OrderCouponProcessor
 import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
 import kr.hhplus.be.server.application.order.processor.OrderPaymentProcessor
 import kr.hhplus.be.server.application.order.processor.OrderProductProcessor
 import kr.hhplus.be.server.domain.order.OrderService
 import kr.hhplus.be.server.domain.order.OrderView
-import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
+import kr.hhplus.be.server.domain.order.exception.OrderCancelFailedException
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Async
-import org.springframework.stereotype.Component
-import org.springframework.transaction.event.TransactionalEventListener
+import org.springframework.stereotype.Service
 
-@Component
-class OrderCancelEventListener(
+@Service
+class OrderCancelFacade(
     private val orderService: OrderService,
     private val orderCouponProcessor: OrderCouponProcessor,
     private val orderProductProcessor: OrderProductProcessor,
     private val orderPaymentProcessor: OrderPaymentProcessor,
     private val orderLifecycleProcessor: OrderLifecycleProcessor
 ) {
-    private val logger = LoggerFactory.getLogger(OrderCancelEventListener::class.java)
+    private val logger = LoggerFactory.getLogger(OrderCancelFacade::class.java)
 
-    @Async
-    @TransactionalEventListener
-    fun handle(event: OrderFailedEvent) {
-        val order = orderService.get(event.orderId.value)
+    fun cancel(command: CancelOrderFacadeCommand) {
+        val currentOrder = orderService.get(command.order.id.value)
 
-        if (order.isFailed().not()) {
+        if (currentOrder.isFailed().not()) {
             logger.warn(
-                "[OrderCancelEventListener] order status is not FAILED: order={}, status={}",
-                order.id.value,
-                order.status,
+                "order status is not FAILED: order={}, status={}",
+                currentOrder.id.value,
+                currentOrder.status,
             )
             return
         }
 
+        val order = command.order
         logger.info("주문 취소 처리 시작: orderId={}", order.id)
-        val orderView = event.order
-        val isSuccess = processCancellation(orderView)
-
-        if (isSuccess) {
-            orderLifecycleProcessor.markFailHandled(
-                MarkOrderFailHandledProcessorCommand(orderId = orderView.id)
-            )
-        }
+        executeCancellation(currentOrder)
     }
 
-    private fun processCancellation(
+    private fun executeCancellation(
         order: OrderView,
-    ): Boolean {
+    ) {
         var isSuccess = true
 
         isSuccess = cancelCouponIfPresent(order) && isSuccess
         isSuccess = cancelOrderProducts(order) && isSuccess
         isSuccess = cancelPayment(order) && isSuccess
-
-        return isSuccess
+        if (isSuccess) {
+            markOrderFailHandled(order)
+        } else {
+            throw OrderCancelFailedException(order.id, "주문 취소 처리에 실패했습니다.")
+        }
     }
 
     private fun cancelCouponIfPresent(
@@ -73,7 +63,7 @@ class OrderCancelEventListener(
             true
         }.getOrElse { error ->
             logger.error(
-                "[OrderCancelEventListener] fail to cancel coupon: order={}, couponId={}",
+                "fail to cancel coupon: order={}, couponId={}",
                 order.id, couponId, error
             )
             false
@@ -87,23 +77,23 @@ class OrderCancelEventListener(
         order.products
             .sortedBy { it.productId.value }
             .forEach { orderProduct ->
-            runCatching {
-                orderProductProcessor.restoreOrderProductStock(
-                    RestoreStockOrderProductProcessorCommand(
-                        productId = orderProduct.productId,
-                        quantity = orderProduct.quantity,
+                runCatching {
+                    orderProductProcessor.restoreOrderProductStock(
+                        RestoreStockOrderProductProcessorCommand(
+                            productId = orderProduct.productId,
+                            quantity = orderProduct.quantity,
+                        )
                     )
-                )
-            }.getOrElse { error ->
-                logger.error(
-                    "[OrderCancelEventListener] fail to restore product stock: order={}, product={}",
-                    order.id.value,
-                    orderProduct.productId,
-                    error
-                )
-                isAllSuccess = false
+                }.getOrElse { error ->
+                    logger.error(
+                        "fail to restore product stock: order={}, product={}",
+                        order.id.value,
+                        orderProduct.productId,
+                        error
+                    )
+                    isAllSuccess = false
+                }
             }
-        }
         return isAllSuccess
     }
 
@@ -119,7 +109,15 @@ class OrderCancelEventListener(
             )
             true
         }.getOrElse { error ->
-            logger.error("[OrderCancelEventListener] fail to cancel order: order={}", order.id.value, error)
+            logger.error("fail to cancel payment: order={}", order.id.value, error)
             false
         }
+
+    private fun markOrderFailHandled(
+        order: OrderView,
+    ) {
+        orderLifecycleProcessor.markFailHandled(
+            MarkOrderFailHandledProcessorCommand(orderId = order.id)
+        )
+    }
 }
