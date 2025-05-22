@@ -89,7 +89,7 @@ class Order(
         productId: ProductId,
         quantity: Int,
         unitPrice: ProductPrice,
-    ) {
+    ): OrderProduct {
         if (status != OrderStatus.READY && status != OrderStatus.STOCK_ALLOCATED) {
             throw InvalidOrderStatusException(
                 id = id(),
@@ -97,7 +97,7 @@ class Order(
                 expect = OrderStatus.READY,
             )
         }
-        OrderProduct.new(
+        val product = OrderProduct.new(
             order = this,
             productId = productId,
             quantity = quantity,
@@ -107,6 +107,7 @@ class Order(
         }
         status = OrderStatus.STOCK_ALLOCATED
         updatedAt = Instant.now()
+        return product
     }
 
     fun applyCoupon(coupon: UsedCoupon) {

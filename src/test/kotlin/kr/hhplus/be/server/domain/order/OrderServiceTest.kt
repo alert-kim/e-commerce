@@ -6,15 +6,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
-import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
+import kr.hhplus.be.server.domain.order.event.*
 import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import kr.hhplus.be.server.testutil.mock.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
-import org.springframework.context.ApplicationEventPublisher
 import java.math.BigDecimal
 
 class OrderServiceTest {
@@ -22,13 +20,13 @@ class OrderServiceTest {
     private lateinit var service: OrderService
 
     private val repository = mockk<OrderRepository>(relaxed = true)
-    private val publisher = mockk<ApplicationEventPublisher>(relaxed = true)
+    private val eventPublisher = mockk<OrderEventPublisher>(relaxed = true)
     private val client = mockk<OrderSender>(relaxed = true)
 
     @BeforeEach
     fun setUp() {
         clearAllMocks()
-        service = OrderService(repository, client, publisher)
+        service = OrderService(repository, client, eventPublisher)
     }
 
     @Nested
@@ -37,9 +35,10 @@ class OrderServiceTest {
         @Test
         @DisplayName("사용자 ID로 주문을 생성")
         fun createOrder() {
-            val orderId = OrderMock.id()
-            every { repository.save(any()) } returns OrderMock.order(id = orderId)
             val userId = UserMock.id()
+            val orderId = OrderMock.id()
+            val order = OrderMock.order(id = orderId, userId = userId)
+            every { repository.save(any()) } returns order
 
             val result = service.createOrder(CreateOrderCommand(userId))
 
@@ -53,6 +52,10 @@ class OrderServiceTest {
                     assertThat(it.totalAmount).isEqualByComparingTo(BigDecimal.ZERO)
                     assertThat(it.couponId).isNull()
                     assertThat(it.products).isEmpty()
+                })
+                eventPublisher.publish(withArg<OrderCreatedEvent> {
+                    assertThat(it.orderId).isEqualTo(orderId)
+                    assertThat(it.userId).isEqualTo(userId)
                 })
             }
         }
@@ -73,7 +76,16 @@ class OrderServiceTest {
                 product = product,
                 stock = stock
             )
+            val orderProduct = OrderMock.product(
+                order = order,
+                productId = product.id,
+                quantity = stock.quantity,
+                unitPrice = product.price.value,
+            )
             every { repository.findById(orderId.value) } returns order
+            every { repository.save(any()) } returns order
+            every { order.placeStock(any(), any(), any()) } returns orderProduct
+            every { order.id() } returns orderId
 
             service.placeStock(command)
 
@@ -83,6 +95,12 @@ class OrderServiceTest {
                     quantity = command.stock.quantity,
                     unitPrice = command.product.price
                 )
+                eventPublisher.publish(withArg<OrderStockPlacedEvent> {
+                    assertThat(it.orderId).isEqualTo(orderId)
+                    assertThat(it.productId).isEqualTo(product.id)
+                    assertThat(it.quantity).isEqualTo(stock.quantity)
+                    assertThat(it.unitPrice).isEqualByComparingTo(product.price.value)
+                })
             }
         }
 
@@ -102,6 +120,10 @@ class OrderServiceTest {
             shouldThrow<NotFoundOrderException> {
                 service.placeStock(command)
             }
+
+            verify(exactly = 0) {
+                eventPublisher.publish(any<OrderStockPlacedEvent>())
+            }
         }
     }
 
@@ -117,12 +139,23 @@ class OrderServiceTest {
                 orderId = orderId,
                 usedCoupon = CouponMock.usedCoupon()
             )
+            val totalAmountAfterCouponApplied = BigDecimal.valueOf(1_000)
             every { repository.findById(orderId.value) } returns order
+            every { order.id() } returns orderId
+            every { order.couponId } returns command.usedCoupon.id
+            every { order.totalAmount } returns totalAmountAfterCouponApplied
+            every { order.discountAmount } returns command.usedCoupon.discountAmount
 
             service.applyCoupon(command)
 
             verify {
                 order.applyCoupon(command.usedCoupon)
+                eventPublisher.publish(withArg<OrderCouponAppliedEvent> {
+                    assertThat(it.orderId).isEqualTo(orderId)
+                    assertThat(it.couponId).isEqualTo(command.usedCoupon.id)
+                    assertThat(it.discCountAmount).isEqualByComparingTo(command.usedCoupon.discountAmount)
+                    assertThat(it.totalAmount).isEqualByComparingTo(totalAmountAfterCouponApplied)
+                })
             }
         }
 
@@ -139,6 +172,10 @@ class OrderServiceTest {
                         usedCoupon = CouponMock.usedCoupon(),
                     )
                 )
+            }
+
+            verify(exactly = 0) {
+                eventPublisher.publish(any<OrderCouponAppliedEvent>())
             }
         }
     }
@@ -165,7 +202,7 @@ class OrderServiceTest {
 
             verify {
                 order.pay()
-                publisher.publishEvent(withArg<OrderCompletedEvent> {
+                eventPublisher.publish(withArg<OrderCompletedEvent> {
                     assertThat(it.orderId).isEqualTo(orderId)
                 })
             }
@@ -187,6 +224,7 @@ class OrderServiceTest {
             shouldThrow<NotFoundOrderException> {
                 service.pay(command)
             }
+            verify(exactly = 0) { eventPublisher.publish(any<OrderCompletedEvent>()) }
         }
     }
 
@@ -194,7 +232,7 @@ class OrderServiceTest {
     @DisplayName("주문 실패 처리")
     inner class FailOrder {
         @Test
-        @DisplayName("주문을 실패 상태로 변경하고 이벤트를 저장")
+        @DisplayName("주문을 실패 상태로 변경하고 이벤트를 발행")
         fun failOrder() {
             val orderId = OrderMock.id()
             val order = mockk<Order>(relaxed = true)
@@ -207,7 +245,7 @@ class OrderServiceTest {
 
             verify {
                 order.fail()
-                publisher.publishEvent(withArg<OrderFailedEvent> {
+                eventPublisher.publish(withArg<OrderFailedEvent> {
                     assertThat(it.orderId).isEqualTo(orderId)
                 })
             }
@@ -226,7 +264,7 @@ class OrderServiceTest {
 
             verify(exactly = 0) {
                 order.fail()
-                publisher.publishEvent(any())
+                eventPublisher.publish(any<OrderFailedEvent>())
             }
         }
 
@@ -240,6 +278,9 @@ class OrderServiceTest {
             shouldThrow<NotFoundOrderException> {
                 service.failOrder(command)
             }
+            verify(exactly = 0) {
+                eventPublisher.publish(any<OrderFailedEvent>())
+            }
         }
     }
 
@@ -252,12 +293,16 @@ class OrderServiceTest {
             val orderId = OrderMock.id()
             val order = mockk<Order>(relaxed = true)
             every { repository.findById(orderId.value) } returns order
+            every { order.id() } returns orderId
 
             service.markFailHandled(MarkOrderFailHandledCommand(orderId))
 
             verify {
                 repository.findById(orderId.value)
                 order.failHandled()
+                eventPublisher.publish(withArg<OrderMarkedFailedHandledEvent> {
+                    assertThat(it.orderId).isEqualTo(orderId)
+                })
             }
         }
 
@@ -273,6 +318,9 @@ class OrderServiceTest {
 
             verify {
                 repository.findById(orderId.value)
+            }
+            verify(exactly = 0) {
+                eventPublisher.publish(any<OrderMarkedFailedHandledEvent>())
             }
         }
     }
