@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.domain.order
 
-import kr.hhplus.be.server.application.order.command.MarkOrderFailHandledProcessorCommand
 import kr.hhplus.be.server.domain.order.command.*
 import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
 import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
@@ -15,7 +14,7 @@ import java.time.Instant
 @Transactional(readOnly = true)
 class OrderService(
     private val repository: OrderRepository,
-    private val client: OrderSnapshotClient,
+    private val client: OrderSender,
     private val publisher: ApplicationEventPublisher,
 ) {
     @Transactional

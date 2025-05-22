@@ -5,6 +5,7 @@ import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.test.web.servlet.get
@@ -18,7 +19,8 @@ class GetProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `상품 목록 조회 - 200 - 해당 상태의 상품 조회`() {
+    @DisplayName("지정된 상태의 상품 목록이 조회된다")
+    fun getProductsByStatus() {
         val totalProducts = 5
         val page = 0
         val pageSize = 10
@@ -50,7 +52,8 @@ class GetProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `상품 목록 조회 - 200 - 페이징 정상 동작`() {
+    @DisplayName("페이징이 정상적으로 동작한다")
+    fun pagination() {
         val totalProducts = 10
         val pageSize = 5
         List(totalProducts) {
@@ -83,7 +86,8 @@ class GetProductsApiTest : ApiTest() {
     }
 
     @Test
-    fun `상품 목록 조회 - 200 - 상품 없음`() {
+    @DisplayName("상품이 없으면 빈 목록이 반환된다")
+    fun emptyProductList() {
         mockMvc.get("/products") {
             param("page", "0")
             param("pageSize", "10")
@@ -96,9 +100,9 @@ class GetProductsApiTest : ApiTest() {
         }
     }
 
-
     @Test
-    fun `상품 목록 조회 - 400 - 잘못된 page, pageSize`() {
+    @DisplayName("잘못된 페이지 파라미터로 요청하면 400 오류가 발생한다")
+    fun invalidPageParameters() {
         mockMvc.get("/products") {
             param("page", "-1")
             param("pageSize", "0")

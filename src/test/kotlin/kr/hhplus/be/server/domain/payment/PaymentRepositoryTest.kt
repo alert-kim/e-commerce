@@ -11,16 +11,17 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class PaymentRepositoryTest : RepositoryTest() {
-
-    @Autowired
-    lateinit var repository: PaymentRepository
+class PaymentRepositoryTest @Autowired constructor(
+    private val repository: PaymentRepository
+) : RepositoryTest() {
 
     @Nested
-    @DisplayName("save")
+    @DisplayName("저장")
     inner class Save {
+
         @Test
-        fun `반환된 Payment 필드 확인`() {
+        @DisplayName("결제 저장 후 필드 확인")
+        fun save() {
             val payment = PaymentMock.payment(id = null)
 
             val saved = repository.save(payment)
@@ -39,10 +40,12 @@ class PaymentRepositoryTest : RepositoryTest() {
     }
 
     @Nested
-    @DisplayName("findById")
+    @DisplayName("ID로 조회")
     inner class FindById {
+
         @Test
-        fun `결제가 존재하는 경우 해당 결제 반환`() {
+        @DisplayName("존재하는 결제 반환")
+        fun findById() {
             val payment = PaymentMock.payment(id = null)
             repository.save(payment)
 
@@ -53,7 +56,8 @@ class PaymentRepositoryTest : RepositoryTest() {
         }
 
         @Test
-        fun `결제 정보가 존재하지 않는 경우 null 반환`() {
+        @DisplayName("존재하지 않는 결제는 null 반환")
+        fun findNotExistsById() {
             val found = repository.findById(PaymentMock.id().value)
 
             assertThat(found).isNull()
@@ -61,10 +65,12 @@ class PaymentRepositoryTest : RepositoryTest() {
     }
 
     @Nested
-    @DisplayName("findByOrderId")
+    @DisplayName("주문 ID로 조회")
     inner class FindByOrderId {
+
         @Test
-        fun `결제가 존재하는 경우 해당 결제 반환`() {
+        @DisplayName("존재하는 결제 반환")
+        fun findByOrderId() {
             val payment = PaymentMock.payment(id = null)
             repository.save(payment)
 
@@ -75,7 +81,8 @@ class PaymentRepositoryTest : RepositoryTest() {
         }
 
         @Test
-        fun `결제 정보가 존재하지 않는 경우 null 반환`() {
+        @DisplayName("존재하지 않는 결제는 null 반환")
+        fun findNotExistsByOrderId() {
             val found = repository.findByOrderId(OrderMock.id())
 
             assertThat(found).isNull()

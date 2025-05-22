@@ -2,9 +2,7 @@ package kr.hhplus.be.server.application.balance
 
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.application.balance.command.ChargeBalanceFacadeCommand
 import kr.hhplus.be.server.application.balance.result.BalanceChargeFacadeResult
@@ -16,24 +14,17 @@ import kr.hhplus.be.server.domain.user.exception.NotFoundUserException
 import kr.hhplus.be.server.testutil.mock.BalanceMock
 import kr.hhplus.be.server.testutil.mock.IdMock
 import kr.hhplus.be.server.testutil.mock.UserMock
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 
-@ExtendWith(MockKExtension::class)
 class BalanceFacadeTest {
-    @InjectMockKs
-    private lateinit var facade: BalanceFacade
-
-    @MockK(relaxed = true)
-    private lateinit var balanceService: BalanceService
-
-    @MockK(relaxed = true)
-    private lateinit var userService: UserService
+    private val balanceService = mockk<BalanceService>(relaxed = true)
+    private val userService = mockk<UserService>(relaxed = true)
+    private val facade = BalanceFacade(balanceService, userService)
 
     @BeforeEach
     fun setup() {
@@ -83,7 +74,7 @@ class BalanceFacadeTest {
 
         val result = facade.charge(command)
 
-        assertThat(result).isEqualTo(BalanceChargeFacadeResult(chargedBalance))
+        Assertions.assertThat(result).isEqualTo(BalanceChargeFacadeResult(chargedBalance))
     }
 
     @Test
@@ -112,8 +103,8 @@ class BalanceFacadeTest {
 
         val result = facade.getOrNullByUerId(userId.value)
 
-        assertThat(result).isInstanceOf(GetBalanceFacadeResult.Found::class.java)
-        assertThat((result as GetBalanceFacadeResult.Found).value).isEqualTo(balance)
+        Assertions.assertThat(result).isInstanceOf(GetBalanceFacadeResult.Found::class.java)
+        Assertions.assertThat((result as GetBalanceFacadeResult.Found).value).isEqualTo(balance)
     }
 
     @Test
@@ -125,8 +116,8 @@ class BalanceFacadeTest {
 
         val result = facade.getOrNullByUerId(userId.value)
 
-        assertThat(result).isInstanceOf(GetBalanceFacadeResult.Empty::class.java)
-        assertThat((result as GetBalanceFacadeResult.Empty).userId).isEqualTo(userId)
+        Assertions.assertThat(result).isInstanceOf(GetBalanceFacadeResult.Empty::class.java)
+        Assertions.assertThat((result as GetBalanceFacadeResult.Empty).userId).isEqualTo(userId)
     }
 
     @Test

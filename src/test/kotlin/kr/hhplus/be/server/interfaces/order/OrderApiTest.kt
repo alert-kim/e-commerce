@@ -7,6 +7,7 @@ import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.interfaces.order.reqeust.OrderRequest
 import kr.hhplus.be.server.testutil.mock.IdMock
 import org.hamcrest.Matchers.hasSize
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.post
@@ -16,7 +17,8 @@ import java.time.Instant
 class OrderApiTest : ApiTest() {
 
     @Test
-    fun `주문 - 200 - 쿠폰 사용안함`() {
+    @DisplayName("쿠폰을 사용하지 않는 주문 처리")
+    fun orderWithoutCoupon() {
         val user = savedUser()
         val products = List(3) {
             savedProduct(
@@ -70,7 +72,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 - 200 - 쿠폰 사용`() {
+    @DisplayName("쿠폰을 사용하는 주문 처리")
+    fun orderWithCoupon() {
         val user = savedUser()
         val products = List(3) {
             savedProduct(
@@ -124,7 +127,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 생성 - 400 - 재고 부족`() {
+    @DisplayName("재고 부족 시 400 오류 응답")
+    fun insufficientStock() {
         val user = savedUser()
         val products = List(1) {
             savedProduct(
@@ -164,7 +168,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 - 400 - 유효하지 않은 주문 금액`() {
+    @DisplayName("유효하지 않은 주문 금액 시 400 오류 응답")
+    fun invalidOrderAmount() {
         val user = savedUser()
         val products = List(1) {
             savedProduct(
@@ -204,7 +209,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 - 400 - 유효하지 않은 주문 수량`() {
+    @DisplayName("유효하지 않은 주문 수량 시 400 오류 응답")
+    fun invalidOrderQuantity() {
         val user = savedUser()
         val products = List(1) {
             savedProduct(
@@ -244,7 +250,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 생성 - 400 - 잔고 부족`() {
+    @DisplayName("잔고 부족 시 400 오류 응답")
+    fun insufficientBalance() {
         val user = savedUser()
         val products = List(1) {
             savedProduct(
@@ -284,7 +291,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 생성 - 400 - 이미 사용된 쿠폰`() {
+    @DisplayName("이미 사용된 쿠폰 사용 시 400 오류 응답")
+    fun alreadyUsedCoupon() {
         val user = savedUser()
         val products = List(1) {
             savedProduct(
@@ -324,7 +332,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 생성 - 404 - 찾을 수 없는 유저`() {
+    @DisplayName("존재하지 않는 유저로 주문 시 404 오류 응답")
+    fun userNotFound() {
         val products = List(1) {
             savedProduct(
                 status = ProductStatus.ON_SALE,
@@ -359,7 +368,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 생성 - 404 - 찾을 수 없는 상품`() {
+    @DisplayName("존재하지 않는 상품으로 주문 시 404 오류 응답")
+    fun productNotFound() {
         val user = savedUser()
         val orderProducts = listOf(
             OrderRequest.OrderProductRequest(
@@ -392,7 +402,8 @@ class OrderApiTest : ApiTest() {
     }
 
     @Test
-    fun `주문 생성 - 404 - 찾을 수 없는 쿠폰`() {
+    @DisplayName("존재하지 않는 쿠폰으로 주문 시 404 오류 응답")
+    fun couponNotFound() {
         val user = savedUser()
         val products = List(1) {
             savedProduct(

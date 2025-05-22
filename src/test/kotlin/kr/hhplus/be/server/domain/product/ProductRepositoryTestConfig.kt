@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.domain.product
 
-import kr.hhplus.be.server.infra.product.ProductJpaRepository
+import kr.hhplus.be.server.infra.product.persistence.ProductJpaRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 

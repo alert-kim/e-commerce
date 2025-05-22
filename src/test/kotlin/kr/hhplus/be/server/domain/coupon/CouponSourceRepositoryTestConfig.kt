@@ -1,9 +1,8 @@
 package kr.hhplus.be.server.domain.coupon
 
-import kr.hhplus.be.server.infra.coupon.CouponSourceJpaRepository
+import kr.hhplus.be.server.infra.coupon.persistence.CouponSourceJpaRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
 
 @TestConfiguration
 class CouponSourceRepositoryTestConfig {

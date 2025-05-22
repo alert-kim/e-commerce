@@ -21,20 +21,17 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 @SpringBootTest
-class OrderProductProcessorConcurrencyTest {
-
-    @Autowired
-    private lateinit var processor: OrderProductProcessor
-
-    @Autowired
-    private lateinit var databaseTestHelper: DatabaseTestHelper
+class OrderProductProcessorConcurrencyTest @Autowired constructor(
+    private val processor: OrderProductProcessor,
+    private val databaseTestHelper: DatabaseTestHelper
+) {
 
     @Nested
     @DisplayName("재고 할당 동시성 테스트")
     inner class AllocateStock {
         @Test
-        @DisplayName("재고 수량이 충분한 경우, 요청 만큼 차감")
-        fun allocate() {
+        @DisplayName("재고가 충분하면 모든 요청이 성공한다")
+        fun sufficientStockAllSuccess() {
             val orderId = databaseTestHelper.savedOrder().id()
             val initialQuantity = 100
             val product = databaseTestHelper.savedProduct(
@@ -87,8 +84,8 @@ class OrderProductProcessorConcurrencyTest {
         }
 
         @Test
-        @DisplayName("재고가 부족한 경우, 동시 요청은 OutOfStockException을 발생시켜야 함")
-        fun outOfStock() {
+        @DisplayName("재고가 부족하면 일부 요청만 성공한다")
+        fun insufficientStockPartialSuccess() {
             val orderId = databaseTestHelper.savedOrder().id()
             val initialQuantity = 20
             val product = databaseTestHelper.savedProduct(
@@ -142,8 +139,8 @@ class OrderProductProcessorConcurrencyTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 상품에 대한 동시 요청은 모두 NotFoundProductException을 발생")
-        fun notFoundProduct() {
+        @DisplayName("존재하지 않는 상품은 모든 요청이 실패한다")
+        fun nonExistingProductAllFail() {
             val orderId = databaseTestHelper.savedOrder().id()
             val nonExistingProductId = ProductMock.id()
             val threadCount = 5
@@ -181,8 +178,8 @@ class OrderProductProcessorConcurrencyTest {
     @DisplayName("재고 복구 동시성 테스트")
     inner class RestoreStock {
         @Test
-        @DisplayName("동시에 재고를 복구하면 모든 요청이 성공해야 함")
-        fun restore() {
+        @DisplayName("동시 재고 복구 요청이 모두 성공한다")
+        fun allRestoreSuccess() {
             val initialQuantity = 10
             val product = databaseTestHelper.savedProduct(stock = initialQuantity)
             val restoreQuantity = 5
@@ -227,8 +224,8 @@ class OrderProductProcessorConcurrencyTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 상품에 대한 동시 요청은 모두 NotFoundStockException을 발생")
-        fun notFoundProduct() {
+        @DisplayName("존재하지 않는 상품의 재고 복구는 모두 실패한다")
+        fun nonExistingProductAllFail() {
             val nonExistingProductId = ProductMock.id()
             val threadCount = 5
             val executor = Executors.newFixedThreadPool(threadCount)
@@ -260,12 +257,12 @@ class OrderProductProcessorConcurrencyTest {
     }
 
     @Nested
-    @DisplayName("재공 할당과 복구에 동시 요청 테스트")
+    @DisplayName("재고 할당과 복구 동시 요청 테스트")
     inner class AllocateAndRestore {
 
         @Test
-        @DisplayName("동일한 상품에 대해 재고 할당과 재고 원복 요청이 동시에 들어오면, 모든 요청이 성공해야 함")
-        fun allSucceed() {
+        @DisplayName("재고 할당과 복구 동시 요청이 모두 성공한다")
+        fun bothOperationsSuccess() {
             val initialQuantity = 10
             val product = databaseTestHelper.savedProduct(stock = initialQuantity)
             val orderId = databaseTestHelper.savedOrder().id()

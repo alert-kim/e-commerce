@@ -21,16 +21,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 @SpringBootTest
-class OrderCouponProcessorConcurrencyTest {
-
-    @Autowired
-    private lateinit var orderService: OrderService
-
-    @Autowired
-    private lateinit var processor: OrderCouponProcessor
-
-    @Autowired
-    private lateinit var databaseTestHelper: DatabaseTestHelper
+class OrderCouponProcessorConcurrencyTest @Autowired constructor(
+    private val orderService: OrderService,
+    private val processor: OrderCouponProcessor,
+    private val databaseTestHelper: DatabaseTestHelper
+) {
 
     @Nested
     @DisplayName("쿠폰 적용 동시성 테스트")
@@ -284,7 +279,7 @@ class OrderCouponProcessorConcurrencyTest {
             val updatedCoupon = databaseTestHelper.findCoupon(coupon.id())
             require(updatedCoupon != null)
             when {
-                applySuccess.get() == true  -> {
+                applySuccess.get() == true -> {
                     Assertions.assertThat(cancelSuccess.get()).isFalse()
                     Assertions.assertThat(updatedCoupon.usedAt).isNotNull()
                 }
@@ -348,9 +343,9 @@ class OrderCouponProcessorConcurrencyTest {
             val usedCoupon = databaseTestHelper.findCoupon(couponToUse.id())
             require(usedCoupon != null)
             Assertions.assertThat(usedCoupon.usedAt).isNotNull()
-            val usagedCanceledCoupon = databaseTestHelper.findCoupon(couponToCancelUsage.id())
-            require(usagedCanceledCoupon != null)
-            Assertions.assertThat(usagedCanceledCoupon.usedAt).isNull()
+            val usedCanceledCoupon = databaseTestHelper.findCoupon(couponToCancelUsage.id())
+            require(usedCanceledCoupon != null)
+            Assertions.assertThat(usedCanceledCoupon.usedAt).isNull()
         }
     }
 }

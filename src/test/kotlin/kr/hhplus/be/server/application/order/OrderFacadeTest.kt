@@ -2,9 +2,6 @@ package kr.hhplus.be.server.application.order
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.*
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import kr.hhplus.be.server.application.order.command.*
 import kr.hhplus.be.server.application.order.processor.OrderCouponProcessor
 import kr.hhplus.be.server.application.order.processor.OrderLifecycleProcessor
@@ -17,37 +14,41 @@ import kr.hhplus.be.server.testutil.mock.CouponMock
 import kr.hhplus.be.server.testutil.mock.OrderCommandMock
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 class OrderFacadeTest {
+    private val orderService = mockk<OrderService>(relaxed = true)
+    private val orderLifecycleProcessor = mockk<OrderLifecycleProcessor>(relaxed = true)
+    private val orderProductProcessor = mockk<OrderProductProcessor>(relaxed = true)
+    private val orderCouponProcessor = mockk<OrderCouponProcessor>(relaxed = true)
+    private val orderPaymentProcessor = mockk<OrderPaymentProcessor>(relaxed = true)
+    private val orderFacade = OrderFacade(
+        orderService,
+        orderLifecycleProcessor,
+        orderProductProcessor,
+        orderCouponProcessor,
+        orderPaymentProcessor
+    )
 
-    @InjectMockKs
-    private lateinit var orderFacade: OrderFacade
-
-    @MockK(relaxed = true)
-    private lateinit var orderService: OrderService
-
-    @MockK(relaxed = true)
-    private lateinit var orderLifecycleProcessor: OrderLifecycleProcessor
-
-    @MockK(relaxed = true)
-    private lateinit var orderProductProcessor: OrderProductProcessor
-
-    @MockK(relaxed = true)
-    private lateinit var orderCouponProcessor: OrderCouponProcessor
-
-    @MockK(relaxed = true)
-    private lateinit var orderPaymentProcessor: OrderPaymentProcessor
+    @BeforeEach
+    fun setup() {
+        clearMocks(
+            orderService,
+            orderLifecycleProcessor,
+            orderProductProcessor,
+            orderCouponProcessor,
+            orderPaymentProcessor
+        )
+    }
 
     @Nested
-    @DisplayName("주문")
+    @DisplayName("주문 처리")
     inner class Order {
         @Test
-        @DisplayName("쿠폰이 있는 주문 처리")
+        @DisplayName("쿠폰이 있는 주문을 처리한다")
         fun withCoupon() {
             val couponId = CouponMock.id()
             val command = OrderCommandMock.facade(couponId = couponId).also { spyk(it) }
@@ -95,7 +96,7 @@ class OrderFacadeTest {
         }
 
         @Test
-        @DisplayName("쿠폰이 없는 주문 처리")
+        @DisplayName("쿠폰이 없는 주문을 처리한다")
         fun withoutCoupon() {
             val command = OrderCommandMock.facade(couponId = null).also { spyk(it) }
             val orderId = OrderMock.id()
@@ -137,7 +138,7 @@ class OrderFacadeTest {
         }
 
         @Test
-        @DisplayName("주문 상품 확보는 productId 기준으로 정렬되어 처리")
+        @DisplayName("주문 상품은 상품 ID 기준으로 정렬되어 처리된다")
         fun processOrderProductsInOrder() {
             val command = mockk<OrderFacadeCommand>(relaxed = true)
             every { command.productsToOrder } returns listOf(
@@ -167,7 +168,7 @@ class OrderFacadeTest {
         }
 
         @Test
-        @DisplayName("주문 중 예외 발생 시 실패 처리")
+        @DisplayName("주문 중 예외가 발생하면 주문을 실패 처리한다")
         fun handleFailure() {
             val command = OrderCommandMock.facade().also { spyk(it) }
             val orderId = OrderMock.id()

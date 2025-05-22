@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class ProductStatRepositoryTest : RepositoryTest() {
-
-    @Autowired
-    private lateinit var repository: ProductSaleStatRepository
+class ProductStatRepositoryTest @Autowired constructor(
+    private val repository: ProductSaleStatRepository,
+) : RepositoryTest() {
 
     @Nested
     @DisplayName("save")

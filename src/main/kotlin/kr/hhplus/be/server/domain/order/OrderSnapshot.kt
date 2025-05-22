@@ -19,6 +19,8 @@ data class OrderSnapshot(
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {
+    val completedAt: Instant
+        get() =updatedAt
 
     fun checkCompleted(): OrderSnapshot {
         if (status != OrderStatus.COMPLETED) {

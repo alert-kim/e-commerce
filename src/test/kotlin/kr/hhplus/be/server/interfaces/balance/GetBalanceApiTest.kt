@@ -5,16 +5,16 @@ import kr.hhplus.be.server.interfaces.ApiTest
 import kr.hhplus.be.server.interfaces.ErrorCode
 import kr.hhplus.be.server.testutil.mock.IdMock
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.get
 import java.math.BigDecimal
 
-class GetBalanceApiTest : ApiTest() {
-
-    @Autowired
-    private lateinit var cacheManager: CacheManager
+class GetBalanceApiTest @Autowired constructor(
+    private val cacheManager: CacheManager
+) : ApiTest() {
 
     @BeforeEach
     fun setup() {
@@ -22,7 +22,8 @@ class GetBalanceApiTest : ApiTest() {
     }
 
     @Test
-    fun `잔고 조회 - 200`() {
+    @DisplayName("정상 처리 시 200 응답")
+    fun success() {
         val user = savedUser()
         val balance = savedBalance(user.id())
 
@@ -36,7 +37,8 @@ class GetBalanceApiTest : ApiTest() {
     }
 
     @Test
-    fun `잔고 조회 - 200 - 유저의 잔고가 없는 경우 잔고를 0으로 반환`() {
+    @DisplayName("잔고가 없는 경우 0 값 반환")
+    fun noBalance() {
         val user = savedUser()
 
         mockMvc.get("/balances") {
@@ -49,7 +51,8 @@ class GetBalanceApiTest : ApiTest() {
     }
 
     @Test
-    fun `잔고 조회 - 404 - 찾을 수 없는 유저`() {
+    @DisplayName("존재하지 않는 유저 시 404 응답")
+    fun userNotFound() {
         val userId = IdMock.value()
 
         mockMvc.get("/balances") {

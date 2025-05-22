@@ -25,21 +25,18 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 @SpringBootTest
-class OrderPaymentProcessorConcurrencyTest {
-
-    @Autowired
-    private lateinit var processor: OrderPaymentProcessor
-
-    @Autowired
-    private lateinit var databaseTestHelper: DatabaseTestHelper
+class OrderPaymentProcessorConcurrencyTest @Autowired constructor(
+    private val processor: OrderPaymentProcessor,
+    private val databaseTestHelper: DatabaseTestHelper
+) {
 
     @Nested
     @DisplayName("주문 결제 동시성 테스트")
     inner class ProcessPayment {
 
         @Test
-        @DisplayName("같은 사용자의 동시 결제 요청은 잔액이 충분한 경우, 요청만큼 차감")
-        fun processPaymentBySameUser() {
+        @DisplayName("잔액이 충분한 경우 동시 결제 요청이 모두 성공한다")
+        fun sufficientBalanceAllSuccess() {
             val initialBalance = BigDecimal.valueOf(10000)
             val orderAmount = BigDecimal.valueOf(1000)
             val userId = UserMock.id()
@@ -98,8 +95,8 @@ class OrderPaymentProcessorConcurrencyTest {
 
 
         @Test
-        @DisplayName("동시 결제 요청이 잔고를 초과하는 경우, 동시 요청은 모두 BelowMinBalanceAmountException을 발생시켜야 함")
-        fun insufficientBalance() {
+        @DisplayName("잔고 부족시 일부 요청만 성공하고 나머지는 오류가 발생한다")
+        fun insufficientBalancePartialSuccess() {
             val initialBalance = BigDecimal.valueOf(3000)
             val orderAmount = BigDecimal.valueOf(1000)
             val userId = UserMock.id()
@@ -155,8 +152,8 @@ class OrderPaymentProcessorConcurrencyTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 잔고에 대한 동시 결제 요청은 모두 NotFoundBalanceException을 발생")
-        fun notFoundBalance() {
+        @DisplayName("존재하지 않는 잔고에 대한 결제 요청은 모두 실패한다")
+        fun nonExistingBalanceAllFail() {
             val orderId = OrderMock.id()
             val nonExistingUserId = UserMock.id()
             val threadCount = 5
@@ -194,8 +191,8 @@ class OrderPaymentProcessorConcurrencyTest {
     inner class CancelPayment {
 
         @Test
-        @DisplayName("같은 사용자의 동시 결제 취소 요청은 모두 성공해야 한다")
-        fun cancel() {
+        @DisplayName("동시 결제 취소 요청이 모두 성공한다")
+        fun allCancelSuccess() {
             val initialBalance = 5000.toBigDecimal()
             val cancelAmount = 1000.toBigDecimal()
             val userId = UserMock.id()
@@ -253,8 +250,8 @@ class OrderPaymentProcessorConcurrencyTest {
         }
 
         @Test
-        @DisplayName("다른 사용자의 결제 취소 시도가 동시에 이루어지면 모두 NotOwnedPaymentException을 발생시켜야 한다")
-        fun cancelNotOwnedPayment() {
+        @DisplayName("타인의 결제 취소 시도는 모두 실패한다")
+        fun otherUserCancelAllFail() {
             val initialBalance = 5000.toBigDecimal()
             val userId = UserMock.id(1)
             databaseTestHelper.savedBalance(userId = userId, amount = initialBalance)
