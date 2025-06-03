@@ -1,43 +1,43 @@
 package kr.hhplus.be.server.domain.order
 
 import kr.hhplus.be.server.domain.order.command.*
-import kr.hhplus.be.server.domain.order.event.OrderCompletedEvent
-import kr.hhplus.be.server.domain.order.event.OrderFailedEvent
+import kr.hhplus.be.server.domain.order.event.*
 import kr.hhplus.be.server.domain.order.exception.NotFoundOrderException
 import kr.hhplus.be.server.domain.order.repository.OrderRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 @Service
 @Transactional(readOnly = true)
 class OrderService(
     private val repository: OrderRepository,
     private val client: OrderSender,
-    private val publisher: ApplicationEventPublisher,
+    private val eventPublisher: OrderEventPublisher,
 ) {
     @Transactional
     fun createOrder(
         command: CreateOrderCommand,
-    ): OrderId =
-        repository.save(
-            Order.new(
-                userId = command.userId,
-            )
-        ).id()
+    ): OrderId {
+        val order = Order.new(
+            userId = command.userId,
+        )
+        val saved = repository.save(order)
+        eventPublisher.publish(OrderCreatedEvent.from(saved))
+        return saved.id()
+    }
 
     @Transactional
     fun placeStock(
         command: PlaceStockCommand,
     ) {
         val order = doGet(command.orderId.value)
-
-        order.placeStock(
+        val orderProduct = order.placeStock(
             productId = command.product.id,
             quantity = command.stock.quantity,
             unitPrice = command.product.price,
         )
+        eventPublisher.publish(OrderStockPlacedEvent.from(orderProduct))
     }
 
     @Transactional
@@ -47,6 +47,7 @@ class OrderService(
         val order = doGet(command.orderId.value)
 
         order.applyCoupon(command.usedCoupon)
+        eventPublisher.publish(OrderCouponAppliedEvent.from(order))
     }
 
     @Transactional
@@ -57,13 +58,7 @@ class OrderService(
         val order = doGet(payment.orderId.value)
 
         order.pay()
-        publisher.publishEvent(
-            OrderCompletedEvent(
-                orderId = order.id(),
-                snapshot = OrderSnapshot.from(order),
-                createdAt = Instant.now(),
-            )
-        )
+        eventPublisher.publish(OrderCompletedEvent.from(order))
     }
 
     @Transactional
@@ -74,29 +69,23 @@ class OrderService(
         if (order.isFailed()) return
 
         order.fail()
-        val event = OrderFailedEvent(
-            orderId = order.id(),
-            snapshot = OrderSnapshot.from(order),
-            createdAt = Instant.now(),
-        )
-        publisher.publishEvent(event)
+        eventPublisher.publish(OrderFailedEvent.from(order))
     }
-
 
     @Transactional
     fun markFailHandled(command: MarkOrderFailHandledCommand) {
         val order = doGet(command.orderId.value)
 
         order.failHandled()
+        eventPublisher.publish(OrderMarkedFailedHandledEvent.from(order))
     }
-
 
     @Transactional
     fun sendOrderCompleted(
         command: SendOrderCompletedCommand,
     ) {
-        val snapshot = command.orderSnapshot.checkCompleted()
-        client.send(snapshot)
+        val order = command.order.checkCompleted()
+        client.send(order)
     }
 
     fun get(

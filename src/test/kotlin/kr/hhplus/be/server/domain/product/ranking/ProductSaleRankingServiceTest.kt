@@ -7,7 +7,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kr.hhplus.be.server.common.util.TimeZone
-import kr.hhplus.be.server.domain.order.OrderSnapshot
+import kr.hhplus.be.server.domain.order.OrderStatus
+import kr.hhplus.be.server.domain.order.OrderView
 import kr.hhplus.be.server.domain.product.ranking.repository.ProductSaleRankingRepository
 import kr.hhplus.be.server.domain.product.ranking.repository.RenewProductSaleRankingCommand
 import kr.hhplus.be.server.domain.product.ranking.repository.UpdateProductSaleRankingCommand
@@ -30,14 +31,12 @@ class ProductSaleRankingServiceTest {
 
         @Test
         @DisplayName("주문 완료 이벤트의 상품 정보를 기반으로 판매 랭킹 업데이트")
-        fun create() {
+        fun update() {
             val orderProducts = List(2) { OrderMock.product() }
-            val event = OrderMock.completedEvent(
-                snapshot = OrderSnapshot.from(OrderMock.order(products = orderProducts))
-            )
-            val date = LocalDate.ofInstant(event.snapshot.completedAt, TimeZone.KSTId)
+            val order = OrderView.from(OrderMock.order(products = orderProducts, status = OrderStatus.COMPLETED))
+            val date = LocalDate.ofInstant(order.getOrNullCompletedAt(), TimeZone.KSTId)
 
-            val command = UpdateProductSaleRankingCommand(event)
+            val command = UpdateProductSaleRankingCommand(order)
             service.updateRanking(command)
 
             verify {
@@ -51,6 +50,19 @@ class ProductSaleRankingServiceTest {
                         )
                     )
                 }
+            }
+        }
+
+        @Test
+        @DisplayName("주문이 완료되지 않았다면, 업데이트 하지 않음")
+        fun notCompleted() {
+            val orderProducts = List(2) { OrderMock.product() }
+            val order = OrderView.from(OrderMock.order(products = orderProducts, status = OrderStatus.FAILED))
+            val command = UpdateProductSaleRankingCommand(order)
+            service.updateRanking(command)
+
+            verify(exactly = 0) {
+                repository.updateRanking(ofType(ProductSaleRankingEntry::class))
             }
         }
     }

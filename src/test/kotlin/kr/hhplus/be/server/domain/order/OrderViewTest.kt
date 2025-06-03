@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.order
 
+import kr.hhplus.be.server.domain.order.exception.InvalidOrderStatusException
 import kr.hhplus.be.server.domain.order.exception.RequiredOrderIdException
 import kr.hhplus.be.server.testutil.mock.OrderMock
 import org.assertj.core.api.Assertions.assertThat
@@ -69,6 +70,66 @@ class OrderViewTest {
 
             assertThat(failedOrder.isFailed()).isTrue()
             assertThat(readyOrder.isFailed()).isFalse()
+        }
+    }
+
+    @Nested
+    @DisplayName("주문 확료 확인")
+    inner class CheckCompleted {
+
+        @Test
+        @DisplayName("완료 상태인 경우 정상 처리")
+        fun completedOrder() {
+            val orderId = OrderMock.id()
+            val order = OrderMock.order(id = orderId, status = OrderStatus.COMPLETED)
+            val orderView = OrderView.from(order)
+
+            val result = orderView.checkCompleted()
+
+            assertThat(result).isEqualTo(orderView)
+        }
+
+        @Test
+        @DisplayName("완료 상태가 아닐 경우 InvalidOrderStatusException 발생")
+        fun notCompletedOrder() {
+            val orderId = OrderMock.id()
+            val status = OrderStatus.entries.filter { it != OrderStatus.COMPLETED }.random()
+            val order = OrderMock.order(id = orderId, status = status)
+            val orderView = OrderView.from(order)
+
+            assertThrows<InvalidOrderStatusException> {
+                orderView.checkCompleted()
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("주문 완료 시각 조회")
+    inner class GetOrNullCompletedAt {
+
+        @Test
+        @DisplayName("완료 상태인 경우 정상 완료시각 반환")
+        fun completedOrder() {
+            val orderId = OrderMock.id()
+            val order = OrderMock.order(id = orderId, status = OrderStatus.COMPLETED)
+            val orderView = OrderView.from(order)
+
+            val result = orderView.getOrNullCompletedAt()
+
+            assertThat(result).isEqualTo(orderView.updatedAt)
+        }
+
+        @Test
+        @DisplayName("완료 상태가 아닐 경우 null 반환")
+        fun notCompletedOrder() {
+            val orderId = OrderMock.id()
+            val status = OrderStatus.entries.filter { it != OrderStatus.COMPLETED }.random()
+            val order = OrderMock.order(id = orderId, status = status)
+            val orderView = OrderView.from(order)
+
+            val result = orderView.getOrNullCompletedAt()
+
+            assertThat(result).isNull()
         }
     }
 }
